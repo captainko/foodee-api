@@ -1,0 +1,32 @@
+* {
+  padding: 0;
+  margin: 0;
+}
+
+body {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(to right,
+  white 0%,
+  white 50%,
+  black 50%,
+  black 100%);
+}
+
+h1 {
+  color: white;
+  white-space: nowrap;
+  position: relative;
+}
+
+h1::before {
+  content: attr(data-heading);
+  position: absolute;
+  text-align: center;
+  left: 0;
+  width: 50%;
+  color: black;
+  overflow: hidden;
+}
