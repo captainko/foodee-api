@@ -1,9 +1,5 @@
-import * as mongoose from 'mongoose';
-
 import { Request, Response } from 'express';
-import { ContactSchema } from '../models/crmModel';
-
-const Contact = mongoose.model('Contact', ContactSchema);
+import { ContactSchema, ContactModel as Contact } from '../models/crmModel';
 export class ContactController {
 
   public getContacts(req: Request, res: Response) {

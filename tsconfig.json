@@ -6,7 +6,7 @@
         "suppressImplicitAnyIndexErrors": true,
         "noUnusedLocals": false,
         "noUnusedParameters": false,
-        "target": "es6",
+        "target": "esnext",
         "outDir": "dist",
         "sourceMap": false,
         "declaration": true,
