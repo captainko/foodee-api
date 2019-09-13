@@ -1,5 +1,6 @@
-import { Schema } from "mongoose";
+import * as mongoose from "mongoose";
 
+const { Schema } = mongoose;
 
 export const ContactSchema = new Schema({
   firstName: {
@@ -11,7 +12,7 @@ export const ContactSchema = new Schema({
     required: 'Enter a last name',
   },
   email: {
-    type: String,
+    type: String
   },
   company: {
     type: String
@@ -25,3 +26,4 @@ export const ContactSchema = new Schema({
   }
 });
 
+export const ContactModel = mongoose.model('contact', ContactSchema);
