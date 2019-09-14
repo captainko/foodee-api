@@ -9,6 +9,7 @@ RecipeRouter.get('/', RecipeController.getRecipes);
 RecipeRouter.delete('/', RecipeController.removeAll);
 RecipeRouter.post('/', RecipeController.createRecipe);
 RecipeRouter.get('/:id', RecipeController.getRecipeByID);
+RecipeRouter.post('/rating/:id', RecipeController.rateRecipe);
 
 
 export { RecipeRouter };

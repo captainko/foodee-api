@@ -1,8 +1,13 @@
-import * as dotenv from "dotenv";
+import * as passport from "passport";
+import * as passportLocal from "passport-local";
+import { User } from "./models/user.model";
 
-dotenv.config();
-
-
-
-export const PORT = process.env.PORT || 3000;
-export const DB_URI = process.env.DB_URI;
+const LocalStrategy = passportLocal.Strategy;
+passport.use(new LocalStrategy({
+  usernameField: 'user[email]',
+  passwordField: 'user[password]',
+}, function(email, passport, done) {
+  User.findOne({email}).then(function(user) => {
+    if(!user || user.)
+  })
+}))

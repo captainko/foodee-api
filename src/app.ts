@@ -4,7 +4,7 @@ import * as bodyParser from "body-parser";
 import * as mongoose from "mongoose";
 import * as logger from "morgan";
 // app
-import { DB_URI } from "./config";
+import { DB_URI } from "./environment";
 import { Routes } from "./routes";
 
 class App {
