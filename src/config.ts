@@ -6,8 +6,14 @@ const LocalStrategy = passportLocal.Strategy;
 passport.use(new LocalStrategy({
   usernameField: 'user[email]',
   passwordField: 'user[password]',
-}, function(email, passport, done) {
-  User.findOne({email}).then(function(user) => {
-    if(!user || user.)
-  })
-}))
+}, (email, password, done) => {
+
+  User.findOne({ email }).then((user) => {
+    // user is found and check the password
+    if (!user || user.validPassword(password)) {
+      return done({ errors: { 'email or password': 'is invalid' } }, false);
+    }
+
+    return done(null, user);
+  }).catch(done);
+}));

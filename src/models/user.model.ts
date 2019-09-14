@@ -3,18 +3,19 @@ import { Document, Schema, model } from "mongoose";
 import * as uniqueValidator from 'mongoose-unique-validator';
 import * as crypto from 'crypto';
 import * as jwt from 'jsonwebtoken';
+
 //app
+import { JWT_SECRET } from "../environment";
 import { IIngredient } from "./ingredient.model";
 import { IRecipe } from "./recipe.model";
-import { JWT_SECRET } from "../environment";
 
-interface IAuthJSON {
+export interface IAuthJSON {
   username: string;
   email: string;
   token: string;
   image_url: string;
 }
-interface IUserMethods {
+export interface IUserMethods {
   addRating: (ratingId: string) => void;
   setPassword: (password: string) => void;
   validPassword: (password: string) => boolean;

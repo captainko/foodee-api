@@ -4,6 +4,7 @@
     "esnext",
     "foodee",
     "mongodb",
+    "resave",
     "respawn",
     "signup",
     "virtuals"
