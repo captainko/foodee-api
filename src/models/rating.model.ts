@@ -1,11 +1,11 @@
-import { Schema, model, SchemaTypes, Document } from 'mongoose';
-import { Recipe, RecipeModel } from './recipe.model';
-import { UserModel } from './user.model';
+import { Schema, model, SchemaTypes, Document, version, Model } from 'mongoose';
+import { Recipe } from './recipe.model';
 
 export interface IRating extends Document {
-  recipeId?: String;
-  userId?: String;
-  rateValue?: Number;
+  _id: string;
+  recipeId?: string;
+  userId?: string;
+  rateValue?: number;
 }
 
 export const RatingSchema = new Schema({
@@ -25,37 +25,67 @@ export const RatingSchema = new Schema({
     min: 1,
     max: 5,
   },
-});
-
-RatingSchema.post('save', async function (doc: IRating) {
-  let recipe = await Recipe.findOne({ _id: doc.recipeId, recipes: { $nin: [doc._id] } }).exec();
-  if (recipe) {
-    recipe.ratings.push(doc._id);
-    await recipe.save();
+}, {
+  toJSON: {
+    virtuals: true,
+    transform: (doc, ret) => {
+      ret.id = ret._id;
+      delete ret._id;
+      delete ret.ratings;
+    },
+  },
+  toObject: {
+    virtuals: true,
+    transform: (doc, ret) => {
+      ret.id = ret._id;
+      delete ret._id;
+    }
   }
-
-  console.log(recipe);
 });
 
-RatingSchema.methods.rate = async function (userId: string, recipeId: string, rateValue: number) {
-  let ratingObj = await Rating.findOne({ userId: userId, recipe: recipeId}).exec();
+export interface RatingModel extends Model<IRating> {
+  rate: (userId: string, recipeId: string, rateValue: number) => IRating;
+}
 
+RatingSchema.statics.rate = async function (userId: string, recipeId: string, rateValue: number) {
+  let ratingObj = await Rating.findOne({ userId, recipeId }).exec();
+  console.log(ratingObj);
   // user already rated;
-  if(ratingObj) {
+  if (ratingObj) {
     ratingObj.rateValue = rateValue;
   } else {
     ratingObj = new Rating({
       userId,
       recipeId,
-      rateValue
+      rateValue,
     });
   }
 
   return await ratingObj.save();
 }
 
+export interface IRatingResult extends Document {
+  _id: string;
+  rating: {
+    avgRating: number;
+    totalRating: number;
+  }
+}
+export const RatingResultSchema = new Schema({
+  _id: {
+    type: Schema.Types.ObjectId,
+    ref: 'recipe',
+  },
+  avgRating: Number
+}, {
+  timestamps: false,
+  versionKey: false,
+})
+
 // validate
 
 
-export const RatingModel = model<IRating>('rating', RatingSchema);
+export const RatingModel = model<IRating, RatingModel>('rating', RatingSchema);
 export const Rating = RatingModel;
+export const RatingResultModel = model<IRatingResult>('ratingResult', RatingResultSchema);
+export const RatingResult = RatingResultModel;

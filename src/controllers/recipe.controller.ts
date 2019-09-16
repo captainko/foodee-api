@@ -1,35 +1,40 @@
 import { Request, Response, Router } from "express";
 
 import { Recipe, IRecipe } from "../models/recipe.model";
-import { Rating, IRating } from "../models/rating.model";
+import { Rating } from "../models/rating.model";
+import { User } from "../models/user.model";
 
-export interface IRecipeRequest extends Request {
-  recipe: IRecipe;
+interface PreloadedRequest extends Request {
+  recipe?: IRecipe;
+  payload?: any;
 }
 
 export class RecipeController {
-  
+
   public static preloadRecipe(req, res: Response, next, id: string) {
+    // if(!id) return next();
+    console.log('lol');
     Recipe
       .findById(id)
-      .populate('ratings')
       .then((recipe) => {
-        if(!recipe) {
+        if (!recipe) {
           return res.sendStatus(404);
         }
         req.recipe = recipe;
+        console.log(req.recipe);
         return next();
       })
       .catch(next);
   }
 
   public static getRecipes(req: Request, res: Response) {
-    Recipe.find({})
-      .then((recipe) => res.json(recipe.map(x => x.toObject({ virtuals: true }))))
-      .catch(error => res.json(error));
+    Recipe.find()
+      .populate('ingredients')
+      .then((recipe) => {res.json(recipe); console.log(recipe)})
+      .catch(error => res.status(500).json(error));
   }
 
-  public static getRecipeByID(req: IRecipeRequest, res: Response) {
+  public static getRecipeByID(req: PreloadedRequest, res: Response) {
     res.json(req.recipe);
   }
 
@@ -43,27 +48,27 @@ export class RecipeController {
       .catch((error) => res.json(error));
   }
 
-  public static async rateRecipe(req: Request, res: Response) {
-    // check if user is already rate the product
-    console.log(req.params.id);
+  public static async rateRecipe(req: PreloadedRequest, res: Response, next) {
+    try {
+      console.log(req.recipe);
+      const rateObj$ = Rating.rate(req.payload.id, req.recipe._id, req.body.rateValue);
+      const user$ = User.findById(req.payload.id).exec();
+      const recipe = req.recipe;
 
-    const ratingObj: IRating = await Rating.findOne({
-      recipeId: req.params.id,
-      userId: '5d7a3b1c01634c4fdc2d41e8',
-    }).exec();
-    if (!ratingObj) {
-      let ratingObj = await Rating.create({
-        userId: '5d7a3b1c01634c4fdc2d41e8',
-        recipeId: req.params.id,
-        rating: req.body.rating,
-      });
-      await ratingObj.populate('recipeId userId').execPopulate();
-      res.json(ratingObj);
-    } else {
-      ratingObj.rateValue = req.body.rating;
-      const savedData = await ratingObj.save();
-      res.json(await savedData.populate('recipeId').populate('userId').execPopulate());
+      const [rateObj, user] = await Promise.all([rateObj$, user$]);
+      recipe.addRating(rateObj._id);
+      user.addRating(rateObj._id);
+
+      await recipe.updateRating();
+
+      await Promise.all([recipe.save(), user.save()])
+
+      return res.json(recipe);
+
+    } catch (e) {
+      next(e);
     }
+
   }
 
   public static removeAll(req: Request, res: Response) {

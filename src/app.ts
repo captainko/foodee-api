@@ -5,6 +5,7 @@ import * as bodyParser from "body-parser";
 import * as mongoose from "mongoose";
 import * as logger from "morgan";
 import * as errorHandler from "errorhandler";
+import "./config";
 // app
 import {
   DB_URI,
@@ -22,6 +23,7 @@ class App {
     this._config();
     this.routePrv.routes(this.app);
 
+    this._addErrorHandlers();
     this._mongoSetup();
   }
 
@@ -66,7 +68,7 @@ class App {
 
     if (!IS_PROD) {
       this.app.use(errorHandler());
-      
+
       this.app.use((err, req, res, next) => {
         console.log(err.stack);
 

@@ -1,5 +1,5 @@
 //lib
-import { Document, Schema, model } from "mongoose";
+import { Document, Schema, model, Model } from "mongoose";
 import * as uniqueValidator from 'mongoose-unique-validator';
 import * as crypto from 'crypto';
 import * as jwt from 'jsonwebtoken';
@@ -7,7 +7,7 @@ import * as jwt from 'jsonwebtoken';
 //app
 import { JWT_SECRET } from "../environment";
 import { IIngredient } from "./ingredient.model";
-import { IRecipe } from "./recipe.model";
+import { IRating } from "./rating.model";
 
 export interface IAuthJSON {
   username: string;
@@ -27,11 +27,16 @@ export interface IUser extends Document, IUserMethods {
   username?: string;
   email?: string;
   image_url?: string;
-  recipes?: IIngredient[];
+  recipes?: Array<string|IIngredient>;
+  ratings?: Array<string|IRating>;
   hash?: string;
   salt?: string;
   created_date?: string;
   updated_date?: string;
+}
+
+export interface IUserModel extends Model<IUser> {
+  
 }
 
 export const UserSchema = new Schema<IUser>({
@@ -57,18 +62,39 @@ export const UserSchema = new Schema<IUser>({
     type: Schema.Types.ObjectId,
     ref: 'recipe'
   }],
+  ratings: {
+    type: [{
+      type: Schema.Types.ObjectId,
+      ref: 'rating',
+    }]
+  },
   hash: String,
   salt: String,
 }, {
   versionKey: false,
   timestamps: true,
+  toJSON: {
+    virtuals: true,
+    transform: (doc, ret) => {
+      ret.id = ret._id;
+      delete ret._id;
+      delete ret.ratings;
+    },
+  },
+  toObject: {
+    virtuals: true,
+    transform: (doc, ret) => {
+      ret.id = ret._id;
+      delete ret._id;
+    }
+  }
 });
 
 UserSchema.plugin(uniqueValidator, { message: 'is already taken.' });
 
 
 UserSchema.methods.addRating = function (ratingId: string) {
-  const user = this as IRecipe;
+  const user = this as IUser;
   if (!user.ratings.includes(ratingId)) {
     user.ratings.push(ratingId);
   }
@@ -104,7 +130,8 @@ UserSchema.methods.toAuthJSON = function () {
     token: this.generateJWT(),
     image_url: this.image_url,
   }
-}
+};
 
-export const UserModel = model<IUser>('user', UserSchema);
+
+export const UserModel = model<IUser, IUserModel>('user', UserSchema);
 export const User = UserModel;
