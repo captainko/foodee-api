@@ -10,14 +10,14 @@
         "start": "npm run watch",
         "watch": "ts-node-dev --respawn --transpileOnly src/server.ts",
         "prod": "tsc && node ./dist/server.js",
-        "build": "tsc"
+        "build": "webpack"
     },
     "dependencies": {
         "cookie-parser": "^1.4.3",
         "dotenv": "^8.1.0",
         "ejs": "^2.6.1",
         "errorhandler": "^1.5.0",
-        "express": "^4.16.3",
+        "express": "^4.17.1",
         "express-jwt": "^5.3.1",
         "express-session": "^1.16.2",
         "express-validator": "^6.2.0",
@@ -52,9 +52,15 @@
         "grunt-shell": "^3.0.1",
         "grunt-ts": "^6.0.0-beta.21",
         "nodemon": "^1.18.9",
+        "terser-webpack-plugin": "^2.1.0",
+        "ts-loader": "^6.1.0",
         "ts-node": "^7.0.1",
         "ts-node-dev": "^1.0.0-pre.42",
         "tslint": "^5.12.1",
-        "typescript": "^3.2.2"
+        "typescript": "^3.2.2",
+        "uglifyjs-webpack-plugin": "^2.2.0",
+        "webpack": "^4.40.2",
+        "webpack-cli": "^3.3.8",
+        "webpack-node-externals": "^1.7.2"
     }
 }

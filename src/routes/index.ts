@@ -1,7 +1,6 @@
 import * as express from 'express';
 
 import { RecipeRouter } from "./recipe.router";
-import { IngredientRouter } from './ingredient.router';
 import { UserRouter } from './user.router';
 
 const api = express();
@@ -22,7 +21,6 @@ export class Routes {
         // app.route('/contact/:contactId')
         //     .get(this.contactCtrl.getContactWithID);
         api.use('/recipe', RecipeRouter);
-        api.use('/ingredient', IngredientRouter);
         api.use('/user', UserRouter)
     }
 }

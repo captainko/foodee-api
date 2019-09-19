@@ -1,17 +1,17 @@
 import { Schema, model, Document, SchemaTypes, Model } from "mongoose";
-import { IIngredient } from "./ingredient.model";
-import { Rating, IRating, RatingResult } from "./rating.model";
+import { Rating, IRating } from "./rating.model";
 
 export interface IRecipe extends Document {
   name?: string;
   description?: string;
   time?: string;
   banners?: string[];
-  ingredients?: [{ quantity: string, ingredient: IIngredient }];
+  ingredients?: [{ quantity: string, ingredient: string }];
   totalRating: number;
   isRated: boolean | number;
   ratings?: string[],
-  created_date?: string;
+  createdDate?: string;
+  updatedDate?: string;
 
   addRating: (ratingId: string) => IRating;
   updateRating: () => Promise<any>;
@@ -38,10 +38,7 @@ export const RecipeSchema = new Schema({
   ingredients: {
     type: [{
       quantity: String,
-      ingredient: {
-        type: Schema.Types.ObjectId,
-        ref: 'ingredient'
-      }
+      ingredient: String,
     }],
     default: [],
   },
@@ -49,6 +46,10 @@ export const RecipeSchema = new Schema({
     type: {
       avgRating: Number,
       totalRating: Number,
+    },
+    default: {
+      avgRating: 0,
+      totalRating: 0,
     }
   },
   ratings: {

@@ -1,7 +1,13 @@
-import { Response } from "express";
-export function responseWithData(res: Response, data: any, message?:string) {
-  const resData = {
-    status: res.statusCode,
-    data: data,
+import { Router } from "express";
+
+type Wrapper = (router: Router) => void;
+
+export const applyMiddleware = (
+  middleware: Wrapper[],
+  router: Router,
+) => {
+  for (const middle of middleware) {
+    middle(router);
   }
-}
+};
+

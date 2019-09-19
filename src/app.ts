@@ -5,14 +5,19 @@ import * as bodyParser from "body-parser";
 import * as mongoose from "mongoose";
 import * as logger from "morgan";
 import * as errorHandler from "errorhandler";
-import "./config";
+
+
 // app
+import "./config";
 import {
   DB_URI,
   IS_PROD,
   SESSION_SECRET
 } from "./environment";
 import { Routes } from "./routes";
+import middleware from "./middleware";
+import { applyMiddleware } from "./util";
+import { errorHandlers } from "./middleware/errorHandlers";
 
 class App {
   public app: express.Application;
@@ -21,24 +26,15 @@ class App {
   constructor() {
     this.app = express();
     this._config();
-    this.routePrv.routes(this.app);
 
-    this._addErrorHandlers();
+    // this._addErrorHandlers();
     this._mongoSetup();
   }
 
   private _config() {
-    // support application/json type post data
-    this.app.use(bodyParser.json());
-    // support application/x-www-form-urlencoded post data
-    this.app.use(bodyParser.urlencoded({ extended: false }));
-    this.app.use(logger("dev"));
-    this.app.use(session({
-      secret: SESSION_SECRET,
-      cookie: { maxAge: 60000 },
-      resave: false,
-      saveUninitialized: false,
-    }));
+    applyMiddleware(middleware, this.app);
+    this.routePrv.routes(this.app);
+    applyMiddleware(errorHandlers, this.app);
   }
 
 
@@ -67,7 +63,7 @@ class App {
     });
 
     if (!IS_PROD) {
-      this.app.use(errorHandler());
+      // this.app.use(errorHandler());
 
       this.app.use((err, req, res, next) => {
         console.log(err.stack);

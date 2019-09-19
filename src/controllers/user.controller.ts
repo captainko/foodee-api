@@ -1,8 +1,10 @@
-import { Request, Response, Router } from "express";
-import { User } from "../models/user.model";
-import { NextFunction } from "connect";
-import { isUndefined } from "util";
+//libs
+import { Request, Response, NextFunction } from "express";
 import passport = require("passport");
+import { isUndefined } from "util";
+
+// app
+import { User } from "../models/user.model";
 
 export class UserController {
   public static addUser(req: Request, res: Response, next) {
@@ -39,7 +41,6 @@ export class UserController {
   }
 
   public static getLoggedUser(req, res: Response, next: NextFunction) {
-    console.log('payload:', req.payload);
     User.findById(req.payload.id).then(user => {
       if (!user) { return res.sendStatus(401) }
 
@@ -49,8 +50,6 @@ export class UserController {
   }
 
   public static updateUser(req, res: Response, next: NextFunction) {
-    console.log(req.payload);
-
     User.findById(req.payload.id).then(user => {
       if (!user) { return res.sendStatus(401) }
 

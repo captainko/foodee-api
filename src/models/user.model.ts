@@ -6,8 +6,8 @@ import * as jwt from 'jsonwebtoken';
 
 //app
 import { JWT_SECRET } from "../environment";
-import { IIngredient } from "./ingredient.model";
 import { IRating } from "./rating.model";
+import { IRecipe } from "./recipe.model";
 
 export interface IAuthJSON {
   username: string;
@@ -27,7 +27,7 @@ export interface IUser extends Document, IUserMethods {
   username?: string;
   email?: string;
   image_url?: string;
-  recipes?: Array<string|IIngredient>;
+  recipes?: Array<string|IRecipe>;
   ratings?: Array<string|IRating>;
   hash?: string;
   salt?: string;
