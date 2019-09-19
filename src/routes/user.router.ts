@@ -4,7 +4,6 @@ import { auth } from "./auth";
 
 const UserRouter = Router();
 
-
 UserRouter
   .get('/', auth.required, UserController.getLoggedUser)
   .put('/', auth.required, UserController.updateUser)
