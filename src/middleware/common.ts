@@ -1,5 +1,7 @@
 // libs
 import { Router } from "express";
+import cors = require('cors');
+import compression = require("compression");
 import session = require("express-session");
 import bodyParser = require("body-parser");
 import logger = require('morgan');
@@ -11,7 +13,7 @@ type Handle = (router: Router) => void;
 
 
 export const handleCors : Handle = (router) => {
-  // cors
+  router.use(cors());
 }
 
 export const handleBodyRequest:Handle  = (router) => {
@@ -26,8 +28,8 @@ export const useLogger: Handle = (router) => {
 }
 
 export const handleCompression : Handle = (router) => {
-  if(!IS_PROD) {
-    // compression
+  if(IS_PROD) {
+    router.use(compression());
   }
 }
 

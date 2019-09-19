@@ -15,7 +15,10 @@ export class UserController {
 
     user.save().then(() => {
       return res.json({ user: user.toAuthJSON() });
-    }).catch(next);
+    }).catch(e => {
+      console.log(e);
+      next(e);
+    });
   }
 
   public static login(req: Request, res: Response, next: NextFunction) {
