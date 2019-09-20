@@ -35,7 +35,7 @@ export const RecipeSchema = new Schema({
     type: String,
     lowercase: true,
     unique: true,
-    required: true,
+    required: [true, 'is required'],
   },
   description: {
     type: String,
@@ -45,7 +45,7 @@ export const RecipeSchema = new Schema({
   status: {
     type: Boolean,
     default: true,
-    required: true,
+    required: [true, 'is required'],
   },
   servings: {
     type: Number,
@@ -57,7 +57,7 @@ export const RecipeSchema = new Schema({
   },
   createdBy: {
     type: Schema.Types.ObjectId,
-    required: true,
+    required: [true, 'is required'],
   },
   banners: [String],
   ingredients: {
@@ -65,12 +65,12 @@ export const RecipeSchema = new Schema({
       _id: false,
       quantity: {
         type: String,
-        required: true,
+        required: [true, 'is required'],
         trim: true,
       },
       ingredient: {
         type: String,
-        required: true,
+        required: [true, 'is required'],
         trim: true,
       },
     }],

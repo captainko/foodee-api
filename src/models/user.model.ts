@@ -42,7 +42,7 @@ export interface IUserModel extends Model<IUser> {
 export const UserSchema = new Schema<IUser>({
   username: {
     type: String,
-    required: [true, 'can\'t be blank'],
+    required: [true, 'is required'],
     match: [/^[a-zA-Z0-9]+$/, 'is invalid'],
     unique: true,
     trim: true,
@@ -53,7 +53,7 @@ export const UserSchema = new Schema<IUser>({
     lowercase: true,
     trim: true,
     unique: true,
-    required: [true, "can't be blank"],
+    required: [true, 'is required'],
     match: [/\S+@\S+\.\S+/, 'is invalid'],
     index: true,
   },
