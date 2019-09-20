@@ -4,14 +4,11 @@ import { Recipe, IRecipe } from "../models/recipe.model";
 import { Rating } from "../models/rating.model";
 import { User } from "../models/user.model";
 import { HTTP404Error } from "../util/httpErrors";
-import { type } from "os";
 
 interface PreloadedRequest extends Request {
   recipe?: IRecipe;
   payload?: any;
 }
-
-type Handler = (req: Request, res?: Response, next?: NextFunction) => Promise<any> | void;
 
 export class RecipeController {
 
@@ -59,6 +56,7 @@ export class RecipeController {
     const { body } = req;
     Recipe.create({
       name: body.name,
+      category: body.category,
       description: body.description,
       time: body.time,
       servings: body.servings,

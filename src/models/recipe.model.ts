@@ -1,15 +1,17 @@
 import { Schema, model, Document, SchemaTypes, Model } from "mongoose";
+import mongoosePagination = require('mongoose-paginate');
 import { Rating, IRating } from "./rating.model";
 
 export interface IRecipe extends Document {
   name?: string;
   description?: string;
+  status?: boolean,// true: public ~ false: private
+  category?: string,
   servings?: number;
   time?: string;
   banners?: string[];
   ingredients?: [{ quantity: string, ingredient: string }];
   totalRating: number;
-  isRated: boolean | number;
   ratings?: string[],
   createdDate?: string;
   updatedDate?: string;
@@ -27,6 +29,12 @@ export const RecipeSchema = new Schema({
     type: String,
     required: [true, 'is required'],
     trim: true,
+  },
+  category: {
+    type: String,
+    lowercase: true,
+    unique: true,
+    required: true,
   },
   description: {
     type: String,
@@ -49,8 +57,16 @@ export const RecipeSchema = new Schema({
   ingredients: {
     type: [{
       _id: false,
-      quantity: String,
-      ingredient: String,
+      quantity: {
+        type: String,
+        required: true,
+        trim: true,
+      },
+      ingredient: {
+        type: String,
+        required: true,
+        trim: true,
+      },
     }],
     default: [],
   },
@@ -91,6 +107,7 @@ export const RecipeSchema = new Schema({
     }
   }
 });
+RecipeSchema.plugin(mongoosePagination);
 
 RecipeSchema.index({
   name: 'text',
@@ -102,7 +119,7 @@ RecipeSchema.index({
     description: 2,
     'recipes.ingredient': 5,
   }
-})
+});
 
 RecipeSchema.methods.updateRating = async function () {
 
