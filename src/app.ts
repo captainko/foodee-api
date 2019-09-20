@@ -1,10 +1,6 @@
 // lib
 import * as express from "express";
-import * as session from "express-session";
-import * as bodyParser from "body-parser";
 import * as mongoose from "mongoose";
-import * as logger from "morgan";
-import * as errorHandler from "errorhandler";
 
 
 // app
@@ -12,7 +8,6 @@ import "./config";
 import {
   DB_URI,
   IS_PROD,
-  SESSION_SECRET
 } from "./environment";
 import { Routes } from "./routes";
 import middleware from "./middleware";
@@ -32,6 +27,13 @@ class App {
   }
 
   private _config() {
+
+    express.response.sendAndWrap = function (obj) {
+      return this.send({
+        status: this.statusCode,
+        data: obj
+      });
+    }
     applyMiddleware(middleware, this.app);
     this.routePrv.routes(this.app);
     applyMiddleware(errorHandlers, this.app);
@@ -52,32 +54,6 @@ class App {
     if (!IS_PROD) {
       mongoose.set('debug', true);
     }
-  }
-
-  private _addErrorHandlers() {
-    /// catch 404 and forward to error handler
-    this.app.use((req, res, next) => {
-      var err = new Error('Not found') as any;
-      err.status = 404;
-      next(err);
-    });
-
-    if (!IS_PROD) {
-      // this.app.use(errorHandler());
-
-      this.app.use((err, req, res, next) => {
-        console.log(err.stack);
-
-        res.status(err.status || 500);
-        res.json({
-          'errors': {
-            message: err.message,
-            error: err
-          }
-        });
-      });
-    }
-
   }
 }
 

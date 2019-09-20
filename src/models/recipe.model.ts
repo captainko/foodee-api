@@ -4,6 +4,7 @@ import { Rating, IRating } from "./rating.model";
 export interface IRecipe extends Document {
   name?: string;
   description?: string;
+  servings?: number;
   time?: string;
   banners?: string[];
   ingredients?: [{ quantity: string, ingredient: string }];
@@ -24,11 +25,21 @@ export interface IRecipeModel extends Model<IRecipe> {
 export const RecipeSchema = new Schema({
   name: {
     type: String,
+    required: [true, 'is required'],
     trim: true,
   },
   description: {
     type: String,
     trim: true,
+  },
+  status: {
+    type: Boolean,
+    default: true,
+    required: true,
+  },
+  servings: {
+    type: Number,
+    required: [true, 'is required'],
   },
   time: {
     type: String,
@@ -37,6 +48,7 @@ export const RecipeSchema = new Schema({
   banners: [String],
   ingredients: {
     type: [{
+      _id: false,
       quantity: String,
       ingredient: String,
     }],
@@ -68,6 +80,7 @@ export const RecipeSchema = new Schema({
       ret.id = ret._id;
       delete ret._id;
       delete ret.ratings;
+      // delete ret.score;
     },
   },
   toObject: {
@@ -79,7 +92,17 @@ export const RecipeSchema = new Schema({
   }
 });
 
-
+RecipeSchema.index({
+  name: 'text',
+  description: 'text',
+  'recipes.ingredient': 'text',
+}, {
+  weights: {
+    name: 10,
+    description: 2,
+    'recipes.ingredient': 5,
+  }
+})
 
 RecipeSchema.methods.updateRating = async function () {
 
@@ -97,16 +120,9 @@ RecipeSchema.methods.updateRating = async function () {
       }
     }
   ]);
-  // results = results.map(x => {
-  //   x.rating = {
-  //     avgRating: x.avgRating,
-  //     totalRating: x.totalRating,
-  //   }
-  // });
   delete results[0]._id;
   this.rating = results[0];
-  await this.save();
-  return this;
+  return await this.save();
 };
 
 RecipeSchema.methods.addRating = function (ratingId: string) {

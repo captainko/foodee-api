@@ -34,3 +34,10 @@ export class HTTP404Error extends HTTPClientError {
     super(message);
   }
 }
+
+export class HTTP422Error extends HTTPClientError {
+  readonly statusCode = 422;
+  constructor(message: string | object = 'Validation Error') {
+    super(message);
+  }
+}

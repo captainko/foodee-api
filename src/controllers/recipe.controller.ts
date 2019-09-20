@@ -1,13 +1,17 @@
-import { Request, Response, Router } from "express";
+import { Request, Response, NextFunction, } from "express";
 
 import { Recipe, IRecipe } from "../models/recipe.model";
 import { Rating } from "../models/rating.model";
 import { User } from "../models/user.model";
+import { HTTP404Error } from "../util/httpErrors";
+import { type } from "os";
 
 interface PreloadedRequest extends Request {
   recipe?: IRecipe;
   payload?: any;
 }
+
+type Handler = (req: Request, res?: Response, next?: NextFunction) => Promise<any> | void;
 
 export class RecipeController {
 
@@ -18,37 +22,53 @@ export class RecipeController {
       .findById(id)
       .then((recipe) => {
         if (!recipe) {
-          return res.sendStatus(404);
+          throw new HTTP404Error();
         }
         req.recipe = recipe;
-        console.log(req.recipe);
         return next();
       })
       .catch(next);
   }
 
-  public static getRecipes(req: Request, res: Response) {
+  public static getRecipes(req: Request, res: Response, next: NextFunction) {
     Recipe.find()
-      .populate('ingredients')
-      .then((recipe) => {res.json(recipe); console.log(recipe)})
-      .catch(error => res.status(500).json(error));
+      .then((recipe) => { res.json(recipe); console.log(recipe) })
+      .catch(next);
+  }
+
+  public static searchRecipes({ query }: Request, res: Response, next: NextFunction) {
+    if (query.q.length < 3) {
+      res.json([]);
+    }
+
+    Recipe.find(
+      { $text: { $search: query.q } },
+      { score: { $meta: "textScore" } }
+    )
+      .sort({ score: { $meta: "textScore" } })
+      .limit(20)
+      .then((value) => res.sendAndWrap(value))
+      .then(next);
   }
 
   public static getRecipeByID(req: PreloadedRequest, res: Response) {
-    res.json(req.recipe);
+    res.sendAndWrap(req.recipe);
   }
 
-  public static createRecipe(req: Request, res: Response) {
+  public static createRecipe(req: Request, res: Response, next: NextFunction) {
     const { body } = req;
     Recipe.create({
       name: body.name,
       description: body.description,
       time: body.time,
-    }).then((value) => res.json(value.toObject({ virtuals: true })))
-      .catch((error) => res.json(error));
+      servings: body.servings,
+      status: body.status,
+      ingredients: body.ingredients,
+    }).then((value) => res.send(value))
+      .catch(next);
   }
 
-  public static async rateRecipe(req: PreloadedRequest, res: Response, next) {
+  public static async rateRecipe(req: PreloadedRequest, res: Response, next: NextFunction) {
     try {
       console.log(req.recipe);
       const rateObj$ = Rating.rate(req.payload.id, req.recipe._id, req.body.rateValue);
@@ -63,17 +83,17 @@ export class RecipeController {
 
       await Promise.all([recipe.save(), user.save()])
 
-      return res.json(recipe);
+      return res.sendAndWrap(recipe);
 
-    } catch (e) {
-      next(e);
+    } catch (err) {
+      next(err);
     }
 
   }
 
-  public static removeAll(req: Request, res: Response) {
+  public static removeAll(req: Request, res: Response, next: NextFunction) {
     Recipe.deleteMany({})
-      .then(result => res.json(result))
-      .catch(error => res.json(error));
+      .then(result => res.sendAndWrap(result))
+      .catch(next);
   }
 }

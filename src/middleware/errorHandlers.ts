@@ -10,6 +10,12 @@ const handle404Error: Handle = (router) => {
   });
 };
 
+const handle422Error: Handle = (router) => {
+  router.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+    ErrorHandlers.validationError(err, res, next);
+  });
+}
+
 const handleClientErrors: Handle = (router) => {
   router.use((err: Error, req: Request, res: Response, next: NextFunction) => {
     ErrorHandlers.clientError(err, res, next);
@@ -24,6 +30,7 @@ const handleServerErrors: Handle = (router) => {
 
 export const errorHandlers = [
   handle404Error,
+  handle422Error,
   handleClientErrors,
   handleServerErrors,
 ]
