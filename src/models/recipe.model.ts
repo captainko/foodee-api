@@ -7,6 +7,7 @@ export interface IRecipe extends Document {
   description?: string;
   status?: boolean,// true: public ~ false: private
   category?: string,
+  createdBy?: string,
   servings?: number;
   time?: string;
   banners?: string[];
@@ -39,6 +40,7 @@ export const RecipeSchema = new Schema({
   description: {
     type: String,
     trim: true,
+    default: false,
   },
   status: {
     type: Boolean,
@@ -52,6 +54,10 @@ export const RecipeSchema = new Schema({
   time: {
     type: String,
     trim: true,
+  },
+  createdBy: {
+    type: Schema.Types.ObjectId,
+    required: true,
   },
   banners: [String],
   ingredients: {

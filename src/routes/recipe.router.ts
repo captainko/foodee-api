@@ -6,11 +6,12 @@ import { auth } from './auth';
 
 
 const RecipeRouter = Router();
+RecipeRouter.all('*', auth.optional).param('recipe', RecipeController.preloadRecipe);
 RecipeRouter.get('/',auth.optional, RecipeController.getRecipes);
 RecipeRouter.delete('/', RecipeController.removeAll);
 RecipeRouter.post('/', auth.required, RecipeController.createRecipe);
 RecipeRouter.get('/search', RecipeController.searchRecipes);
-RecipeRouter.param('recipe', RecipeController.preloadRecipe);
+// RecipeRouter.param('recipe',RecipeController.preloadRecipe);
 RecipeRouter.get('/:recipe', RecipeController.getRecipeByID);
 RecipeRouter.post('/:recipe/rating', auth.required, RecipeController.rateRecipe);
 
