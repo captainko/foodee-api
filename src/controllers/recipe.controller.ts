@@ -3,7 +3,7 @@ import { Request, Response, NextFunction, } from "express";
 import { Recipe, IRecipe } from "../models/recipe.model";
 import { Rating } from "../models/rating.model";
 import { User } from "../models/user.model";
-import { HTTP404Error } from "../util/httpErrors";
+import { HTTP404Error, HTTP403Error } from "../util/httpErrors";
 
 interface PreloadedRequest extends Request {
   recipe?: IRecipe;
@@ -12,14 +12,20 @@ interface PreloadedRequest extends Request {
 
 export class RecipeController {
 
-  public static preloadRecipe(req, res: Response, next, id: string) {
+  public static preloadRecipe(req: PreloadedRequest, res: Response, next, id: string) {
     // if(!id) return next();
-    console.log('lol');
+    console.log('iss',req.isAuthenticated());
+    
     Recipe
       .findById(id)
       .then((recipe) => {
         if (!recipe) {
           throw new HTTP404Error();
+        }
+
+        if(!recipe.status  && recipe.createdBy !== req.payload.id) {
+          console.log('error');
+          throw new HTTP403Error();
         }
         req.recipe = recipe;
         return next();
@@ -52,7 +58,7 @@ export class RecipeController {
     res.sendAndWrap(req.recipe);
   }
 
-  public static createRecipe(req: Request, res: Response, next: NextFunction) {
+  public static createRecipe(req: PreloadedRequest, res: Response, next: NextFunction) {
     const { body } = req;
     Recipe.create({
       name: body.name,
@@ -62,6 +68,7 @@ export class RecipeController {
       servings: body.servings,
       status: body.status,
       ingredients: body.ingredients,
+      createdBy: req.payload.id,
     }).then((value) => res.send(value))
       .catch(next);
   }
