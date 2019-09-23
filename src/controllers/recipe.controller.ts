@@ -13,9 +13,7 @@ interface PreloadedRequest extends Request {
 export class RecipeController {
 
   public static preloadRecipe(req: PreloadedRequest, res: Response, next, id: string) {
-    // if(!id) return next();
-    console.log('iss',req.isAuthenticated());
-    
+    // if(!id) return next();    
     Recipe
       .findById(id)
       .then((recipe) => {
@@ -37,6 +35,13 @@ export class RecipeController {
     Recipe.find()
       .then((recipe) => { res.json(recipe); console.log(recipe) })
       .catch(next);
+  }
+
+  public static getRecipesByCategory(req: Request, res: Response, next: NextFunction) {
+    Recipe.paginate({
+      category: req.params.category
+    }).then(x => res.sendAndWrap(x))
+    .catch(next);
   }
 
   public static searchRecipes({ query }: Request, res: Response, next: NextFunction) {
@@ -64,6 +69,8 @@ export class RecipeController {
       name: body.name,
       category: body.category,
       description: body.description,
+      image_url: body.image_url,
+      banners: body.banners,
       time: body.time,
       servings: body.servings,
       status: body.status,

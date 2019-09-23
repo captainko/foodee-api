@@ -43,6 +43,7 @@
         "@types/jsonwebtoken": "^8.3.3",
         "@types/method-override": "0.0.31",
         "@types/mongoose": "^5.3.26",
+        "@types/mongoose-paginate": "^5.0.6",
         "@types/morgan": "^1.7.35",
         "@types/node": "^10.12.18",
         "@types/passport-local": "^1.0.33",

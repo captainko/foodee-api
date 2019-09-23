@@ -1,6 +1,13 @@
-import { Schema, model, Document, SchemaTypes, Model } from "mongoose";
+import { Schema, model, Document, SchemaTypes, Model, PaginateModel } from "mongoose";
 import mongoosePagination = require('mongoose-paginate');
 import { Rating, IRating } from "./rating.model";
+
+
+export interface ICategory {
+  _id: string,
+  total: number,
+  image_url: string,
+}
 
 export interface IRecipe extends Document {
   name?: string;
@@ -11,6 +18,7 @@ export interface IRecipe extends Document {
   servings?: number;
   time?: string;
   banners?: string[];
+  image_url?: string,
   ingredients?: [{ quantity: string, ingredient: string }];
   totalRating: number;
   ratings?: string[],
@@ -19,10 +27,11 @@ export interface IRecipe extends Document {
 
   addRating: (ratingId: string) => IRating;
   updateRating: () => Promise<any>;
-
 }
 
-export interface IRecipeModel extends Model<IRecipe> {
+export interface IRecipeModel extends PaginateModel<IRecipe> {
+  getCategories: () => Promise<Array<ICategory>>;
+  getRecipesByCategory: (category: string) => Promise<Array<IRecipe>>;
 }
 
 export const RecipeSchema = new Schema({
@@ -40,7 +49,6 @@ export const RecipeSchema = new Schema({
   description: {
     type: String,
     trim: true,
-    default: false,
   },
   status: {
     type: Boolean,
@@ -60,6 +68,10 @@ export const RecipeSchema = new Schema({
     required: [true, 'is required'],
   },
   banners: [String],
+  image_url: {
+    type: String,
+    required: [true, 'is required'],
+  },
   ingredients: {
     type: [{
       _id: false,
@@ -102,7 +114,7 @@ export const RecipeSchema = new Schema({
       ret.id = ret._id;
       delete ret._id;
       delete ret.ratings;
-      // delete ret.score;
+      delete ret.score;
     },
   },
   toObject: {
@@ -128,7 +140,6 @@ RecipeSchema.index({
 });
 
 RecipeSchema.methods.updateRating = async function () {
-
   let results = await Rating.aggregate([
     {
       $match: {
@@ -155,6 +166,23 @@ RecipeSchema.methods.addRating = function (ratingId: string) {
   }
 
   return this;
+}
+
+RecipeSchema.statics.getCategories = async function () {
+  const categories = await Recipe.aggregate([
+    {
+      $group: {
+        _id: { $ifNull: ["$category", "Unknown"] },
+        total: { $sum: 1 },
+        image_url: { $last: { $arrayElemAt: ["$banners", 0] } },
+      }, // ~$group
+    }
+  ]);
+  return categories;
+}
+
+RecipeSchema.statics.getRecipesByCategory = async function (category:string) {
+  return await Recipe.find({category}).exec();
 }
 
 export const RecipeModel = model<IRecipe, IRecipeModel>('recipe', RecipeSchema);

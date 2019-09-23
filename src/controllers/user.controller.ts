@@ -7,16 +7,15 @@ import { isUndefined } from "util";
 import { User } from "../models/user.model";
 
 export class UserController {
-  public static addUser(req: Request, res: Response, next) {
+  public static addUser(req: Request, res: Response, next: NextFunction) {
     const user = new User();
     user.email = req.body.email;
     user.username = req.body.username;
     user.setPassword(req.body.password);
 
     user.save().then(() => {
-      return res.json({ user: user.toAuthJSON() });
+      return res.sendAndWrap({ user: user.toAuthJSON() });
     }).catch(e => {
-      console.log(e);
       next(e);
     });
   }
@@ -24,11 +23,11 @@ export class UserController {
   public static login(req: Request, res: Response, next: NextFunction) {
     const { body } = req;
     if (!body.email) {
-      return res.status(422).json({ errors: { email: "can't be blank" } });
+      return res.status(422).json({ errors: { email: "is required" } });
     }
 
     if (!body.password) {
-      return res.status(422).json({ errors: { password: "can't be blank" } });
+      return res.status(422).json({ errors: { password: "is required" } });
     }
 
     passport.authenticate('local', { session: false }, (err, user, info) => {
@@ -36,9 +35,9 @@ export class UserController {
 
       if (user) {
         user.token = user.generateJWT();
-        return res.json({ user: user.toAuthJSON() });
+        return res.sendAndWrap({ user: user.toAuthJSON() });
       } else {
-        return res.status(422).json(info);
+        return res.status(422).sendAndWrap(info);
       }
     })(req, res, next);
   }
@@ -47,7 +46,7 @@ export class UserController {
     User.findById(req.payload.id).then(user => {
       if (!user) { return res.sendStatus(401) }
 
-      return res.send(user.toAuthJSON());
+      return res.sendAndWrap({user: user.toAuthJSON()});
     })
       .catch(next);
   }
@@ -68,7 +67,7 @@ export class UserController {
       }
 
       return user.save().then(() => {
-        return res.json(user.toAuthJSON());
+        return res.sendAndWrap({user: user.toAuthJSON()});
       });
     }).catch(next);
   }

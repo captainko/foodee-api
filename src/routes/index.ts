@@ -2,6 +2,7 @@ import * as express from 'express';
 
 import { RecipeRouter } from "./recipe.router";
 import { UserRouter } from './user.router';
+import { CategoryRouter } from './category.router';
 
 const api = express();
 export class Routes {
@@ -21,6 +22,7 @@ export class Routes {
         // app.route('/contact/:contactId')
         //     .get(this.contactCtrl.getContactWithID);
         api.use('/recipe', RecipeRouter);
+        api.use('/category', CategoryRouter);
         api.use('/user', UserRouter)
     }
 }
