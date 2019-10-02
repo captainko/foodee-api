@@ -85,6 +85,9 @@ export class RecipeController {
   }
 
   public static updateRecipe(req: PreloadedRequest, res: Response, next: NextFunction) {
+    if(req.user.id !== req.recipe.createdBy) {
+     return next(new HTTP403Error('Forbidden'));
+    }
     req.recipe.update(req.body)
       .then((value) => res.sendAndWrap(value, 'recipe'))
       .catch(next);
