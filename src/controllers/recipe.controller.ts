@@ -2,12 +2,13 @@ import { Request, Response, NextFunction, } from "express";
 
 import { Recipe, IRecipe } from "../models/recipe.model";
 import { Rating } from "../models/rating.model";
-import { User } from "../models/user.model";
+import { User, IUser } from "../models/user.model";
 import { HTTP404Error, HTTP403Error } from "../util/httpErrors";
 
 interface PreloadedRequest extends Request {
   recipe?: IRecipe;
   payload?: any;
+  user: IUser,
 }
 
 export class RecipeController {
@@ -69,20 +70,27 @@ export class RecipeController {
       name: body.name,
       category: body.category,
       description: body.description,
-      image_url: body.image_url,
       banners: body.banners,
       time: body.time,
       servings: body.servings,
       status: body.status,
       ingredients: body.ingredients,
       createdBy: req.payload.id,
-    }).then((value) => res.send(value))
+    })
+    .then((recipe) => {
+      req.user.createdRecipes.push(recipe._id);
+      req.user.save().then(() => res.sendAndWrap(recipe.toJSONFor(req.user), 'recipe'));
+    })
       .catch(next);
+  }
+
+  public static updateRecipe(req: PreloadedRequest, res: Response, next: NextFunction) {
+    req.recipe.update(req.body).then((value) => res.sendAndWrap(value, ))
   }
 
   public static async rateRecipe(req: PreloadedRequest, res: Response, next: NextFunction) {
     try {
-      console.log(req.recipe);
+      console.log('this',req.recipe);
       const rateObj$ = Rating.rate(req.payload.id, req.recipe._id, req.body.rateValue);
       const user$ = User.findById(req.payload.id).exec();
       const recipe = req.recipe;

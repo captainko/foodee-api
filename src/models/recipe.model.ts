@@ -1,6 +1,14 @@
-import { Schema, model, Document, SchemaTypes, Model, PaginateModel } from "mongoose";
+import {
+  Schema,
+  model,
+  Document,
+  SchemaTypes,
+  PaginateModel,
+  DocumentQuery
+} from "mongoose";
 import mongoosePagination = require('mongoose-paginate');
 import { Rating, IRating } from "./rating.model";
+import { IUser, User } from "./user.model";
 
 
 export interface ICategory {
@@ -16,25 +24,28 @@ export interface IRecipe extends Document {
   category?: string,
   createdBy?: string,
   servings?: number;
-  time?: string;
+  time?: number;
+  tags?: string[];
   banners?: string[];
-  image_url?: string,
+  image_url?: string;
   ingredients?: [{ quantity: string, ingredient: string }];
   totalRating: number;
-  ratings?: string[],
-  createdDate?: string;
-  updatedDate?: string;
+  ratings?: string[];
+  createdAt?: string;
+  updatedAt?: string;
 
+  toJSONFor:(user: IUser) => IRecipe;
   addRating: (ratingId: string) => IRating;
   updateRating: () => Promise<any>;
 }
 
 export interface IRecipeModel extends PaginateModel<IRecipe> {
   getCategories: () => Promise<Array<ICategory>>;
-  getRecipesByCategory: (category: string) => Promise<Array<IRecipe>>;
+  getRecipesByCategory: (category: string) => DocumentQuery<IRecipe[], IRecipe, {}>;
+  getRecipesFor: (userId?: string) => DocumentQuery<IRecipe[], IRecipe, {}>;
 }
 
-export const RecipeSchema = new Schema({
+export const RecipeSchema = new Schema<IRecipe>({
   name: {
     type: String,
     required: [true, 'is required'],
@@ -44,6 +55,7 @@ export const RecipeSchema = new Schema({
     type: String,
     lowercase: true,
     unique: true,
+    trim: true,
     required: [true, 'is required'],
   },
   description: {
@@ -65,12 +77,15 @@ export const RecipeSchema = new Schema({
   },
   createdBy: {
     type: Schema.Types.ObjectId,
+    ref: 'user',
     required: [true, 'is required'],
   },
-  banners: [String],
-  image_url: {
-    type: String,
-    required: [true, 'is required'],
+  banners: {
+    type: [String],
+    minlength: 1,
+    maxlength: 4,
+    required: true,
+    trim: true,
   },
   ingredients: {
     type: [{
@@ -104,6 +119,11 @@ export const RecipeSchema = new Schema({
       ref: 'rating',
     }],
     default: [],
+  },
+  tags: {
+    type: [String],
+    trim: true,
+    lowercase: true,
   }
 }, {
   versionKey: false,
@@ -111,21 +131,29 @@ export const RecipeSchema = new Schema({
   toJSON: {
     virtuals: true,
     transform: (doc, ret) => {
-      ret.id = ret._id;
       delete ret._id;
       delete ret.ratings;
       delete ret.score;
+      delete ret.createdAt;
+      delete ret.updatedAt;
     },
   },
   toObject: {
     virtuals: true,
     transform: (doc, ret) => {
-      ret.id = ret._id;
       delete ret._id;
+      delete ret.ratings;
+      delete ret.score;
+      delete ret.createdAt;
+      delete ret.updatedAt;
     }
-  }
+  },
 });
 RecipeSchema.plugin(mongoosePagination);
+
+RecipeSchema.virtual('image_url').get(function () {
+  return this.banners[0];
+});
 
 RecipeSchema.index({
   name: 'text',
@@ -138,6 +166,16 @@ RecipeSchema.index({
     'recipes.ingredient': 5,
   }
 });
+
+RecipeSchema.methods.toJSONFor = function(user) {
+
+  delete this.toJSON;
+  return {
+    ... this.toObject(), 
+    savedByUser:  user.createdRecipe(this._id),
+    createdByUser: user._id === this.createdBy,
+  };
+}
 
 RecipeSchema.methods.updateRating = async function () {
   let results = await Rating.aggregate([
@@ -181,8 +219,18 @@ RecipeSchema.statics.getCategories = async function () {
   return categories;
 }
 
-RecipeSchema.statics.getRecipesByCategory = async function (category:string) {
-  return await Recipe.find({category}).exec();
+RecipeSchema.statics.getRecipesByCategory = function (category: string) {
+  return Recipe.find({ category });
+}
+
+RecipeSchema.statics.getRecipesFor = function (userId?: string) {
+  console.log(userId);
+  return Recipe.find({
+    $or: [
+      { status: true },
+      { $and: [{ status: false }, { createdBy: userId }] }
+    ]
+  });
 }
 
 export const RecipeModel = model<IRecipe, IRecipeModel>('recipe', RecipeSchema);

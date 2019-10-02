@@ -8,6 +8,7 @@ import logger = require('morgan');
 
 // app
 import { IS_PROD, SESSION_SECRET } from "../environment";
+import passport = require("passport");
 
 type Handle = (router: Router) => void;
 
@@ -42,3 +43,7 @@ export const handleSession : Handle = (router) => {
   }));
 }
 
+export const handlePassportSession: Handle = (router) => {
+  router.use(passport.initialize())
+  router.use(passport.session());
+}

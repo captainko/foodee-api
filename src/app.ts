@@ -28,12 +28,20 @@ class App {
 
   private _config() {
 
-    express.response.sendAndWrap = function (obj) {
+    express.response.sendAndWrap = function (obj, key = 'data') {
       return this.send({
         status: this.statusCode,
-        data: obj
+        [key]: obj
       });
     }
+
+    express.response.jsonAndWrap = function (obj, key = 'data') {
+      return this.json({
+        status: this.statusCode,
+        [key]: obj,
+      })
+    }
+
     applyMiddleware(middleware, this.app);
     this.routePrv.routes(this.app);
     applyMiddleware(errorHandlers, this.app);

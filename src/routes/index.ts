@@ -3,6 +3,8 @@ import * as express from 'express';
 import { RecipeRouter } from "./recipe.router";
 import { UserRouter } from './user.router';
 import { CategoryRouter } from './category.router';
+import { ImageRouter } from './image.router';
+import { MainFrameRouter } from './main-frame.router';
 
 const api = express();
 export class Routes {
@@ -23,6 +25,8 @@ export class Routes {
         //     .get(this.contactCtrl.getContactWithID);
         api.use('/recipe', RecipeRouter);
         api.use('/category', CategoryRouter);
-        api.use('/user', UserRouter)
+        api.use('/upload-image', ImageRouter);
+        api.use('/user', UserRouter);
+        api.use('/main-frame', MainFrameRouter)
     }
 }

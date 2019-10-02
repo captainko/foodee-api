@@ -3,3 +3,4 @@ dist/
 .tscache/
 package-lock.json
 .env
+./src/uploads/

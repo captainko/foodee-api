@@ -21,18 +21,22 @@ export interface IUserMethods {
   validPassword: (password: string) => boolean;
   generateJWT: () => string;
   toAuthJSON: () => IAuthJSON;
+  createdRecipe:(recipeId: string) => boolean;
+  savedRecipe: (recipeId: string) => boolean;
 }
 
 export interface IUser extends Document, IUserMethods {
+  id: string;
   username?: string;
   email?: string;
   image_url?: string;
-  recipes?: Array<string|IRecipe>;
+  createdRecipes?: Array<string|IRecipe>;
+  savedRecipes?: Array<string|IRecipe>;
   ratings?: Array<string|IRating>;
   hash?: string;
   salt?: string;
-  created_date?: string;
-  updated_date?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface IUserModel extends Model<IUser> {
@@ -58,7 +62,11 @@ export const UserSchema = new Schema<IUser>({
     index: true,
   },
   image_url: String,
-  recipes: [{
+  createdRecipes: [{
+    type: Schema.Types.ObjectId,
+    ref: 'recipe'
+  }],
+  savedRecipes: [{
     type: Schema.Types.ObjectId,
     ref: 'recipe'
   }],
@@ -76,7 +84,6 @@ export const UserSchema = new Schema<IUser>({
   toJSON: {
     virtuals: true,
     transform: (doc, ret) => {
-      ret.id = ret._id;
       delete ret._id;
       delete ret.ratings;
     },
@@ -84,7 +91,7 @@ export const UserSchema = new Schema<IUser>({
   toObject: {
     virtuals: true,
     transform: (doc, ret) => {
-      ret.id = ret._id;
+      
       delete ret._id;
     }
   }
@@ -131,6 +138,15 @@ UserSchema.methods.toAuthJSON = function () {
     image_url: this.image_url,
   }
 };
+
+UserSchema.methods.createdRecipe = function(recipeId: string) {
+  return this.createdRecipes.includes(recipeId);
+}
+
+UserSchema.methods.savedRecipe = function(recipeId: string) {
+  return this.user.createdRecipes.includes(recipeId);
+}
+
 
 
 export const UserModel = model<IUser, IUserModel>('user', UserSchema);
