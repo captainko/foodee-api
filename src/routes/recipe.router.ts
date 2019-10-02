@@ -15,6 +15,7 @@ RecipeRouter.get('/search', RecipeController.searchRecipes);
 RecipeRouter.get('/category/:category', RecipeController.getRecipesByCategory);
 // RecipeRouter.param('recipe',RecipeController.preloadRecipe);
 RecipeRouter.get('/:recipe', RecipeController.getRecipeByID);
+RecipeRouter.put('/:recipe', RecipeController.updateRecipe);
 RecipeRouter.post('/:recipe/rating', auth.required, userMiddleware, RecipeController.rateRecipe);
 
 

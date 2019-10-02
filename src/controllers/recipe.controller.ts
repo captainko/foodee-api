@@ -79,13 +79,15 @@ export class RecipeController {
     })
     .then((recipe) => {
       req.user.createdRecipes.push(recipe._id);
-      req.user.save().then(() => res.sendAndWrap(recipe.toJSONFor(req.user), 'recipe'));
+      req.user.save().then(() => res.sendAndWrap('created successfully', 'message'));
     })
       .catch(next);
   }
 
   public static updateRecipe(req: PreloadedRequest, res: Response, next: NextFunction) {
-    req.recipe.update(req.body).then((value) => res.sendAndWrap(value, ))
+    req.recipe.update(req.body)
+      .then((value) => res.sendAndWrap(value, 'recipe'))
+      .catch(next);
   }
 
   public static async rateRecipe(req: PreloadedRequest, res: Response, next: NextFunction) {
