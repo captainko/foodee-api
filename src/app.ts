@@ -35,11 +35,8 @@ class App {
       });
     }
 
-    express.response.jsonAndWrap = function (obj, key = 'data') {
-      return this.json({
-        status: this.statusCode,
-        [key]: obj,
-      })
+    express.response.sendMessage = function(message) {
+      return this.sendAndWrap(message, 'message');
     }
 
     applyMiddleware(middleware, this.app);

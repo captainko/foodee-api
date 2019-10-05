@@ -34,7 +34,7 @@ export interface IRecipe extends Document {
   createdAt?: string;
   updatedAt?: string;
 
-  toJSONFor:(user: IUser) => IRecipe;
+  toJSONFor: (user: IUser) => IRecipe;
   addRating: (ratingId: string) => IRating;
   updateRating: () => Promise<any>;
 }
@@ -42,7 +42,7 @@ export interface IRecipe extends Document {
 export interface IRecipeModel extends PaginateModel<IRecipe> {
   getCategories: () => Promise<Array<ICategory>>;
   getRecipesByCategory: (category: string) => DocumentQuery<IRecipe[], IRecipe, {}>;
-  getRecipesFor: (userId?: string) => DocumentQuery<IRecipe[], IRecipe, {}>;
+  getPublicRecipes: () => DocumentQuery<IRecipe[], IRecipe, {}>;
 }
 
 export const RecipeSchema = new Schema<IRecipe>({
@@ -133,7 +133,7 @@ export const RecipeSchema = new Schema<IRecipe>({
     transform: (doc, ret) => {
       delete ret._id;
       delete ret.ratings;
-      delete ret.score;
+      // delete ret.score;
       delete ret.createdAt;
       delete ret.updatedAt;
     },
@@ -143,7 +143,7 @@ export const RecipeSchema = new Schema<IRecipe>({
     transform: (doc, ret) => {
       delete ret._id;
       delete ret.ratings;
-      delete ret.score;
+      // delete ret.score;
       delete ret.createdAt;
       delete ret.updatedAt;
     }
@@ -158,21 +158,20 @@ RecipeSchema.virtual('image_url').get(function () {
 RecipeSchema.index({
   name: 'text',
   description: 'text',
-  'recipes.ingredient': 'text',
+  'ingredients.ingredient': 'text',
 }, {
   weights: {
     name: 10,
-    description: 2,
-    'recipes.ingredient': 5,
+    description: 5,
+    'ingredients.ingredient': 5,
   }
 });
 
-RecipeSchema.methods.toJSONFor = function(user) {
+RecipeSchema.methods.toJSONFor = function (user: IUser) {
 
-  delete this.toJSON;
   return {
-    ... this.toObject(), 
-    savedByUser:  user.createdRecipe(this._id),
+    ... this.toObject(),
+    savedByUser: user.savedRecipe(this._id),
     createdByUser: user._id === this.createdBy,
   };
 }
@@ -198,11 +197,10 @@ RecipeSchema.methods.updateRating = async function () {
 };
 
 RecipeSchema.methods.addRating = function (ratingId: string) {
-  const recipe = this as IRecipe;
-  if (!recipe.ratings.includes(ratingId)) {
-    recipe.ratings.push(ratingId);
+  if (!this.ratings.includes(ratingId)) {
+    this.ratings.push(ratingId);
   }
-
+  
   return this;
 }
 
@@ -223,14 +221,8 @@ RecipeSchema.statics.getRecipesByCategory = function (category: string) {
   return Recipe.find({ category });
 }
 
-RecipeSchema.statics.getRecipesFor = function (userId?: string) {
-  console.log(userId);
-  return Recipe.find({
-    $or: [
-      { status: true },
-      { $and: [{ status: false }, { createdBy: userId }] }
-    ]
-  });
+RecipeSchema.statics.getPublicRecipes = function() {
+  return Recipe.find({status: true});
 }
 
 export const RecipeModel = model<IRecipe, IRecipeModel>('recipe', RecipeSchema);

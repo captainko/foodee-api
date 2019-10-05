@@ -44,7 +44,7 @@ export const RatingSchema = new Schema({
 });
 
 export interface RatingModel extends Model<IRating> {
-  rate: (userId: string, recipeId: string, rateValue: number) => IRating;
+  rate: (userId: string, recipeId: string, rateValue: number) => Promise<IRating>;
 }
 
 RatingSchema.statics.rate = async function (userId: string, recipeId: string, rateValue: number) {

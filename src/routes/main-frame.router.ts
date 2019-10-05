@@ -5,5 +5,5 @@ import { userMiddleware } from "../middleware/user.middleware";
 
 export const MainFrameRouter = Router();
 
-MainFrameRouter.get('/', auth.optional,userMiddleware, MainFrameController.getMainFrame);
+MainFrameRouter.get('/', auth.optional, userMiddleware, MainFrameController.getMainFrame);
 

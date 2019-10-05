@@ -19,7 +19,6 @@ export const auth = {
     secret: JWT_SECRET,
     userProperty: 'payload',
     getToken: getTokenFromHeader,
-    credentialsRequired: true
   }),
   optional: jwt({
     secret: JWT_SECRET,

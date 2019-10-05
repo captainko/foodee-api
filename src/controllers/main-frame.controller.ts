@@ -7,14 +7,12 @@ interface PreloadedRequest extends Request {
   user?: IUser,
 }
 export class MainFrameController {
-  public static async getMainFrame(req: PreloadedRequest, res: Response, next: NextFunction) {
-
-    if(req.user)  {
-      Recipe.getRecipesFor(req.user.id).exec((err, recipes) => {
-        if(err)
-         return next(err)
-        res.sendAndWrap(recipes.map((r)=>r.toJSONFor(req.user)), 'recipes');
-      });
+  public static async getMainFrame({user}: PreloadedRequest, res: Response, next: NextFunction) {
+    
+    if(user)  {
+      user = await user.populate('savedRecipes').populate('createdRecipes').execPopulate();
+      return res.json(user)
     }
+    res.send(200);
   }
 }

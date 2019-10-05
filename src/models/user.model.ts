@@ -21,18 +21,21 @@ export interface IUserMethods {
   validPassword: (password: string) => boolean;
   generateJWT: () => string;
   toAuthJSON: () => IAuthJSON;
-  createdRecipe:(recipeId: string) => boolean;
+  createdRecipe: (recipeId: string) => boolean;
+  createRecipe: (recipeId: string) => IUser;
+  saveRecipe: (recipeId: string) => IUser;
   savedRecipe: (recipeId: string) => boolean;
 }
 
 export interface IUser extends Document, IUserMethods {
   id: string;
   username?: string;
+  admin?: boolean;
   email?: string;
   image_url?: string;
-  createdRecipes?: Array<string|IRecipe>;
-  savedRecipes?: Array<string|IRecipe>;
-  ratings?: Array<string|IRating>;
+  createdRecipes?: Array<string & IRecipe>;
+  savedRecipes?: Array<string & IRecipe>;
+  ratings?: Array<string | IRating>;
   hash?: string;
   salt?: string;
   createdAt?: string;
@@ -40,7 +43,7 @@ export interface IUser extends Document, IUserMethods {
 }
 
 export interface IUserModel extends Model<IUser> {
-  
+
 }
 
 export const UserSchema = new Schema<IUser>({
@@ -61,15 +64,25 @@ export const UserSchema = new Schema<IUser>({
     match: [/\S+@\S+\.\S+/, 'is invalid'],
     index: true,
   },
+  admin: {
+    type: Boolean,
+    required: true,
+    default: false,
+  },
   image_url: String,
-  createdRecipes: [{
-    type: Schema.Types.ObjectId,
-    ref: 'recipe'
-  }],
-  savedRecipes: [{
-    type: Schema.Types.ObjectId,
-    ref: 'recipe'
-  }],
+  createdRecipes: {
+    type: [{
+      type: Schema.Types.ObjectId,
+      ref: 'recipe'
+    }]
+  },
+  savedRecipes: {
+
+    type: [{
+      type: Schema.Types.ObjectId,
+      ref: 'recipe'
+    }]
+  },
   ratings: {
     type: [{
       type: Schema.Types.ObjectId,
@@ -91,7 +104,7 @@ export const UserSchema = new Schema<IUser>({
   toObject: {
     virtuals: true,
     transform: (doc, ret) => {
-      
+
       delete ret._id;
     }
   }
@@ -107,7 +120,19 @@ UserSchema.methods.addRating = function (ratingId: string) {
   }
 };
 
-UserSchema.methods.setPassword = function (password: string) {
+UserSchema.methods.saveRecipe = function(recipeId) {
+  if(!this.savedRecipes.includes(recipeId)) {
+    this.savedRecipes.push(recipeId);
+  }
+  return this;
+}
+
+UserSchema.methods.createRecipe = function(recipeId) {
+  this.createdRecipe.push(recipeId);
+  return this;
+}
+
+UserSchema.methods.setPassword = function (password) {
   this.salt = crypto.randomBytes(16).toString('hex');
   this.hash = crypto.pbkdf2Sync(password, this.salt, 10000, 512, 'sha512').toString('hex');
 }
@@ -139,12 +164,12 @@ UserSchema.methods.toAuthJSON = function () {
   }
 };
 
-UserSchema.methods.createdRecipe = function(recipeId: string) {
+UserSchema.methods.createdRecipe = function (recipeId: string) {
   return this.createdRecipes.includes(recipeId);
 }
 
-UserSchema.methods.savedRecipe = function(recipeId: string) {
-  return this.user.createdRecipes.includes(recipeId);
+UserSchema.methods.savedRecipe = function (recipeId: string) {
+  return this.createdRecipes.includes(recipeId);
 }
 
 
