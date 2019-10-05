@@ -11,13 +11,16 @@ RecipeRouter.all('*', auth.optional).param('recipe', RecipeController.preloadRec
 RecipeRouter.get('/', auth.optional, RecipeController.getRecipes);
 RecipeRouter.delete('/', RecipeController.removeAll);
 RecipeRouter.post('/', auth.required, userMiddleware, RecipeController.createRecipe);
-RecipeRouter.get('/search', RecipeController.searchRecipes);
+RecipeRouter.get('/search', auth.optional, userMiddleware, RecipeController.searchRecipes);
 RecipeRouter.get('/category/:category', RecipeController.getRecipesByCategory);
 // RecipeRouter.param('recipe',RecipeController.preloadRecipe);
-RecipeRouter.get('/:recipe', RecipeController.getRecipeByID);
-RecipeRouter.put('/:recipe', RecipeController.updateRecipe);
-RecipeRouter.delete('')
+RecipeRouter.get('/:recipe/', auth.optional, userMiddleware, RecipeController.onlyPermitted, RecipeController.getRecipeByID);
+RecipeRouter.put('/:recipe/', auth.required, userMiddleware, RecipeController.onlySameUserOrAdmin, RecipeController.updateRecipe);
+
 RecipeRouter.post('/:recipe/rating', auth.required, userMiddleware, RecipeController.rateRecipe);
+RecipeRouter.post('/:recipe/save', auth.required, userMiddleware, RecipeController.onlySameUserOrAdmin, RecipeController.saveRecipe);
+
+RecipeRouter.delete('')
 
 
 export { RecipeRouter };
