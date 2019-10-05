@@ -38,7 +38,7 @@ export class Http401Error extends HTTPClientError {
 export class HTTP403Error extends HTTPClientError {
   readonly statusCode = 403;
 
-  constructor(message: string |object = "Forbidden") {
+  constructor(message: string |object = "Access Denied") {
     super(message);
   }
 }
