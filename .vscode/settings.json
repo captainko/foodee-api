@@ -1,4 +1,9 @@
 {
+  "editor.fontWeight": "500",
+  "editor.fontSize": 16,
+  "workbench.colorTheme": "Shades of Purple",
+  "workbench.activityBar.visible": true,
+  "workbench.iconTheme": "vs-seti",
   "cSpell.words": [
     "Interop",
     "deserialize",
