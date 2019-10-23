@@ -8,7 +8,6 @@ import { HTTP404Error, HTTP403Error } from "../util/httpErrors";
 export class RecipeController {
 
   public static preloadRecipe(req: Request, res: Response, next, id: string) {
-    // if(!id) return next();    
     Recipe
       .findById(id)
       .then((recipe) => {
@@ -34,54 +33,7 @@ export class RecipeController {
       .catch(next);
   }
 
-  private static _sorts = {
-    name: {name: 1},
-    score: {score: -1}, // relevant
-    rating: {"rating.total" : -1, "rating.avg": -1},
-  }
-  public static searchRecipes(req: Request, res: Response, next: NextFunction) {
-    if (req.query.q.length < 3) {
-      res.sendAndWrap([], 'recipes');
-    }
-    const sorts = RecipeController._sorts;
-
-    let {
-      page = 0,
-      perPage = 5,
-      sortBy = 'score'
-    } = req.query;
-    page = +page;
-    perPage = +perPage;
-    const queries = {
-      status: true,
-      $text: {
-        $search: req.query.q,
-        $caseSensitive: false,
-      }
-    }
-    const project = {
-      score: { $meta: 'textScore' }
-    }
-
-    const counted = Recipe.find(queries).count();
-    const paginated = Recipe.find(queries, project)
-      // .sort({ [sortBy]: { $meta: "textScore" } })
-      .sort(sorts[sortBy])
-      .skip(page * perPage)
-      .limit(perPage);
-          
-    Promise.all([counted, paginated])
-      .then(([total, recipes]) => {
-        const pages = Math.floor(total / perPage);
-        let nextPage = page + 1;
-        if (nextPage > pages) nextPage = null;
-        
-        if(req.user) {
-          recipes = recipes.map(r =>r.toSearchResult(req.user));
-        }
-        res.sendAndWrap({ nextPage, pages, total, recipes }, 'paginate')
-      }).catch(next);
-  }
+  
 
   public static getRecipeByID(req: Request, res: Response) {
     res.sendAndWrap(req.recipe);
@@ -146,7 +98,7 @@ export class RecipeController {
   }
 
   public static onlySameUserOrAdmin(req: Request, res: Response, next: NextFunction) {
-    if (!req.user) {
+    if (req.isUnauthenticated()) {
       throw new HTTP403Error();
     }
     if (req.user.id === req.recipe.createdAt || req.user.admin) {
@@ -158,7 +110,7 @@ export class RecipeController {
 
   public static onlyPermitted(req: Request, res: Response, next: NextFunction) {
     if (req.recipe.status) { return next() };
-    if (!req.user) {
+    if (req.isUnauthenticated()) {
       throw new HTTP403Error();
     }
     if (req.user.admin || req.recipe.createdBy === req.user.id) {
@@ -167,6 +119,7 @@ export class RecipeController {
 
     throw new HTTP403Error();
   }
+
   public static removeAll(req: Request, res: Response, next: NextFunction) {
     Recipe.deleteMany({})
       .then(result => res.sendAndWrap(result))

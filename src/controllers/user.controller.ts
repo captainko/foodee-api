@@ -15,9 +15,7 @@ export class UserController {
 
     user.save().then(() => {
       return res.sendAndWrap({ user: user.toAuthJSON() });
-    }).catch(e => {
-      next(e);
-    });
+    }).catch(next);
   }
 
   public static login(req: Request, res: Response, next: NextFunction) {

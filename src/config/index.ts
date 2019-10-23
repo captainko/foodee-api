@@ -3,6 +3,7 @@ import * as passportLocal from "passport-local";
 import { User } from "../models/user.model";
 
 
+// passport
 passport.serializeUser((user: any, done) => {
   console.log('id', user.id);
   done(null, user.id)
@@ -27,8 +28,8 @@ passport.use(new LocalStrategy({
       return done(null, false, { message: 'email or password is invalid' });
     }
     return done(null, user);
-  }).catch((err) =>done(err, false,{ message: 'mail or password is invalid' }));
+  }).catch((err) => done(err, false, { message: 'mail or password is invalid' }));
 }));
 
-
+//~ passport
 

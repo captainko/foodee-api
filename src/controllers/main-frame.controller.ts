@@ -5,7 +5,7 @@ import { IUser } from "../models/user.model";
 
 export class MainFrameController {
   public static async getMainFrame(req: Request, res: Response, next: NextFunction) {
-    let {user, payload} = req;
+    let {user} = req;
     const selectedField = "id name image_url rating banners";
     
     const newRecipes$ = Recipe.getNewRecipes().select(selectedField).limit(20);
@@ -16,8 +16,6 @@ export class MainFrameController {
       newRecipes: recipes[0],
       highRatedRecipes: recipes[1],
     }
-    req.isAuthenticated();
-    console.log(req.isAuthenticated(), req.session);
     if(req.isAuthenticated())  {
       let user = req.user;
       user = await user.populate('savedRecipes', selectedField).populate('createdRecipes', selectedField ).execPopulate();
