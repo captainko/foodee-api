@@ -7,9 +7,11 @@ import cookieParser = require('cookie-parser');
 import session = require("express-session");
 import bodyParser = require("body-parser");
 import logger = require('morgan');
+import * as connectMongo from 'connect-mongo';
+const MongoStore = connectMongo(session);
 
 // app
-import { IS_PROD, SESSION_SECRET } from "../environment";
+import { IS_PROD, SESSION_SECRET, DB_URI } from "../environment";
 import passport = require("passport");
 
 type Handle = (router: Router) => void;
@@ -47,6 +49,7 @@ export const handleSession : Handle = (router) => {
     resave: true,
     // rolling: true,
     saveUninitialized: true,
+    store: new MongoStore({url:DB_URI})
   }));
 }
 
