@@ -1,6 +1,10 @@
 {
   "editor.fontWeight": "500",
   "editor.fontSize": 16,
+  "files.watcherExclude": {
+    "**/.git/objects/**": true,
+    "**/node_modules/**": true
+  },
   "workbench.colorTheme": "Shades of Purple",
   "workbench.activityBar.visible": true,
   "workbench.iconTheme": "vs-seti",
