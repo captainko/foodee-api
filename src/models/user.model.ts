@@ -23,7 +23,7 @@ export interface IUserMethods {
   toAuthJSON: () => IAuthJSON;
   createdRecipe: (recipeId: string) => boolean;
   createRecipe: (recipeId: string) => IUser;
-  saveRecipe: (recipeId: string) => IUser;
+  saveRecipe: (this: IUser, recipeId: string) => IUser;
   savedRecipe: (recipeId: string) => boolean;
 }
 
@@ -33,9 +33,9 @@ export interface IUser extends Document, IUserMethods {
   admin?: boolean;
   email?: string;
   image_url?: string;
-  createdRecipes?: Array<string & IRecipe>;
-  savedRecipes?: Array<string & IRecipe>;
-  ratings?: Array<string | IRating>;
+  createdRecipes?: Array<IRecipe | string>;
+  savedRecipes?: Array<IRecipe | string>;
+  ratings?: Array<IRating | string>;
   hash?: string;
   salt?: string;
   createdAt?: string;
@@ -77,10 +77,9 @@ export const UserSchema = new Schema<IUser>({
     }]
   },
   savedRecipes: {
-
     type: [{
       type: Schema.Types.ObjectId,
-      ref: 'recipe'
+      ref: 'recipe',
     }]
   },
   ratings: {
@@ -113,36 +112,35 @@ export const UserSchema = new Schema<IUser>({
 UserSchema.plugin(uniqueValidator, { message: 'is already taken.' });
 
 
-UserSchema.methods.addRating = function (ratingId: string) {
-  const user = this as IUser;
-  if (!user.ratings.includes(ratingId)) {
-    user.ratings.push(ratingId);
+UserSchema.methods.addRating = function (this: IUser, ratingId: string) {
+  if (!this.ratings.includes(ratingId)) {
+    this.ratings.push(ratingId);
   }
 };
 
-UserSchema.methods.saveRecipe = function(recipeId) {
-  if(!this.savedRecipes.includes(recipeId)) {
-    this.savedRecipes.push(recipeId);
+UserSchema.methods.saveRecipe = function (this: IUser, recipeId) {
+  if (!this.savedRecipes.includes(recipeId)) {
+    this.savedRecipes.unshift(recipeId);
   }
   return this;
 }
 
-UserSchema.methods.createRecipe = function(recipeId) {
-  this.createdRecipe.push(recipeId);
+UserSchema.methods.createRecipe = function (this: IUser, recipeId) {
+  this.createdRecipes.unshift(recipeId);
   return this;
 }
 
-UserSchema.methods.setPassword = function (password) {
+UserSchema.methods.setPassword = function (this: IUser, password) {
   this.salt = crypto.randomBytes(16).toString('hex');
   this.hash = crypto.pbkdf2Sync(password, this.salt, 10000, 512, 'sha512').toString('hex');
 }
 
-UserSchema.methods.validPassword = function (password: string) {
+UserSchema.methods.validPassword = function (this: IUser, password: string) {
   const hash = crypto.pbkdf2Sync(password, this.salt, 10000, 512, 'sha512').toString('hex');
   return this.hash === hash;
 }
 
-UserSchema.methods.generateJWT = function () {
+UserSchema.methods.generateJWT = function (this: IUser) {
   const today = new Date();
   const exp = new Date(today);
   exp.setDate(today.getDate() + 60);
@@ -164,11 +162,11 @@ UserSchema.methods.toAuthJSON = function () {
   }
 };
 
-UserSchema.methods.createdRecipe = function (recipeId: string) {
+UserSchema.methods.createdRecipe = function (this: IUser, recipeId: string) {
   return this.createdRecipes.includes(recipeId);
 }
 
-UserSchema.methods.savedRecipe = function (recipeId: string) {
+UserSchema.methods.savedRecipe = function (this: IUser, recipeId: string) {
   return this.createdRecipes.includes(recipeId);
 }
 

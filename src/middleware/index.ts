@@ -1,10 +1,17 @@
-import { 
+import {
   handleCors,
+  handleCookies,
   handleBodyRequest,
   handleSession,
   handleCompression,
   handlePassportSession,
- } from "./common";
+} from "./common";
 
 
- export default [handleCors, handleBodyRequest, handleCompression];
+export default [
+  handleCors,
+  handleCompression,
+  handleCookies,
+  handleBodyRequest,
+  handleSession,
+  handlePassportSession,];

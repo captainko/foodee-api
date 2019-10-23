@@ -1,7 +1,8 @@
 import { Router } from "express";
 import { ImageController } from "../controllers/image.controller";
 import { upload } from "../middleware/upload";
+import { auth } from "./auth";
 
 export const ImageRouter = Router();
 
-ImageRouter.post('/', upload.single('image'), ImageController.uploadImage);
+ImageRouter.post('/',auth.required,  upload.single('image'), ImageController.uploadImage);

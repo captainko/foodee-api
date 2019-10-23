@@ -1,7 +1,9 @@
 // libs
+
 import { Router } from "express";
 import cors = require('cors');
 import compression = require("compression");
+import cookieParser = require('cookie-parser');
 import session = require("express-session");
 import bodyParser = require("body-parser");
 import logger = require('morgan');
@@ -34,12 +36,17 @@ export const handleCompression : Handle = (router) => {
   }
 }
 
+export const handleCookies: Handle = (router) => {
+  router.use(cookieParser());
+}
+
 export const handleSession : Handle = (router) => {
   router.use(session({
     secret: SESSION_SECRET,
     cookie: { maxAge: 60000 },
-    resave: false,
-    saveUninitialized: false,
+    resave: true,
+    // rolling: true,
+    saveUninitialized: true,
   }));
 }
 

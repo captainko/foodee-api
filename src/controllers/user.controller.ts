@@ -30,12 +30,15 @@ export class UserController {
       return res.status(422).json({ errors: { password: "is required" } });
     }
 
-    passport.authenticate('local', { session: false }, (err, user, info) => {
+    passport.authenticate('local', { session: true, }, (err, user, info) => {
       if (err) { return next(err) };
 
       if (user) {
         user.token = user.generateJWT();
-        return res.sendAndWrap({ user: user.toAuthJSON() });
+        req.logIn(user, (err) =>{
+          if(err) return next(err);
+          return res.sendAndWrap({ user: user.toAuthJSON() });
+        })
       } else {
         return res.status(422).sendAndWrap(info);
       }

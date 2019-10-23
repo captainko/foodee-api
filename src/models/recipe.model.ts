@@ -9,6 +9,7 @@ import {
 import mongoosePagination = require('mongoose-paginate');
 import { Rating, IRating } from "./rating.model";
 import { IUser, User } from "./user.model";
+import { PATH_IMAGE } from "../environment";
 
 
 export interface ICategory {
@@ -29,20 +30,24 @@ export interface IRecipe extends Document {
   banners?: string[];
   image_url?: string;
   ingredients?: [{ quantity: string, ingredient: string }];
-  totalRating: number;
+  rating: { total: number, avg: number }
   ratings?: string[];
   createdAt?: string;
   updatedAt?: string;
 
   toJSONFor: (user: IUser) => IRecipe;
+  toThumbnail: (user?: IUser) => IRecipe;
+  toSearchResult: (user?: IUser) => IRecipe;
   addRating: (ratingId: string) => IRating;
   updateRating: () => Promise<any>;
 }
 
 export interface IRecipeModel extends PaginateModel<IRecipe> {
+  getNewRecipes: () => DocumentQuery<IRecipe[], IRecipe, {}>;
+  getHighRatedRecipes: () => DocumentQuery<IRecipe[], IRecipe, {}>;
+  getPublicRecipes: () => DocumentQuery<IRecipe[], IRecipe, {}>;
   getCategories: () => Promise<Array<ICategory>>;
   getRecipesByCategory: (category: string) => DocumentQuery<IRecipe[], IRecipe, {}>;
-  getPublicRecipes: () => DocumentQuery<IRecipe[], IRecipe, {}>;
 }
 
 export const RecipeSchema = new Schema<IRecipe>({
@@ -72,8 +77,9 @@ export const RecipeSchema = new Schema<IRecipe>({
     required: [true, 'is required'],
   },
   time: {
-    type: String,
-    trim: true,
+    type: Number,
+    min: 1,
+    max: 200,
   },
   createdBy: {
     type: Schema.Types.ObjectId,
@@ -86,6 +92,9 @@ export const RecipeSchema = new Schema<IRecipe>({
     maxlength: 4,
     required: true,
     trim: true,
+    get: function (banners) {
+        return banners.map(b => PATH_IMAGE + b);
+    }
   },
   ingredients: {
     type: [{
@@ -105,12 +114,12 @@ export const RecipeSchema = new Schema<IRecipe>({
   },
   rating: {
     type: {
-      avgRating: Number,
-      totalRating: Number,
+      avg: Number,
+      total: Number,
     },
     default: {
       avgRating: 0,
-      totalRating: 0,
+      total: 0,
     }
   },
   ratings: {
@@ -134,7 +143,7 @@ export const RecipeSchema = new Schema<IRecipe>({
       delete ret._id;
       delete ret.ratings;
       // delete ret.score;
-      delete ret.createdAt;
+      // delete ret.createdAt;
       delete ret.updatedAt;
     },
   },
@@ -144,7 +153,7 @@ export const RecipeSchema = new Schema<IRecipe>({
       delete ret._id;
       delete ret.ratings;
       // delete ret.score;
-      delete ret.createdAt;
+      // delete ret.createdAt;
       delete ret.updatedAt;
     }
   },
@@ -152,6 +161,7 @@ export const RecipeSchema = new Schema<IRecipe>({
 RecipeSchema.plugin(mongoosePagination);
 
 RecipeSchema.virtual('image_url').get(function () {
+  if(!this.banners) return '';
   return this.banners[0];
 });
 
@@ -167,7 +177,41 @@ RecipeSchema.index({
   }
 });
 
-RecipeSchema.methods.toJSONFor = function (user: IUser) {
+RecipeSchema.methods.toThumbnail = function(this: IRecipe, user: IUser) {
+  let recipe = user ? this.toJSONFor(user) : this.toJSON();
+
+  delete recipe.createdBy;
+  delete recipe.banners;
+  delete recipe.createdAt;
+  delete recipe.ingredients;
+  delete recipe.servings;
+  delete recipe.description;
+  delete recipe.category;
+  delete recipe.tags;
+  delete recipe.time;
+  delete recipe.status;
+  return recipe
+}
+
+RecipeSchema.methods.toSearchResult = function(this: IRecipe, user: IUser) {
+  let recipe = user ? this.toJSONFor(user) : this.toJSON();
+
+  delete recipe.createdBy;
+  delete recipe.banners;
+  delete recipe.createdAt;
+  delete recipe.ingredients;
+  delete recipe.servings;
+  delete recipe.description;
+  delete recipe.category;
+  delete recipe.tags;
+  delete recipe.time;
+  delete recipe.status;
+  delete recipe.score;
+  return recipe
+}
+
+
+RecipeSchema.methods.toJSONFor = function (this: IRecipe, user: IUser) {
 
   return {
     ... this.toObject(),
@@ -176,7 +220,7 @@ RecipeSchema.methods.toJSONFor = function (user: IUser) {
   };
 }
 
-RecipeSchema.methods.updateRating = async function () {
+RecipeSchema.methods.updateRating = async function (this: IRecipe) {
   let results = await Rating.aggregate([
     {
       $match: {
@@ -186,8 +230,8 @@ RecipeSchema.methods.updateRating = async function () {
     {
       $group: {
         _id: '$recipeId',
-        avgRating: { $avg: '$rateValue' },
-        totalRating: { $sum: 1 },
+        avg: { $avg: '$rateValue' },
+        total: { $sum: 1 },
       }
     }
   ]);
@@ -196,11 +240,12 @@ RecipeSchema.methods.updateRating = async function () {
   return await this.save();
 };
 
-RecipeSchema.methods.addRating = function (ratingId: string) {
+
+RecipeSchema.methods.addRating = function (this: IRecipe, ratingId: string) {
   if (!this.ratings.includes(ratingId)) {
     this.ratings.push(ratingId);
   }
-  
+
   return this;
 }
 
@@ -210,6 +255,7 @@ RecipeSchema.statics.getCategories = async function () {
       $group: {
         _id: { $ifNull: ["$category", "Unknown"] },
         total: { $sum: 1 },
+        // should change to first in product
         image_url: { $last: { $arrayElemAt: ["$banners", 0] } },
       }, // ~$group
     }
@@ -217,12 +263,24 @@ RecipeSchema.statics.getCategories = async function () {
   return categories;
 }
 
+RecipeSchema.statics.getNewRecipes = function () {
+  return Recipe.getPublicRecipes().sort('-createdAt');
+
+//  return Recipe.find().sort('-createdAt');
+}
+
+RecipeSchema.statics.getHighRatedRecipes = function() {
+  return Recipe.getPublicRecipes().sort({"rating.total": -1, "rating.avg": -1});
+}
+
+
 RecipeSchema.statics.getRecipesByCategory = function (category: string) {
   return Recipe.find({ category });
 }
 
-RecipeSchema.statics.getPublicRecipes = function() {
-  return Recipe.find({status: true});
+RecipeSchema.statics.getPublicRecipes = function () {
+  return Recipe.where('status', true);
+
 }
 
 export const RecipeModel = model<IRecipe, IRecipeModel>('recipe', RecipeSchema);
@@ -230,3 +288,6 @@ export const RecipeModel = model<IRecipe, IRecipeModel>('recipe', RecipeSchema);
 export const Recipe = RecipeModel;
 
 
+/**
+ * aggregate([{$match: {$or : [{status: true}, {$and: [{status: false}, {createdBy: "5d96d8ccca60c720bcf45383"}]}]}}, {$project: {status:1, createdBy: 1}}])
+ */

@@ -4,7 +4,7 @@ import { Request } from "express";
 const storage = multer.diskStorage({
   destination: function(req, file, cb) {
     console.log(file);
-    cb(null, './src/uploads/');
+    cb(null, './src/public/uploads/');
   },
   filename(req, file, cb) {
     cb(null, Date.now() + '.'+ file.originalname.split('.').pop());

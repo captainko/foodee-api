@@ -1,15 +1,13 @@
 import { Request, Response, NextFunction, } from "express";
 
-import { Recipe, IRecipe } from "../models/recipe.model";
+import { Recipe } from "../models/recipe.model";
 import { Rating } from "../models/rating.model";
-import { User, IUser } from "../models/user.model";
+import { User } from "../models/user.model";
 import { HTTP404Error, HTTP403Error } from "../util/httpErrors";
-import { PreloadedRequest } from "../util/interfaces";
-import { DocumentQuery } from "mongoose";
 
 export class RecipeController {
 
-  public static preloadRecipe(req: PreloadedRequest, res: Response, next, id: string) {
+  public static preloadRecipe(req: Request, res: Response, next, id: string) {
     // if(!id) return next();    
     Recipe
       .findById(id)
@@ -36,18 +34,26 @@ export class RecipeController {
       .catch(next);
   }
 
-
-  public static searchRecipes(req: PreloadedRequest, res: Response, next: NextFunction) {
+  private static _sorts = {
+    name: {name: 1},
+    score: {score: -1}, // relevant
+    rating: {"rating.total" : -1, "rating.avg": -1},
+  }
+  public static searchRecipes(req: Request, res: Response, next: NextFunction) {
     if (req.query.q.length < 3) {
       res.sendAndWrap([], 'recipes');
     }
+    const sorts = RecipeController._sorts;
+
     let {
       page = 0,
       perPage = 5,
+      sortBy = 'score'
     } = req.query;
     page = +page;
     perPage = +perPage;
     const queries = {
+      status: true,
       $text: {
         $search: req.query.q,
         $caseSensitive: false,
@@ -59,7 +65,8 @@ export class RecipeController {
 
     const counted = Recipe.find(queries).count();
     const paginated = Recipe.find(queries, project)
-      .sort({ score: { $meta: "textScore" } })
+      // .sort({ [sortBy]: { $meta: "textScore" } })
+      .sort(sorts[sortBy])
       .skip(page * perPage)
       .limit(perPage);
           
@@ -68,18 +75,19 @@ export class RecipeController {
         const pages = Math.floor(total / perPage);
         let nextPage = page + 1;
         if (nextPage > pages) nextPage = null;
+        
         if(req.user) {
-          recipes = recipes.map(r =>r.toJSONFor(req.user));
+          recipes = recipes.map(r =>r.toSearchResult(req.user));
         }
         res.sendAndWrap({ nextPage, pages, total, recipes }, 'paginate')
       }).catch(next);
   }
 
-  public static getRecipeByID(req: PreloadedRequest, res: Response) {
+  public static getRecipeByID(req: Request, res: Response) {
     res.sendAndWrap(req.recipe);
   }
 
-  public static createRecipe(req: PreloadedRequest, res: Response, next: NextFunction) {
+  public static createRecipe(req: Request, res: Response, next: NextFunction) {
     const { body } = req;
     Recipe.create({
       name: body.name,
@@ -100,13 +108,13 @@ export class RecipeController {
       .catch(next);
   }
 
-  public static updateRecipe(req: PreloadedRequest, res: Response, next: NextFunction) {
+  public static updateRecipe(req: Request, res: Response, next: NextFunction) {
     req.recipe.update(req.body)
       .then((value) => res.sendAndWrap(value, 'recipe'))
       .catch(next);
   }
 
-  public static async rateRecipe(req: PreloadedRequest, res: Response, next: NextFunction) {
+  public static async rateRecipe(req: Request, res: Response, next: NextFunction) {
     try {
       const rateObj$ = await Rating.rate(req.payload.id, req.recipe._id, req.body.rateValue);
       const user$ = User.findById(req.payload.id).exec();
@@ -127,7 +135,7 @@ export class RecipeController {
     }
   }
 
-  public static async saveRecipe(req: PreloadedRequest, res: Response, next: NextFunction) {
+  public static async saveRecipe(req: Request, res: Response, next: NextFunction) {
     try {
       req.user.saveRecipe(req.recipe.id);
       await req.user.save();
@@ -137,7 +145,7 @@ export class RecipeController {
     }
   }
 
-  public static onlySameUserOrAdmin(req: PreloadedRequest, res: Response, next: NextFunction) {
+  public static onlySameUserOrAdmin(req: Request, res: Response, next: NextFunction) {
     if (!req.user) {
       throw new HTTP403Error();
     }
@@ -148,7 +156,7 @@ export class RecipeController {
   }
 
 
-  public static onlyPermitted(req: PreloadedRequest, res: Response, next: NextFunction) {
+  public static onlyPermitted(req: Request, res: Response, next: NextFunction) {
     if (req.recipe.status) { return next() };
     if (!req.user) {
       throw new HTTP403Error();

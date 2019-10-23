@@ -4,7 +4,6 @@ import * as mongoose from "mongoose";
 
 
 // app
-import "./config";
 import {
   DB_URI,
   IS_PROD,
@@ -13,6 +12,8 @@ import { Routes } from "./routes";
 import middleware from "./middleware";
 import { applyMiddleware } from "./util";
 import { errorHandlers } from "./middleware/errorHandlers";
+// import passport = require("passport");
+import "./config";
 
 class App {
   public app: express.Application;
