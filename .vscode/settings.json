@@ -5,8 +5,8 @@
     "**/.git/objects/**": true,
     "**/node_modules/**": true
   },
+  "typescript.format.insertSpaceAfterFunctionKeywordForAnonymousFunctions": false,
   "workbench.colorTheme": "Shades of Purple",
-  "workbench.activityBar.visible": true,
   "workbench.iconTheme": "vs-seti",
   "cSpell.words": [
     "Interop",

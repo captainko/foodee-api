@@ -92,8 +92,8 @@ export const RecipeSchema = new Schema<IRecipe>({
     maxlength: 4,
     required: true,
     trim: true,
-    get: function (banners) {
-        return banners.map(b => PATH_IMAGE + b);
+    get: function(banners) {
+      return banners.map(b => PATH_IMAGE + b);
     }
   },
   ingredients: {
@@ -160,8 +160,8 @@ export const RecipeSchema = new Schema<IRecipe>({
 });
 RecipeSchema.plugin(mongoosePagination);
 
-RecipeSchema.virtual('image_url').get(function () {
-  if(!this.banners) return '';
+RecipeSchema.virtual('image_url').get(function() {
+  if (!this.banners) return '';
   return this.banners[0];
 });
 
@@ -211,7 +211,7 @@ RecipeSchema.methods.toSearchResult = function(this: IRecipe, user: IUser) {
 }
 
 
-RecipeSchema.methods.toJSONFor = function (this: IRecipe, user: IUser) {
+RecipeSchema.methods.toJSONFor = function(this: IRecipe, user: IUser) {
 
   return {
     ... this.toObject(),
@@ -220,7 +220,7 @@ RecipeSchema.methods.toJSONFor = function (this: IRecipe, user: IUser) {
   };
 }
 
-RecipeSchema.methods.updateRating = async function (this: IRecipe) {
+RecipeSchema.methods.updateRating = async function(this: IRecipe) {
   let results = await Rating.aggregate([
     {
       $match: {
@@ -241,7 +241,7 @@ RecipeSchema.methods.updateRating = async function (this: IRecipe) {
 };
 
 
-RecipeSchema.methods.addRating = function (this: IRecipe, ratingId: string) {
+RecipeSchema.methods.addRating = function(this: IRecipe, ratingId: string) {
   if (!this.ratings.includes(ratingId)) {
     this.ratings.push(ratingId);
   }
@@ -249,7 +249,7 @@ RecipeSchema.methods.addRating = function (this: IRecipe, ratingId: string) {
   return this;
 }
 
-RecipeSchema.statics.getCategories = async function () {
+RecipeSchema.statics.getCategories = async function() {
   const categories = await Recipe.aggregate([
     {
       $group: {
@@ -263,22 +263,22 @@ RecipeSchema.statics.getCategories = async function () {
   return categories;
 }
 
-RecipeSchema.statics.getNewRecipes = function () {
+RecipeSchema.statics.getNewRecipes = function() {
   return Recipe.getPublicRecipes().sort('-createdAt');
 
-//  return Recipe.find().sort('-createdAt');
+  //  return Recipe.find().sort('-createdAt');
 }
 
 RecipeSchema.statics.getHighRatedRecipes = function() {
-  return Recipe.getPublicRecipes().sort({"rating.total": -1, "rating.avg": -1});
+  return Recipe.getPublicRecipes().sort({ "rating.total": -1, "rating.avg": -1 });
 }
 
 
-RecipeSchema.statics.getRecipesByCategory = function (category: string) {
+RecipeSchema.statics.getRecipesByCategory = function(category: string) {
   return Recipe.find({ category });
 }
 
-RecipeSchema.statics.getPublicRecipes = function () {
+RecipeSchema.statics.getPublicRecipes = function() {
   return Recipe.where('status', true);
 
 }
