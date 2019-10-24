@@ -14,4 +14,5 @@ export default [
   handleCookies,
   handleBodyRequest,
   handleSession,
-  handlePassportSession,];
+  handlePassportSession,
+];
