@@ -1,5 +1,5 @@
 //lib
-import { Document, Schema, model, Model } from "mongoose";
+import { Document, Schema, model, Model, DocumentQuery } from "mongoose";
 import * as uniqueValidator from 'mongoose-unique-validator';
 import * as crypto from 'crypto';
 import * as jwt from 'jsonwebtoken';
@@ -43,7 +43,7 @@ export interface IUser extends Document, IUserMethods {
 }
 
 export interface IUserModel extends Model<IUser> {
-
+  findOneByEmailOrUsername(term: string): DocumentQuery<IUser,IUser,{}>;
 }
 
 export const UserSchema = new Schema<IUser>({
@@ -170,7 +170,9 @@ UserSchema.methods.savedRecipe = function(this: IUser, recipeId: string) {
   return this.createdRecipes.includes(recipeId);
 }
 
-
+UserSchema.statics.findOneByEmailOrUsername = function(term: string) {
+  return User.findOne({ $or: [{ email: term }, { username: term }] });
+}
 
 export const UserModel = model<IUser, IUserModel>('user', UserSchema);
 export const User = UserModel;

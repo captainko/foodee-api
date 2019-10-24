@@ -22,7 +22,8 @@ passport.use(new LocalStrategy({
   usernameField: 'email',
   passwordField: 'password',
 }, (email, password, done) => {
-  User.findOne({ email }).then((user) => {
+  
+  User.findOneByEmailOrUsername(email).then((user) => {
     // user is found and check the password
     if (!user || !user.validPassword(password)) {
       return done(null, false, { message: 'email or password is invalid' });
