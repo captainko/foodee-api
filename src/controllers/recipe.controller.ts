@@ -21,7 +21,7 @@ export class RecipeController {
 
   public static getRecipes(req: Request, res: Response, next: NextFunction) {
     Recipe.find()
-      .then((recipe) => { res.sendAndWrap(recipe, 'recipes') })
+      .then((recipe) => { res.sendAndWrap(recipe, 'recipes'); })
       .catch(next);
   }
 
@@ -73,7 +73,7 @@ export class RecipeController {
 
       await recipe.updateRating();
 
-      await Promise.all([recipe.save(), user.save()])
+      await Promise.all([recipe.save(), user.save()]);
 
       return res.sendMessage('rated successfully');
 
@@ -108,10 +108,10 @@ export class RecipeController {
     }
     if (req.user.canEdit(req.recipe)) {
       next();
-    } else
+    } else {
       throw new HTTP403Error();
+    }
   }
-
 
   public static onlyPermitted(req: Request, res: Response, next: NextFunction) {
     // public recipe
