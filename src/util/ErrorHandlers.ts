@@ -16,14 +16,6 @@ export const validationError = (err: Error, res: Response, next: NextFunction) =
   }
 };
 
-export const authenticationError = (err: Error, res: Response, next: NextFunction) => {
-  if (err.message === 'UnauthorizedError') {
-    res.status(403).sendMessage(err.message);
-  } else {
-    next(err);
-  }
-};
-
 export const clientError = (err: Error, res: Response, next: NextFunction) => {
   if (err instanceof HTTPClientError) {
     console.warn(err);

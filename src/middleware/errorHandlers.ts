@@ -4,10 +4,6 @@ import * as ErrorHandlers from "../util/ErrorHandlers";
 
 type Handle = (router: Router) => void;
 
-const handle403Error: Handle = (router) => {
-  router.use((req, res) => ErrorHandlers.authenticationError);
-};
-
 const handle404Error: Handle = (router) => {
   router.use((req, res) => {
     ErrorHandlers.notFoundError();
@@ -33,7 +29,6 @@ const handleServerErrors: Handle = (router) => {
 };
 
 export const errorHandlers = [
-  handle403Error,
   handle404Error,
   handle422Error,
   handleClientErrors,
