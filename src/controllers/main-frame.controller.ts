@@ -7,30 +7,28 @@ export class MainFrameController {
     let { user } = req;
     const recipeFields = "id name image_url rating banners";
 
-    const newRecipes$ = Recipe.getNewRecipes().select(recipeFields).limit(20);
+    const newRecipes$ = Recipe.getNewRecipes().select(recipeFields).limit(20).then(x => x.toThumbnailFor(user));
     const highRatedRecipes$ = Recipe.getHighRatedRecipes().select(recipeFields).limit(20);
     const categories$ = Recipe.getCategories(5);
 
-    const lists = await Promise.all([newRecipes$, highRatedRecipes$, categories$]);
+    const lists = await Promise.all([newRecipes$, highRatedRecipes$, categories$]).catch(next);
     const mainFrame = {
       newRecipes: lists[0],
-      highRatedRecipes: lists[1],
+      highRatedRecipes: lists[1].toThumbnailFor(user),
       categories: lists[2],
     };
     if (req.isAuthenticated()) {
       user = await user.populate('savedRecipes', recipeFields).populate('createdRecipes', recipeFields).execPopulate();
       // @ts-ignore
-      mainFrame.savedRecipes = toThumbnail(user.savedRecipes, user);
+      mainFrame.savedRecipes = user.savedRecipes.toThumbnailFor(user);
       // @ts-ignore
-      mainFrame.createdRecipes = toThumbnail(user.createdRecipes, user);
+      mainFrame.createdRecipes = user.createdRecipes.toThumbnailFor(user);
     }
-    mainFrame.newRecipes = toThumbnail(mainFrame.newRecipes, user);
-    mainFrame.highRatedRecipes = toThumbnail(mainFrame.highRatedRecipes, user);
     res.sendAndWrap(mainFrame, 'mainFrame');
   }
 
 }
 
 function toThumbnail(recipes: IRecipe[], user: IUser = null) {
-  return recipes.map(r => r.toThumbnail(user));
+  return recipes.map(r => r.toThumbnailFor(user));
 }

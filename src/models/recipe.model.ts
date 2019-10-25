@@ -35,8 +35,8 @@ export interface IRecipe extends Document {
   updatedAt?: string;
 
   toJSONFor: (user: IUser) => IRecipe;
-  toThumbnail: (user?: IUser) => IRecipe;
-  toSearchResult: (user?: IUser) => IRecipe;
+  toThumbnailFor: (user?: IUser) => IRecipe;
+  toSearchResultFor: (user?: IUser) => IRecipe;
   addRating: (ratingId: string) => IRating;
   updateRating: () => Promise<any>;
 }
@@ -178,7 +178,7 @@ RecipeSchema.index({
   }
 });
 
-RecipeSchema.methods.toThumbnail = function(this: IRecipe, user: IUser) {
+RecipeSchema.methods.toThumbnailFor = function(this: IRecipe, user?: IUser) {
   const recipe = user ? this.toJSONFor(user) : this.toJSON();
 
   delete recipe.createdBy;
@@ -194,7 +194,7 @@ RecipeSchema.methods.toThumbnail = function(this: IRecipe, user: IUser) {
   return recipe;
 };
 
-RecipeSchema.methods.toSearchResult = function(this: IRecipe, user: IUser) {
+RecipeSchema.methods.toSearchResultFor = function(this: IRecipe, user?: IUser) {
   const recipe = user ? this.toJSONFor(user) : this.toJSON();
 
   delete recipe.createdBy;
@@ -216,7 +216,7 @@ RecipeSchema.methods.toJSONFor = function(this: IRecipe, user: IUser) {
   return {
     ... this.toObject(),
     savedByUser: user.didSaveRecipe(this.id),
-    createdByUser: user.id === this.createdBy,
+    createdByUser: user.didCreateRecipe(this.id),
   };
 };
 

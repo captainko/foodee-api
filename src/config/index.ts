@@ -2,6 +2,7 @@ import * as passport from "passport";
 import * as passportLocal from "passport-local";
 import { User } from "../models/user.model";
 import express = require("express");
+import "./extends";
 
 // express
 express.response.sendAndWrap = function(obj, key = 'data') {

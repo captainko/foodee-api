@@ -44,7 +44,7 @@ export class SearchController {
         if (nextPage > pages) { nextPage = null; }
 
         if (req.isAuthenticated()) {
-          recipes = recipes.map(r => r.toSearchResult(req.user));
+          recipes = recipes.map(r => r.toSearchResultFor(req.user));
         }
         res.sendAndWrap({ nextPage, pages, total, recipes }, 'paginate');
       }).catch(next);
