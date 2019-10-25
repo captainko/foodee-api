@@ -92,7 +92,7 @@ export const RecipeSchema = new Schema<IRecipe>({
     maxlength: 4,
     required: true,
     trim: true,
-    get: function(banners) {
+    get(banners) {
       return banners.map(b => PATH_IMAGE + b);
     }
   },
@@ -161,7 +161,9 @@ export const RecipeSchema = new Schema<IRecipe>({
 RecipeSchema.plugin(mongoosePagination);
 
 RecipeSchema.virtual('image_url').get(function(this: IRecipe) {
-  if (!this.banners) return '';
+  if (!this.banners) {
+    return '';
+  }
   return this.banners[0];
 });
 
@@ -178,7 +180,7 @@ RecipeSchema.index({
 });
 
 RecipeSchema.methods.toThumbnail = function(this: IRecipe, user: IUser) {
-  let recipe = user ? this.toJSONFor(user) : this.toJSON();
+  const recipe = user ? this.toJSONFor(user) : this.toJSON();
 
   delete recipe.createdBy;
   delete recipe.banners;
@@ -190,11 +192,11 @@ RecipeSchema.methods.toThumbnail = function(this: IRecipe, user: IUser) {
   delete recipe.tags;
   delete recipe.time;
   delete recipe.status;
-  return recipe
+  return recipe;
 }
 
 RecipeSchema.methods.toSearchResult = function(this: IRecipe, user: IUser) {
-  let recipe = user ? this.toJSONFor(user) : this.toJSON();
+  const recipe = user ? this.toJSONFor(user) : this.toJSON();
 
   delete recipe.createdBy;
   delete recipe.banners;
@@ -207,7 +209,7 @@ RecipeSchema.methods.toSearchResult = function(this: IRecipe, user: IUser) {
   delete recipe.time;
   delete recipe.status;
   delete recipe.score;
-  return recipe
+  return recipe;
 }
 
 

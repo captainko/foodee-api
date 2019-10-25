@@ -42,7 +42,7 @@ export const RatingSchema = new Schema({
   }
 });
 
-export interface RatingModel extends Model<IRating> {
+export interface IRatingModel extends Model<IRating> {
   rate: (userId: string, recipeId: string, rateValue: number) => Promise<IRating>;
 }
 
@@ -84,7 +84,7 @@ export const RatingResultSchema = new Schema({
 // validate
 
 
-export const RatingModel = model<IRating, RatingModel>('rating', RatingSchema);
+export const RatingModel = model<IRating, IRatingModel>('rating', RatingSchema);
 export const Rating = RatingModel;
 export const RatingResultModel = model<IRatingResult>('ratingResult', RatingResultSchema);
 export const RatingResult = RatingResultModel;

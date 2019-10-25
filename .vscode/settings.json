@@ -1,6 +1,9 @@
 {
   "editor.fontWeight": "500",
   "editor.fontSize": 16,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.tslint": true
+  },
   "files.watcherExclude": {
     "**/.git/objects/**": true,
     "**/node_modules/**": true
@@ -11,6 +14,7 @@
   "cSpell.words": [
     "Interop",
     "deserialize",
+    "eofline",
     "esnext",
     "foodee",
     "maxlength",
@@ -18,9 +22,11 @@
     "minlength",
     "mongodb",
     "originalname",
+    "quotemark",
     "resave",
     "respawn",
     "signup",
+    "uglifyjs",
     "virtuals"
   ]
 }

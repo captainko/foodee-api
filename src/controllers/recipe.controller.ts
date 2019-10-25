@@ -32,8 +32,6 @@ export class RecipeController {
       .catch(next);
   }
 
-
-
   public static getRecipeByID(req: Request, res: Response) {
     res.sendAndWrap(req.recipe);
   }
@@ -117,7 +115,7 @@ export class RecipeController {
 
   public static onlyPermitted(req: Request, res: Response, next: NextFunction) {
     // public recipe
-    if (req.recipe.status) { return next() };
+    if (req.recipe.status) { return next(); }
 
     if (req.isUnauthenticated()) {
       throw new HTTP403Error();

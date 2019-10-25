@@ -16,9 +16,10 @@
             "es2015",
             "es2017"
         ],
-        "types": [
-            "./src/util/types.d.ts"
-        ],
+        "baseUrl": "./",
+        "paths": {
+            "*" : ["src/@types/*"]
+        }
     },
     "moduleResolution": "node",
     "sourceMap": true,

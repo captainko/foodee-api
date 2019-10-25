@@ -1,7 +1,7 @@
-//lib
+// lib
 import { Request, Response, NextFunction } from "express";
 
-//app
+// app
 import { Collection } from "../models/collection.model";
 import { HTTP404Error } from "../util/httpErrors";
 
