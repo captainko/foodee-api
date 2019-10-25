@@ -21,10 +21,12 @@ export interface IUserMethods {
   validPassword: (password: string) => boolean;
   generateJWT: () => string;
   toAuthJSON: () => IAuthJSON;
-  createdRecipe: (recipeId: string) => boolean;
+  didCreateRecipe: (recipeId: string) => boolean;
   createRecipe: (recipeId: string) => IUser;
+  canEdit: (this: IUser, recipe: IRecipe) => boolean
   saveRecipe: (this: IUser, recipeId: string) => IUser;
-  savedRecipe: (recipeId: string) => boolean;
+  removeRecipe: (this: IUser, recipeId: string) => IUser;
+  didSaveRecipe: (recipeId: string) => boolean;
 }
 
 export interface IUser extends Document, IUserMethods {
@@ -43,7 +45,7 @@ export interface IUser extends Document, IUserMethods {
 }
 
 export interface IUserModel extends Model<IUser> {
-  findOneByEmailOrUsername(term: string): DocumentQuery<IUser,IUser,{}>;
+  findOneByEmailOrUsername(term: string): DocumentQuery<IUser, IUser, {}>;
 }
 
 export const UserSchema = new Schema<IUser>({
@@ -103,7 +105,6 @@ export const UserSchema = new Schema<IUser>({
   toObject: {
     virtuals: true,
     transform: (doc, ret) => {
-
       delete ret._id;
     }
   }
@@ -118,27 +119,37 @@ UserSchema.methods.addRating = function(this: IUser, ratingId: string) {
   }
 };
 
-UserSchema.methods.saveRecipe = function(this: IUser, recipeId) {
+UserSchema.methods.saveRecipe = function(this: IUser, recipeId: string) {
+
   if (!this.savedRecipes.includes(recipeId)) {
     this.savedRecipes.unshift(recipeId);
   }
   return this;
-}
+};
+
+UserSchema.methods.removeRecipe = function(this: IUser, recipeId: string) {
+  //@ts-ignore
+  const position = this.savedRecipes.findIndex(recipeId);
+  if (position !== -1) {
+    this.savedRecipes.splice(position, 1);
+  }
+  return this;
+};
 
 UserSchema.methods.createRecipe = function(this: IUser, recipeId) {
   this.createdRecipes.unshift(recipeId);
   return this;
-}
+};
 
 UserSchema.methods.setPassword = function(this: IUser, password) {
   this.salt = crypto.randomBytes(16).toString('hex');
   this.hash = crypto.pbkdf2Sync(password, this.salt, 10000, 512, 'sha512').toString('hex');
-}
+};
 
 UserSchema.methods.validPassword = function(this: IUser, password: string) {
   const hash = crypto.pbkdf2Sync(password, this.salt, 10000, 512, 'sha512').toString('hex');
   return this.hash === hash;
-}
+};
 
 UserSchema.methods.generateJWT = function(this: IUser) {
   const today = new Date();
@@ -162,17 +173,21 @@ UserSchema.methods.toAuthJSON = function() {
   }
 };
 
-UserSchema.methods.createdRecipe = function(this: IUser, recipeId: string) {
+UserSchema.methods.didCreateRecipe = function(this: IUser, recipeId: string) {
   return this.createdRecipes.includes(recipeId);
-}
+};
 
-UserSchema.methods.savedRecipe = function(this: IUser, recipeId: string) {
+UserSchema.methods.canEdit = function(this: IUser, recipe: IRecipe) {
+  return this.id == recipe.createdBy || this.admin;
+};
+
+UserSchema.methods.didSaveRecipe = function(this: IUser, recipeId: string) {
   return this.createdRecipes.includes(recipeId);
-}
+};
 
 UserSchema.statics.findOneByEmailOrUsername = function(term: string) {
   return User.findOne({ $or: [{ email: term }, { username: term }] });
-}
+};
 
 export const UserModel = model<IUser, IUserModel>('user', UserSchema);
 export const User = UserModel;

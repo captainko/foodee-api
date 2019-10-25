@@ -6,8 +6,7 @@ export class CategoryController {
   public static getCategories(req: Request, res: Response, next: NextFunction) {
     Recipe.getCategories().then((result) => {
       res.sendAndWrap(result);
-    }).catch(next)
+    }).catch(next);
   }
-
  
 }

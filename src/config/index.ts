@@ -1,7 +1,22 @@
 import * as passport from "passport";
 import * as passportLocal from "passport-local";
 import { User } from "../models/user.model";
+import express = require("express");
 
+
+// express
+express.response.sendAndWrap = function(obj, key = 'data') {
+  return this.send({
+    status: this.statusCode,
+    [key]: obj
+  });
+}
+
+express.response.sendMessage = function(message) {
+  return this.sendAndWrap(message, 'message');
+}
+
+//~express
 
 // passport
 passport.serializeUser((user: any, done) => {
@@ -12,7 +27,7 @@ passport.serializeUser((user: any, done) => {
 passport.deserializeUser((id, done) => {
   console.log('id2', id);
 
-  User.findById(id, function (err, user) {
+  User.findById(id, function(err, user) {
     done(err, user);
   });
 });
@@ -22,7 +37,7 @@ passport.use(new LocalStrategy({
   usernameField: 'email',
   passwordField: 'password',
 }, (email, password, done) => {
-  
+
   User.findOneByEmailOrUsername(email).then((user) => {
     // user is found and check the password
     if (!user || !user.validPassword(password)) {

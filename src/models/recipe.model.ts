@@ -13,7 +13,7 @@ import { PATH_IMAGE } from "../environment";
 
 
 export interface ICategory {
-  _id: string,
+  name: string,
   total: number,
   image_url: string,
 }
@@ -46,7 +46,7 @@ export interface IRecipeModel extends PaginateModel<IRecipe> {
   getNewRecipes: () => DocumentQuery<IRecipe[], IRecipe, {}>;
   getHighRatedRecipes: () => DocumentQuery<IRecipe[], IRecipe, {}>;
   getPublicRecipes: () => DocumentQuery<IRecipe[], IRecipe, {}>;
-  getCategories: () => Promise<Array<ICategory>>;
+  getCategories: (limit?: number) => Promise<Array<ICategory>>;
   getRecipesByCategory: (category: string) => DocumentQuery<IRecipe[], IRecipe, {}>;
 }
 
@@ -215,8 +215,8 @@ RecipeSchema.methods.toJSONFor = function(this: IRecipe, user: IUser) {
 
   return {
     ... this.toObject(),
-    savedByUser: user.savedRecipe(this._id),
-    createdByUser: user._id === this.createdBy,
+    savedByUser: user.didSaveRecipe(this.id),
+    createdByUser: user.id === this.createdBy,
   };
 }
 
@@ -233,7 +233,7 @@ RecipeSchema.methods.updateRating = async function(this: IRecipe) {
         avg: { $avg: '$rateValue' },
         total: { $sum: 1 },
       }
-    }
+    },
   ]);
   delete results[0]._id;
   this.rating = results[0];
@@ -247,41 +247,51 @@ RecipeSchema.methods.addRating = function(this: IRecipe, ratingId: string) {
   }
 
   return this;
-}
+};
 
-RecipeSchema.statics.getCategories = async function() {
+RecipeSchema.statics.getCategories = async function(limit: number = null) {
   const categories = await Recipe.aggregate([
     {
+      $match: {
+        status: true,
+        category: { $ne: null }
+      }
+    },
+    {
       $group: {
-        _id: { $ifNull: ["$category", "Unknown"] },
+        // _id: { $ifNull: ["$category", "Unknown"] },
+        _id: "$category",
         total: { $sum: 1 },
         // should change to first in product
         image_url: { $last: { $arrayElemAt: ["$banners", 0] } },
       }, // ~$group
-    }
+    },
+    // {
+    //   $limit: limit,
+    // }
   ]);
   return categories;
-}
+};
+
+
+RecipeSchema.statics.getPublicRecipes = function() {
+  return Recipe.where('status', true);
+};
 
 RecipeSchema.statics.getNewRecipes = function() {
   return Recipe.getPublicRecipes().sort('-createdAt');
 
   //  return Recipe.find().sort('-createdAt');
-}
+};
 
 RecipeSchema.statics.getHighRatedRecipes = function() {
   return Recipe.getPublicRecipes().sort({ "rating.total": -1, "rating.avg": -1 });
-}
-
+};
 
 RecipeSchema.statics.getRecipesByCategory = function(category: string) {
-  return Recipe.find({ category });
-}
+  return Recipe.getPublicRecipes().find({ category });
+};
 
-RecipeSchema.statics.getPublicRecipes = function() {
-  return Recipe.where('status', true);
-
-}
 
 export const RecipeModel = model<IRecipe, IRecipeModel>('recipe', RecipeSchema);
 

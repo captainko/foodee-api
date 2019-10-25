@@ -5,20 +5,21 @@ import { IUser } from "../models/user.model";
 
 export class MainFrameController {
   public static async getMainFrame(req: Request, res: Response, next: NextFunction) {
-    let {user} = req;
-    const selectedField = "id name image_url rating banners";
-    
-    const newRecipes$ = Recipe.getNewRecipes().select(selectedField).limit(20);
-    const highRatedRecipes$ = Recipe.getHighRatedRecipes().select(selectedField).limit(20);
+    let { user } = req;
+    const recipeFields = "id name image_url rating banners";
 
-    const recipes = await Promise.all([newRecipes$, highRatedRecipes$])
+    const newRecipes$ = Recipe.getNewRecipes().select(recipeFields).limit(20);
+    const highRatedRecipes$ = Recipe.getHighRatedRecipes().select(recipeFields).limit(20);
+    const categories$ = Recipe.getCategories(5);
+
+    const lists = await Promise.all([newRecipes$, highRatedRecipes$, categories$])
     const mainFrame = {
-      newRecipes: recipes[0],
-      highRatedRecipes: recipes[1],
+      newRecipes: lists[0],
+      highRatedRecipes: lists[1],
+      categories: lists[2],
     }
-    if(req.isAuthenticated())  {
-      let user = req.user;
-      user = await user.populate('savedRecipes', selectedField).populate('createdRecipes', selectedField ).execPopulate();
+    if (req.isAuthenticated()) {
+      user = await user.populate('savedRecipes', recipeFields).populate('createdRecipes', recipeFields).execPopulate();
       // @ts-ignore
       mainFrame.savedRecipes = toThumbnail(user.savedRecipes, user);
       // @ts-ignore
@@ -30,9 +31,6 @@ export class MainFrameController {
   }
 
 }
-
-// include fields used by virtuals
-
 
 function toThumbnail(recipes: IRecipe[], user: IUser = null) {
   return recipes.map(r => r.toThumbnail(user));

@@ -5,4 +5,4 @@ import { auth } from "./auth";
 
 export const ImageRouter = Router();
 
-ImageRouter.post('/',auth.required,  upload.single('image'), ImageController.uploadImage);
+ImageRouter.post('/', auth.required, upload.single('image'), ImageController.uploadImage);

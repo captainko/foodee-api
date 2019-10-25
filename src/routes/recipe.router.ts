@@ -1,6 +1,6 @@
 import { Router } from 'express';
 
-import { RecipeController as RecipeCtrl } from "../controllers/recipe.controller";
+import { RecipeController as RecipeCtrl, RecipeController } from "../controllers/recipe.controller";
 import { auth } from './auth';
 
 

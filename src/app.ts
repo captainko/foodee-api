@@ -1,19 +1,18 @@
 // lib
-import * as express from "express";
-import * as mongoose from "mongoose";
-
+import express = require("express");
+import mongoose = require("mongoose");
 
 // app
 import {
   DB_URI,
   IS_PROD,
 } from "./environment";
+
+import "./config";
 import { Routes } from "./routes";
 import middleware from "./middleware";
 import { applyMiddleware } from "./util";
 import { errorHandlers } from "./middleware/errorHandlers";
-// import passport = require("passport");
-import "./config";
 
 class App {
   public app: express.Application;
@@ -29,29 +28,12 @@ class App {
 
   private _config() {
 
-    express.response.sendAndWrap = function (obj, key = 'data') {
-      return this.send({
-        status: this.statusCode,
-        [key]: obj
-      });
-    }
-
-    express.response.sendMessage = function(message) {
-      return this.sendAndWrap(message, 'message');
-    }
-
     applyMiddleware(middleware, this.app);
     this.routePrv.routes(this.app);
     applyMiddleware(errorHandlers, this.app);
   }
-
-
-  private _setupRoutes() {
-
-  }
-
+  
   private _mongoSetup() {
-    // mongoose.Promise = global.Promise;
     mongoose.set('useCreateIndex', true);
     mongoose.connect(this.mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true })
       .then(() => console.log("Connected to db"))

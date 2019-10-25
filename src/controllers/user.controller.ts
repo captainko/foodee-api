@@ -1,7 +1,6 @@
 //libs
 import { Request, Response, NextFunction } from "express";
 import passport = require("passport");
-import { isUndefined } from "util";
 
 // app
 import { User } from "../models/user.model";
@@ -33,9 +32,9 @@ export class UserController {
 
       if (user) {
         user.token = user.generateJWT();
-        req.logIn(user, (err) =>{
-          if(err) return next(err);
-          return res.sendAndWrap({ user: user.toAuthJSON() });
+        req.logIn(user, (err) => {
+          if (err) return next(err);
+          return res.sendAndWrap(user.toAuthJSON(), 'user');
         })
       } else {
         return res.status(422).sendAndWrap(info);
@@ -43,33 +42,26 @@ export class UserController {
     })(req, res, next);
   }
 
-  public static getLoggedUser(req, res: Response, next: NextFunction) {
-    User.findById(req.payload.id).then(user => {
-      if (!user) { return res.sendStatus(401) }
-
-      return res.sendAndWrap({user: user.toAuthJSON()});
-    })
-      .catch(next);
+  public static getLoggedUser(req: Request, res: Response, next: NextFunction) {
+    return res.sendAndWrap(req.user.toAuthJSON(), 'user');
   }
 
-  public static updateUser(req, res: Response, next: NextFunction) {
-    User.findById(req.payload.id).then(user => {
-      if (!user) { return res.sendStatus(401) }
+  public static updateUser(req: Request, res: Response, next: NextFunction) {
 
-      const { body } = req;
-      if (!isUndefined(body.username)) {
-        user.username = req.username;
-      }
-      if (!isUndefined(body.email)) {
-        user.email = body.email;
-      }
-      if (!isUndefined(body.password)) {
-        user.setPassword(body.password);
-      }
+    const { body, user } = req;
 
-      return user.save().then(() => {
-        return res.sendAndWrap({user: user.toAuthJSON()});
-      });
+    if (body.username) {
+      user.username = body.username;
+    }
+    if (body.email) {
+      user.email = body.email;
+    }
+    if (body.password) {
+      user.setPassword(body.password);
+    }
+
+    return user.save().then(() => {
+      return res.sendAndWrap(user.toAuthJSON(), 'user');
     }).catch(next);
   }
 }

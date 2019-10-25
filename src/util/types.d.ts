@@ -4,6 +4,7 @@ declare namespace Express {
     payload?: any;
     user?: import('../models/user.model').IUser;
     recipe?: import('../models/recipe.model').IRecipe;
+    collection?: import('../models/collection.model').ICollection
   }
   
   export interface Response {

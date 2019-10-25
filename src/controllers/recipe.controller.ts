@@ -7,7 +7,7 @@ import { HTTP404Error, HTTP403Error } from "../util/httpErrors";
 
 export class RecipeController {
 
-  public static preloadRecipe(req: Request, res: Response, next, id: string) {
+  public static preloadRecipe(req: Request, res: Response, next, id: string) {    
     Recipe
       .findById(id)
       .then((recipe) => {
@@ -97,11 +97,21 @@ export class RecipeController {
     }
   }
 
+  public static async removeRecipe(req: Request, res: Response, next: NextFunction) {
+    try {
+      req.user.removeRecipe(req.recipe.id);
+      await req.user.save();
+      res.sendMessage('remove successfully');
+    } catch (err) {
+      next(err);
+    }
+  }
+
   public static onlySameUserOrAdmin(req: Request, res: Response, next: NextFunction) {
     if (req.isUnauthenticated()) {
       throw new HTTP403Error();
     }
-    if (req.user.id === req.recipe.createdAt || req.user.admin) {
+    if (req.user.canEdit(req.recipe)) {
       next();
     } else
       throw new HTTP403Error();
