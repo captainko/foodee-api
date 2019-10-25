@@ -27,7 +27,7 @@ export class UserController {
       return res.status(422).json({ errors: { password: "is required" } });
     }
 
-    passport.authenticate('local', { session: false, }, (err, user, info) => {
+    passport.authenticate('local', { session: false }, (err, user, info) => {
       if (err) { return next(err); }
 
       if (user) {

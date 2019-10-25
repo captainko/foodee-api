@@ -20,13 +20,10 @@ express.response.sendMessage = function(message) {
 
 // passport
 passport.serializeUser((user: any, done) => {
-  console.log('id', user.id);
   done(null, user.id);
 });
 
 passport.deserializeUser((id, done) => {
-  console.log('id2', id);
-
   User.findById(id, function(err, user) {
     done(err, user);
   });

@@ -8,13 +8,14 @@ export class MainFrameController {
     const recipeFields = "id name image_url rating banners";
 
     const newRecipes$ = Recipe.getNewRecipes().select(recipeFields).limit(20).then(x => x.toThumbnailFor(user));
-    const highRatedRecipes$ = Recipe.getHighRatedRecipes().select(recipeFields).limit(20);
+    // tslint:disable-next-line: max-line-length
+    const highRatedRecipes$ = Recipe.getHighRatedRecipes().select(recipeFields).limit(20).then(x => x.toThumbnailFor(user));
     const categories$ = Recipe.getCategories(5);
 
     const lists = await Promise.all([newRecipes$, highRatedRecipes$, categories$]).catch(next);
     const mainFrame = {
       newRecipes: lists[0],
-      highRatedRecipes: lists[1].toThumbnailFor(user),
+      highRatedRecipes: lists[1],
       categories: lists[2],
     };
     if (req.isAuthenticated()) {
