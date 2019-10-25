@@ -3,25 +3,24 @@ import * as passportLocal from "passport-local";
 import { User } from "../models/user.model";
 import express = require("express");
 
-
 // express
 express.response.sendAndWrap = function(obj, key = 'data') {
   return this.send({
     status: this.statusCode,
     [key]: obj
   });
-}
+};
 
 express.response.sendMessage = function(message) {
   return this.sendAndWrap(message, 'message');
-}
+};
 
-//~express
+// ~express
 
 // passport
 passport.serializeUser((user: any, done) => {
   console.log('id', user.id);
-  done(null, user.id)
+  done(null, user.id);
 });
 
 passport.deserializeUser((id, done) => {
@@ -47,5 +46,4 @@ passport.use(new LocalStrategy({
   }).catch((err) => done(err, false, { message: 'mail or password is invalid' }));
 }));
 
-//~ passport
-
+// ~ passport

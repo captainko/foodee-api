@@ -16,44 +16,43 @@ import passport = require("passport");
 
 type Handle = (router: Router) => void;
 
-
-export const handleCors : Handle = (router) => {
+export const handleCors: Handle = (router) => {
   router.use(cors());
-}
+};
 
-export const handleBodyRequest:Handle  = (router) => {
-  router.use(bodyParser.urlencoded({extended: true}));
+export const handleBodyRequest: Handle = (router) => {
+  router.use(bodyParser.urlencoded({ extended: true }));
   router.use(bodyParser.json());
-}
+};
 
 export const useLogger: Handle = (router) => {
   if (!IS_PROD) {
     router.use(logger('dev'));
   }
-}
+};
 
-export const handleCompression : Handle = (router) => {
-  if(IS_PROD) {
+export const handleCompression: Handle = (router) => {
+  if (IS_PROD) {
     router.use(compression());
   }
-}
+};
 
 export const handleCookies: Handle = (router) => {
   router.use(cookieParser());
-}
+};
 
-export const handleSession : Handle = (router) => {
+export const handleSession: Handle = (router) => {
   router.use(session({
     secret: SESSION_SECRET,
-    cookie: { maxAge: 60000 },
+    cookie: { maxAge: 1000 * 60 * 60 },
     resave: true,
     // rolling: true,
     saveUninitialized: true,
-    store: new MongoStore({url:DB_URI})
+    store: new MongoStore({ url: DB_URI })
   }));
-}
+};
 
 export const handlePassportSession: Handle = (router) => {
-  router.use(passport.initialize())
+  router.use(passport.initialize());
   router.use(passport.session());
-}
+};

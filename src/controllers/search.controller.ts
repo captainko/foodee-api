@@ -3,11 +3,6 @@ import { Request, Response, NextFunction } from "express-serve-static-core";
 import { Recipe } from "../models/recipe.model";
 
 export class SearchController {
-  private static _sorts = {
-    name: { name: 1 },
-    score: { score: -1 }, // relevant
-    rating: { "rating.total": -1, "rating.avg": -1 },
-  }
   
   public static searchRecipes(req: Request, res: Response, next: NextFunction) {
     if (req.query.q.length < 3) {
@@ -18,6 +13,7 @@ export class SearchController {
     let {
       page = 0,
       perPage = 5,
+      // tslint:disable-next-line: prefer-const
       sortBy = 'score'
     } = req.query;
     page = +page;
@@ -28,10 +24,10 @@ export class SearchController {
         $search: req.query.q,
         $caseSensitive: false,
       }
-    }
+    };
     const project = {
       score: { $meta: 'textScore' }
-    }
+    };
 
     const counted = Recipe.find(queries).count();
     const paginated = Recipe.find(queries, project)
@@ -45,12 +41,18 @@ export class SearchController {
         const pages = Math.floor(total / perPage);
         let nextPage = page + 1;
 
-        if (nextPage > pages) nextPage = null;
+        if (nextPage > pages) { nextPage = null; }
 
         if (req.isAuthenticated()) {
           recipes = recipes.map(r => r.toSearchResult(req.user));
         }
-        res.sendAndWrap({ nextPage, pages, total, recipes }, 'paginate')
+        res.sendAndWrap({ nextPage, pages, total, recipes }, 'paginate');
       }).catch(next);
   }
+  // tslint:disable-next-line: variable-name
+  private static _sorts = {
+    name: { name: 1 },
+    score: { score: -1 }, // relevant
+    rating: { "rating.total": -1, "rating.avg": -1 },
+  };
 }

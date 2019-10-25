@@ -61,14 +61,14 @@ RatingSchema.statics.rate = async function(userId: string, recipeId: string, rat
   }
 
   return await ratingObj.save();
-}
+};
 
 export interface IRatingResult extends Document {
   _id: string;
   rating: {
     avgRating: number;
     totalRating: number;
-  }
+  };
 }
 export const RatingResultSchema = new Schema({
   _id: {
@@ -79,11 +79,9 @@ export const RatingResultSchema = new Schema({
 }, {
   timestamps: false,
   versionKey: false,
-})
+});
 
 // validate
-
-
 export const RatingModel = model<IRating, IRatingModel>('rating', RatingSchema);
 export const Rating = RatingModel;
 export const RatingResultModel = model<IRatingResult>('ratingResult', RatingResultSchema);

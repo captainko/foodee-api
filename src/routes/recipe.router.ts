@@ -3,8 +3,6 @@ import { Router } from 'express';
 import { RecipeController as RecipeCtrl, RecipeController } from "../controllers/recipe.controller";
 import { auth } from './auth';
 
-
-
 const RecipeRouter = Router();
 RecipeRouter.all('*', auth.optional).param('recipe', RecipeCtrl.preloadRecipe);
 RecipeRouter.get('/', auth.optional, RecipeCtrl.getRecipes);
@@ -18,7 +16,6 @@ RecipeRouter.put('/:recipe/', auth.required, RecipeCtrl.onlySameUserOrAdmin, Rec
 RecipeRouter.post('/:recipe/rating', auth.required, RecipeCtrl.rateRecipe);
 RecipeRouter.post('/:recipe/save', auth.required, RecipeCtrl.onlySameUserOrAdmin, RecipeCtrl.saveRecipe);
 
-RecipeRouter.delete('')
-
+RecipeRouter.delete('');
 
 export { RecipeRouter };

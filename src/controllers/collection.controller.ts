@@ -3,15 +3,17 @@ import { Request, Response, NextFunction } from "express";
 
 // app
 import { Collection } from "../models/collection.model";
-import { HTTP404Error } from "../util/httpErrors";
+import { HTTP404Error, HTTP400Error, HTTP403Error } from "../util/httpErrors";
+import { Recipe } from "../models/recipe.model";
 
 export class CollectionController {
   public static preloadCollection(req: Request, res: Response, next: NextFunction, collectionId: string) {
+    console.log('collection', Date.now());
     Collection
       .findById(collectionId)
       .then((collection) => {
         if (!collection) {
-          throw new HTTP404Error();
+          throw new HTTP404Error('Collection not found');
         }
         req.collection = collection;
         return next();
@@ -19,14 +21,32 @@ export class CollectionController {
       .catch(next);
   }
 
-  public static createCollection({ body }: Request, res: Response, next: NextFunction) {
-    Collection.create({
-      name: body.name
-    })
-      .then((collection) => {
-        res.sendAndWrap(collection);
+  public static preloadRecipe(req: Request, res: Response, next: NextFunction, recipeId: string) {
+    console.log('recipe', Date.now());
+    Recipe.findById(recipeId)
+      .then((recipe) => {
+        if (!recipe) {
+          throw new HTTP404Error('Recipe not found');
+        }
+
       })
       .catch(next);
+  }
+
+  public static async createCollection({ body, user }: Request, res: Response, next: NextFunction) {
+    try {
+
+      const collection = await Collection.create({
+        name: body.name,
+        createdBy: user.id,
+      });
+      
+      await user.createCollection(collection.id).save();
+
+      res.sendMessage('created successfully');
+    } catch (err) {
+      next(err);
+    }
   }
 
   public static getCollection({ collection }: Request, res: Response) {
@@ -41,8 +61,14 @@ export class CollectionController {
 
     collection.save()
       .then((collection) => {
-        res.sendAndWrap(collection);
+        res.sendAndWrap(collection, 'collection');
       })
       .catch(next);
+  }
+
+  public static onlySameUserOrAdmin(req: Request, res: Response, next: NextFunction) {
+    if (req.user.canEdit(req.collection)) {
+
+    }
   }
 }

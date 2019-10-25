@@ -4,7 +4,6 @@ import { IS_PROD } from "../environment";
 import { Error } from "mongoose";
 const { ValidationError, CastError } = Error;
 
-
 export const notFoundError = () => {
   throw new HTTP404Error('Method not found.');
 };
@@ -15,7 +14,15 @@ export const validationError = (err: Error, res: Response, next: NextFunction) =
   } else {
     next(err);
   }
-}
+};
+
+export const authenticationError = (err: Error, res: Response, next: NextFunction) => {
+  if (err.message === 'UnauthorizedError') {
+    res.status(403).sendMessage(err.message);
+  } else {
+    next(err);
+  }
+};
 
 export const clientError = (err: Error, res: Response, next: NextFunction) => {
   if (err instanceof HTTPClientError) {
@@ -24,14 +31,14 @@ export const clientError = (err: Error, res: Response, next: NextFunction) => {
   } else {
     next(err);
   }
-}
+};
 
 export const serverError = (err: Error, res: Response, next: NextFunction) => {
   console.error(err);
-  
+
   if (IS_PROD) {
     res.status(500).sendMessage("Internal Server Error");
   } else {
     res.status(500).send(err.stack);
   }
-}
+};

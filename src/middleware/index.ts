@@ -7,7 +7,6 @@ import {
   handlePassportSession,
 } from "./common";
 
-
 export default [
   handleCors,
   handleCompression,

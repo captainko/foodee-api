@@ -37,7 +37,11 @@ export class RecipeController {
   }
 
   public static createRecipe(req: Request, res: Response, next: NextFunction) {
+    if (req.isUnauthenticated()) {
+      
+    }
     const { body } = req;
+    console.log(req.user);
     Recipe.create({
       name: body.name,
       category: body.category,

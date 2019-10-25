@@ -1,4 +1,4 @@
-//libs
+// libs
 import { Request, Response, NextFunction } from "express";
 import passport = require("passport");
 
@@ -27,15 +27,15 @@ export class UserController {
       return res.status(422).json({ errors: { password: "is required" } });
     }
 
-    passport.authenticate('local', { session: true, }, (err, user, info) => {
-      if (err) { return next(err) };
+    passport.authenticate('local', { session: false, }, (err, user, info) => {
+      if (err) { return next(err); }
 
       if (user) {
         user.token = user.generateJWT();
         req.logIn(user, (err) => {
-          if (err) return next(err);
+          if (err) { return next(err); }
           return res.sendAndWrap(user.toAuthJSON(), 'user');
-        })
+        });
       } else {
         return res.status(422).sendAndWrap(info);
       }

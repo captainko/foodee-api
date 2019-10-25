@@ -1,7 +1,7 @@
-//lib
+// lib
 import { Document, Model, model, Schema, SchemaTypes } from "mongoose";
 
-//app
+// app
 import { PATH_IMAGE } from "../environment";
 import { IUser } from "./user.model";
 import { IRecipeModel, IRecipe } from "./recipe.model";
@@ -15,7 +15,7 @@ export interface ICollection extends Document, ICollectionMethods {
   createdBy?: string | IUser;
   image?: string;
   image_url?: string;
-  recipes?: Array<string | ICollection>
+  recipes?: Array<string | ICollection>;
 }
 
 export interface ICollectionModel extends Model<ICollection> {
@@ -26,7 +26,7 @@ export const CollectionSchema = new Schema({
     type: String,
     minlength: 1,
     maxlength: 50,
-    required: true,
+    required: [true, 'is required'],
   },
   createdBy: {
     type: SchemaTypes.ObjectId,
@@ -51,6 +51,7 @@ export const CollectionSchema = new Schema({
     transform: (doc, ret) => {
       delete ret._id;
       delete ret.image;
+      delete ret.updatedAt;
     }
   },
   toObject: {
@@ -58,6 +59,7 @@ export const CollectionSchema = new Schema({
     transform: (doc, ret) => {
       delete ret._id;
       delete ret.image;
+      delete ret.updatedAt;
     }
   },
 });
@@ -72,7 +74,7 @@ CollectionSchema.methods.addRecipe = function(this: ICollection, recipeId: strin
     this.image = (this.recipes[0] as IRecipe).banners[0];
   }
   return this;
-}
+};
 
 export const CollectionModel = model<ICollection, IRecipeModel>('collection', CollectionSchema);
 

@@ -1,10 +1,10 @@
-//lib
-import { Document, Schema, model, Model, DocumentQuery } from "mongoose";
+// lib
+import { Document, Schema, model, Model, DocumentQuery, SchemaTypes } from "mongoose";
 import * as uniqueValidator from 'mongoose-unique-validator';
 import * as crypto from 'crypto';
 import * as jwt from 'jsonwebtoken';
 
-//app
+// app
 import { JWT_SECRET } from "../environment";
 import { IRating } from "./rating.model";
 import { IRecipe } from "./recipe.model";
@@ -24,7 +24,10 @@ export interface IUserMethods {
   toAuthJSON: () => IAuthJSON;
   didCreateRecipe: (recipeId: string) => boolean;
   createRecipe: (recipeId: string) => IUser;
-  canEdit: (this: IUser, recipe: IRecipe) => boolean
+  deleteRecipe: (recipeId: string) => IUser;
+  createCollection: (collectionId: string) => IUser;
+  deleteCollection: (collectionId: string) => IUser;
+  canEdit: (this: IUser, recipe: IRecipe | ICollection) => boolean;
   saveRecipe: (this: IUser, recipeId: string) => IUser;
   removeRecipe: (this: IUser, recipeId: string) => IUser;
   didSaveRecipe: (recipeId: string) => boolean;
@@ -38,6 +41,7 @@ export interface IUser extends Document, IUserMethods {
   image_url?: string;
   createdRecipes?: Array<IRecipe | string>;
   savedRecipes?: Array<IRecipe | string>;
+  collections?: Array<ICollection | string>;
   ratings?: Array<IRating | string>;
   hash?: string;
   salt?: string;
@@ -75,21 +79,27 @@ export const UserSchema = new Schema<IUser>({
   image_url: String,
   createdRecipes: {
     type: [{
-      type: Schema.Types.ObjectId,
+      type: SchemaTypes.ObjectId,
       ref: 'recipe'
     }]
   },
   savedRecipes: {
     type: [{
-      type: Schema.Types.ObjectId,
+      type: SchemaTypes.ObjectId,
       ref: 'recipe',
     }]
   },
   ratings: {
     type: [{
-      type: Schema.Types.ObjectId,
+      type: SchemaTypes.ObjectId,
       ref: 'rating',
     }]
+  },
+  collections: {
+    type: [{
+      type: SchemaTypes.ObjectId,
+      ref: 'collection',
+    }],
   },
   hash: String,
   salt: String,
@@ -113,7 +123,6 @@ export const UserSchema = new Schema<IUser>({
 
 UserSchema.plugin(uniqueValidator, { message: 'is already taken.' });
 
-
 UserSchema.methods.addRating = function(this: IUser, ratingId: string) {
   if (!this.ratings.includes(ratingId)) {
     this.ratings.push(ratingId);
@@ -128,8 +137,8 @@ UserSchema.methods.saveRecipe = function(this: IUser, recipeId: string) {
   return this;
 };
 
-UserSchema.methods.removeRecipe = function(this: IUser, recipeId: string) {
-  //@ts-ignore
+UserSchema.methods.removeRecipe = function(this: IUser, recipeId) {
+  // @ts-ignore
   const position = this.savedRecipes.findIndex(recipeId);
   if (position !== -1) {
     this.savedRecipes.splice(position, 1);
@@ -139,6 +148,32 @@ UserSchema.methods.removeRecipe = function(this: IUser, recipeId: string) {
 
 UserSchema.methods.createRecipe = function(this: IUser, recipeId) {
   this.createdRecipes.unshift(recipeId);
+  return this;
+};
+
+UserSchema.methods.deleteRecipe = function(this: IUser, recipeId) {
+  // delete recipe from all collections
+
+  // @ts-ignore
+  const position = this.savedRecipes.findIndex(recipeId);
+  if (position !== -1) {
+    this.savedRecipes.splice(position, 1);
+  }
+  return this;
+};
+
+UserSchema.methods.createCollection = function(this: IUser, collectionId) {
+  this.collections.unshift(collectionId);
+  return this;
+};
+
+UserSchema.methods.deleteCollection = function(this: IUser, collectionId) {
+
+  // @ts-ignore
+  const position = this.savedRecipes.findIndex(collectionId);
+  if (position !== -1) {
+    this.savedRecipes.splice(position, 1);
+  }
   return this;
 };
 
@@ -171,7 +206,7 @@ UserSchema.methods.toAuthJSON = function() {
     email: this.email,
     token: this.generateJWT(),
     image_url: this.image_url,
-  }
+  };
 };
 
 UserSchema.methods.didCreateRecipe = function(this: IUser, recipeId: string) {

@@ -11,26 +11,25 @@ import { Rating, IRating } from "./rating.model";
 import { IUser, User } from "./user.model";
 import { PATH_IMAGE } from "../environment";
 
-
 export interface ICategory {
-  name: string,
-  total: number,
-  image_url: string,
+  name: string;
+  total: number;
+  image_url: string;
 }
 
 export interface IRecipe extends Document {
   name?: string;
   description?: string;
-  status?: boolean,// true: public ~ false: private
-  category?: string,
-  createdBy?: string,
+  status?: boolean; // true: public ~ false: private
+  category?: string;
+  createdBy?: string;
   servings?: number;
   time?: number;
   tags?: string[];
   banners?: string[];
   image_url?: string;
   ingredients?: [{ quantity: string, ingredient: string }];
-  rating: { total: number, avg: number }
+  rating: { total: number, avg: number };
   ratings?: string[];
   createdAt?: string;
   updatedAt?: string;
@@ -193,7 +192,7 @@ RecipeSchema.methods.toThumbnail = function(this: IRecipe, user: IUser) {
   delete recipe.time;
   delete recipe.status;
   return recipe;
-}
+};
 
 RecipeSchema.methods.toSearchResult = function(this: IRecipe, user: IUser) {
   const recipe = user ? this.toJSONFor(user) : this.toJSON();
@@ -210,8 +209,7 @@ RecipeSchema.methods.toSearchResult = function(this: IRecipe, user: IUser) {
   delete recipe.status;
   delete recipe.score;
   return recipe;
-}
-
+};
 
 RecipeSchema.methods.toJSONFor = function(this: IRecipe, user: IUser) {
 
@@ -220,10 +218,10 @@ RecipeSchema.methods.toJSONFor = function(this: IRecipe, user: IUser) {
     savedByUser: user.didSaveRecipe(this.id),
     createdByUser: user.id === this.createdBy,
   };
-}
+};
 
 RecipeSchema.methods.updateRating = async function(this: IRecipe) {
-  let results = await Rating.aggregate([
+  const results = await Rating.aggregate([
     {
       $match: {
         recipeId: this._id
@@ -241,7 +239,6 @@ RecipeSchema.methods.updateRating = async function(this: IRecipe) {
   this.rating = results[0];
   return await this.save();
 };
-
 
 RecipeSchema.methods.addRating = function(this: IRecipe, ratingId: string) {
   if (!this.ratings.includes(ratingId)) {
@@ -275,7 +272,6 @@ RecipeSchema.statics.getCategories = async function(limit: number = null) {
   return categories;
 };
 
-
 RecipeSchema.statics.getPublicRecipes = function() {
   return Recipe.where('status', true);
 };
@@ -294,12 +290,10 @@ RecipeSchema.statics.getRecipesByCategory = function(category: string) {
   return Recipe.getPublicRecipes().find({ category });
 };
 
-
 export const RecipeModel = model<IRecipe, IRecipeModel>('recipe', RecipeSchema);
 
 export const Recipe = RecipeModel;
 
-
-/**
- * aggregate([{$match: {$or : [{status: true}, {$and: [{status: false}, {createdBy: "5d96d8ccca60c720bcf45383"}]}]}}, {$project: {status:1, createdBy: 1}}])
- */
+// tslint:disable-next-line: max-line-length
+// aggregate([{$match: {$or : [{status: true}, {$and: [{status: false}, {createdBy: "5d96d8ccca60c720bcf45383"}]}]}}, {$project: {status:1, createdBy: 1}}])
+ 
