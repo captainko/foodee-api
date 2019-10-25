@@ -16,6 +16,9 @@
             "es2015",
             "es2017"
         ],
+        "types": [
+            "./src/util/types.d.ts"
+        ],
     },
     "moduleResolution": "node",
     "sourceMap": true,

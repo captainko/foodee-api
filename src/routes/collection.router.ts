@@ -2,7 +2,7 @@
 import { Router } from "express";
 //app
 import { auth } from "./auth";
-import { CollectionController } from '@controllers/collection.controller';
+import { CollectionController } from '../controllers/collection.controller';
 
 const router = Router();
 

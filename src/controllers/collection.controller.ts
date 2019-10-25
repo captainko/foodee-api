@@ -22,7 +22,7 @@ export class CollectionController {
   public static createCollection({ body }: Request, res: Response, next: NextFunction) {
     Collection.create({
       name: body.name
-    }).save()
+    })
       .then((collection) => {
         res.sendAndWrap(collection);
       })

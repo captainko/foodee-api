@@ -2,12 +2,11 @@ import { Request, Response, NextFunction, } from "express";
 
 import { Recipe } from "../models/recipe.model";
 import { Rating } from "../models/rating.model";
-import { User } from "../models/user.model";
 import { HTTP404Error, HTTP403Error } from "../util/httpErrors";
 
 export class RecipeController {
 
-  public static preloadRecipe(req: Request, res: Response, next, id: string) {    
+  public static preloadRecipe(req: Request, res: Response, next, id: string) {
     Recipe
       .findById(id)
       .then((recipe) => {
@@ -33,7 +32,7 @@ export class RecipeController {
       .catch(next);
   }
 
-  
+
 
   public static getRecipeByID(req: Request, res: Response) {
     res.sendAndWrap(req.recipe);
@@ -68,11 +67,9 @@ export class RecipeController {
 
   public static async rateRecipe(req: Request, res: Response, next: NextFunction) {
     try {
-      const rateObj$ = await Rating.rate(req.payload.id, req.recipe._id, req.body.rateValue);
-      const user$ = User.findById(req.payload.id).exec();
-      const recipe = req.recipe;
+      const rateObj = await Rating.rate(req.payload.id, req.recipe._id, req.body.rateValue);
+      const { user, recipe } = req;
 
-      const [rateObj, user] = await Promise.all([rateObj$, user$]);
       recipe.addRating(rateObj._id);
       user.addRating(rateObj._id);
 
@@ -119,11 +116,14 @@ export class RecipeController {
 
 
   public static onlyPermitted(req: Request, res: Response, next: NextFunction) {
+    // public recipe
     if (req.recipe.status) { return next() };
+
     if (req.isUnauthenticated()) {
       throw new HTTP403Error();
     }
-    if (req.user.admin || req.recipe.createdBy === req.user.id) {
+
+    if (req.user.canEdit(req.recipe)) {
       return next();
     }
 

@@ -160,7 +160,7 @@ export const RecipeSchema = new Schema<IRecipe>({
 });
 RecipeSchema.plugin(mongoosePagination);
 
-RecipeSchema.virtual('image_url').get(function() {
+RecipeSchema.virtual('image_url').get(function(this: IRecipe) {
   if (!this.banners) return '';
   return this.banners[0];
 });

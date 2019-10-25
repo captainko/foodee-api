@@ -8,6 +8,7 @@ import * as jwt from 'jsonwebtoken';
 import { JWT_SECRET } from "../environment";
 import { IRating } from "./rating.model";
 import { IRecipe } from "./recipe.model";
+import { ICollection } from "./collection.model";
 
 export interface IAuthJSON {
   username: string;
@@ -177,8 +178,8 @@ UserSchema.methods.didCreateRecipe = function(this: IUser, recipeId: string) {
   return this.createdRecipes.includes(recipeId);
 };
 
-UserSchema.methods.canEdit = function(this: IUser, recipe: IRecipe) {
-  return this.id == recipe.createdBy || this.admin;
+UserSchema.methods.canEdit = function(this: IUser, doc: IRecipe | ICollection) {
+  return this.id == doc.createdBy || this.admin;
 };
 
 UserSchema.methods.didSaveRecipe = function(this: IUser, recipeId: string) {

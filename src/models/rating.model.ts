@@ -1,5 +1,4 @@
-import { Schema, model, SchemaTypes, Document, version, Model } from 'mongoose';
-import { Recipe } from './recipe.model';
+import { Schema, model, SchemaTypes, Document, Model } from 'mongoose';
 
 export interface IRating extends Document {
   _id: string;
@@ -29,7 +28,7 @@ export const RatingSchema = new Schema({
   toJSON: {
     virtuals: true,
     transform: (doc, ret) => {
-      ret.id = ret._id;
+      // ret.id = ret._id;
       delete ret._id;
       delete ret.ratings;
     },
@@ -37,7 +36,7 @@ export const RatingSchema = new Schema({
   toObject: {
     virtuals: true,
     transform: (doc, ret) => {
-      ret.id = ret._id;
+      // ret.id = ret._id;
       delete ret._id;
     }
   }
