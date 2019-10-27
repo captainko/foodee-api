@@ -9,14 +9,14 @@ module.exports = {
   entry: './src/server.ts',
   mode: NODE_ENV,
   target: 'node',
-  // optimization: {
-  //   minimizer: [new UglifyJsPlugin({
-  //     parallel: true,
-  //     terserOptions: {
-  //       ecma: 6,
-  //     }
-  //   })],
-  // },
+  optimization: {
+    minimizer: [new UglifyJsPlugin({
+      parallel: true,
+      terserOptions: {
+        ecma: 6,
+      }
+    })],
+  },
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: 'index.js'
@@ -24,7 +24,7 @@ module.exports = {
   resolve: {
     extensions: ['.ts', '.js','html', 'css'],
   },
-  // externals: [nodeExternals()],
+  // externals: [nodeExternals(), ],
   module: {
     rules: [
       {
