@@ -5,7 +5,6 @@ import { IUser } from "../models/user.model";
 export class MainFrameController {
   public static async getMainFrame(req: Request, res: Response, next: NextFunction) {
     let { user } = req;
-    console.log(user);
     const recipeFields = "id name image_url rating banners createdBy";
 
     // tslint:disable-next-line: max-line-length

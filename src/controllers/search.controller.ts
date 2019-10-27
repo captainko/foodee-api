@@ -14,14 +14,15 @@ export class SearchController {
       page = 0,
       perPage = 5,
       // tslint:disable-next-line: prefer-const
-      sortBy = 'score'
+      sortBy = 'score',
+      q
     } = req.query;
     page = +page;
     perPage = +perPage;
     const queries = {
       status: true,
       $text: {
-        $search: req.query.q,
+        $search: q,
         $caseSensitive: false,
       }
     };
@@ -29,25 +30,29 @@ export class SearchController {
       score: { $meta: 'textScore' }
     };
 
-    const counted = Recipe.find(queries).count();
-    const paginated = Recipe.find(queries, project)
+    const counted$ = Recipe.find(queries).count();
+    const paginated$ = Recipe.find(queries, project)
       // .sort({ [sortBy]: { $meta: "textScore" } })
-      .sort(sorts[sortBy])
       .skip(page * perPage)
+      .sort(sorts[sortBy])
       .limit(perPage);
 
-    Promise.all([counted, paginated])
+    Promise.all([counted$, paginated$])
       .then(([total, recipes]) => {
         const pages = Math.floor(total / perPage);
         let nextPage = page + 1;
-
-        if (nextPage > pages) { nextPage = null; }
+        if (total % perPage !== 0) {
+          if (nextPage > pages) { nextPage = null; }
+          
+        } else {
+          if (nextPage >= pages) { nextPage = null; }
+        }
 
         if (req.isAuthenticated()) {
           recipes = recipes.map(r => r.toSearchResultFor(req.user));
         }
         res.sendAndWrap({ nextPage, pages, total, recipes }, 'paginate');
-      }).catch(next);
+      });
   }
   // tslint:disable-next-line: variable-name
   private static _sorts = {

@@ -33,8 +33,6 @@ export class RecipeController {
   }
 
   public static getRecipeByID(req: Request, res: Response) {
-    console.log(req['auth']);
-
     req.recipe.populate('createdBy', 'username')
       .execPopulate()
       .then(x => {

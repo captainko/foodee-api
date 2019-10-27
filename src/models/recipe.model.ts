@@ -176,12 +176,16 @@ RecipeSchema.virtual('image_url').get(function(this: IRecipe) {
 RecipeSchema.index({
   name: 'text',
   description: 'text',
+  category: 'text',
+  'tags': 'text',
   'ingredients.ingredient': 'text',
 }, {
   weights: {
     name: 10,
     description: 5,
-    'ingredients.ingredient': 5,
+    category: 7,
+    tags: 6,
+    'ingredients.ingredient':  6,
   }
 });
 
@@ -303,11 +307,11 @@ RecipeSchema.statics.getRecipesByCategory = function(category: string) {
   return Recipe.getPublicRecipes().find({ category });
 };
 
-RecipeSchema.pre("remove", async function(this: IRecipe) {
-  const users$ = User.find({ savedRecipes: { $contains: this.id } });
-  const collections$ = Collection.find({ recipes: { $contains: this.id } });
+// RecipeSchema.pre("remove", async function(this: IRecipe) {
+//   const users$ = User.find({ savedRecipes: { $contains: this.id } });
+//   const collections$ = Collection.find({ recipes: { $contains: this.id } });
 
-});
+// });
 
 export const RecipeModel = model<IRecipe, IRecipeModel>('recipe', RecipeSchema);
 
