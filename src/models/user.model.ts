@@ -224,7 +224,6 @@ UserSchema.methods.didSaveRecipe = function(this: IUser, recipe: IRecipe) {
   return this.savedRecipes
     .findIndex(
       (r: any ) => {
-        console.log('day ne', typeof recipe);
         return r == recipe.id || r.id == recipe.id;
       }
     ) !== -1;

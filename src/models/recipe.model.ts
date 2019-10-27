@@ -222,7 +222,6 @@ RecipeSchema.methods.toSearchResultFor = function(this: IRecipe, user?: IUser) {
 };
 
 RecipeSchema.methods.isCreatedBy = function(this: IRecipe, user: IUser) {
-  console.log(this.createdBy, typeof user.id);
   return this.createdBy == user.id;
 };
 
