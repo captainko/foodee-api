@@ -2,7 +2,6 @@ import * as jwt from 'express-jwt';
 import { Request } from 'express';
 import { JWT_SECRET } from '../environment';
 
-
 function getTokenFromHeader(req: Request) {
   const authorization = req.headers.authorization;
   if (authorization) {
@@ -24,7 +23,6 @@ export const auth = {
     secret: JWT_SECRET,
     userProperty: 'payload',
     credentialsRequired: false,
-    getToken: getTokenFromHeader,
-  })
+    getToken: getTokenFromHeader, 
+  }),
 };
-

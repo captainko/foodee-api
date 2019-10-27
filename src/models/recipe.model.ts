@@ -4,7 +4,8 @@ import {
   Document,
   SchemaTypes,
   PaginateModel,
-  DocumentQuery
+  DocumentQuery,
+  Collection
 } from "mongoose";
 import mongoosePagination = require('mongoose-paginate');
 import { Rating, IRating } from "./rating.model";
@@ -22,18 +23,20 @@ export interface IRecipe extends Document {
   description?: string;
   status?: boolean; // true: public ~ false: private
   category?: string;
-  createdBy?: string;
+  createdBy?: string & IUser;
   servings?: number;
   time?: number;
   tags?: string[];
   banners?: string[];
   image_url?: string;
   ingredients?: [{ quantity: string, ingredient: string }];
+  methods?: string[];
   rating: { total: number, avg: number };
   ratings?: string[];
   createdAt?: string;
   updatedAt?: string;
 
+  isCreatedBy: (user: string | IUser) => boolean;
   toJSONFor: (user: IUser) => IRecipe;
   toThumbnailFor: (user?: IUser) => IRecipe;
   toSearchResultFor: (user?: IUser) => IRecipe;
@@ -81,7 +84,7 @@ export const RecipeSchema = new Schema<IRecipe>({
     max: 200,
   },
   createdBy: {
-    type: Schema.Types.ObjectId,
+    type: SchemaTypes.ObjectId,
     ref: 'user',
     required: [true, 'is required'],
   },
@@ -110,6 +113,10 @@ export const RecipeSchema = new Schema<IRecipe>({
       },
     }],
     default: [],
+  },
+  methods: {
+    type: [String],
+    required: true,
   },
   rating: {
     type: {
@@ -185,6 +192,7 @@ RecipeSchema.methods.toThumbnailFor = function(this: IRecipe, user?: IUser) {
   delete recipe.banners;
   delete recipe.createdAt;
   delete recipe.ingredients;
+  delete recipe.methods;
   delete recipe.servings;
   delete recipe.description;
   delete recipe.category;
@@ -200,7 +208,9 @@ RecipeSchema.methods.toSearchResultFor = function(this: IRecipe, user?: IUser) {
   delete recipe.createdBy;
   delete recipe.banners;
   delete recipe.createdAt;
+  delete recipe.createdBy;
   delete recipe.ingredients;
+  delete recipe.methods;
   delete recipe.servings;
   delete recipe.description;
   delete recipe.category;
@@ -211,12 +221,16 @@ RecipeSchema.methods.toSearchResultFor = function(this: IRecipe, user?: IUser) {
   return recipe;
 };
 
-RecipeSchema.methods.toJSONFor = function(this: IRecipe, user: IUser) {
+RecipeSchema.methods.isCreatedBy = function(this: IRecipe, user: IUser) {
+  console.log(this.createdBy, typeof user.id);
+  return this.createdBy == user.id;
+};
 
+RecipeSchema.methods.toJSONFor = function(this: IRecipe, user: IUser) {
   return {
     ... this.toObject(),
-    savedByUser: user.didSaveRecipe(this.id),
-    createdByUser: user.didCreateRecipe(this.id),
+    savedByUser: user.didSaveRecipe(this),
+    createdByUser: this.isCreatedBy(user),
   };
 };
 
@@ -290,10 +304,15 @@ RecipeSchema.statics.getRecipesByCategory = function(category: string) {
   return Recipe.getPublicRecipes().find({ category });
 };
 
+RecipeSchema.pre("remove", async function(this: IRecipe) {
+  const users$ = User.find({ savedRecipes: { $contains: this.id } });
+  const collections$ = Collection.find({ recipes: { $contains: this.id } });
+
+});
+
 export const RecipeModel = model<IRecipe, IRecipeModel>('recipe', RecipeSchema);
 
 export const Recipe = RecipeModel;
 
 // tslint:disable-next-line: max-line-length
 // aggregate([{$match: {$or : [{status: true}, {$and: [{status: false}, {createdBy: "5d96d8ccca60c720bcf45383"}]}]}}, {$project: {status:1, createdBy: 1}}])
- 

@@ -3,7 +3,6 @@ import { Request } from "express";
 
 const storage = multer.diskStorage({
   destination(req, file, cb) {
-    console.log(file);
     cb(null, './src/public/uploads/');
   },
   filename(req, file, cb) {
@@ -14,7 +13,6 @@ const storage = multer.diskStorage({
 const acceptedTypes = ['image/jpeg', 'image/png'];
 
 const fileFilter = (req: Request, file: Express.Multer.File, cb) => {
-  console.log('lol', file);
   if (acceptedTypes.includes(file.mimetype)) {
     cb(null, true);
   } else {

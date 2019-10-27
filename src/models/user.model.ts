@@ -1,5 +1,5 @@
 // lib
-import { Document, Schema, model, Model, DocumentQuery, SchemaTypes } from "mongoose";
+import { Document, Schema, model, Model, DocumentQuery, SchemaTypes, Mongoose } from "mongoose";
 import * as uniqueValidator from 'mongoose-unique-validator';
 import * as crypto from 'crypto';
 import * as jwt from 'jsonwebtoken';
@@ -22,15 +22,15 @@ export interface IUserMethods {
   validPassword: (password: string) => boolean;
   generateJWT: () => string;
   toAuthJSON: () => IAuthJSON;
-  didCreateRecipe: (recipeId: string) => boolean;
+  didCreateRecipe: (recipe: IRecipe) => boolean;
   createRecipe: (recipeId: string) => IUser;
   deleteRecipe: (recipeId: string) => IUser;
   createCollection: (collectionId: string) => IUser;
   deleteCollection: (collectionId: string) => IUser;
   canEdit: (this: IUser, recipe: IRecipe | ICollection) => boolean;
-  saveRecipe: (this: IUser, recipeId: string) => IUser;
-  removeRecipe: (this: IUser, recipeId: string) => IUser;
-  didSaveRecipe: (recipeId: string) => boolean;
+  saveRecipe: (this: IUser, recipe: IRecipe) => IUser;
+  unsaveRecipe: (this: IUser, recipe: IRecipe) => IUser;
+  didSaveRecipe: (recipe: IRecipe) => boolean;
 }
 
 export interface IUser extends Document, IUserMethods {
@@ -129,17 +129,17 @@ UserSchema.methods.addRating = function(this: IUser, ratingId: string) {
   }
 };
 
-UserSchema.methods.saveRecipe = function(this: IUser, recipeId: string) {
+UserSchema.methods.saveRecipe = function(this: IUser, recipe: IRecipe) {
 
-  if (!this.savedRecipes.includes(recipeId)) {
-    this.savedRecipes.unshift(recipeId);
+  if (!this.didSaveRecipe(recipe)) {
+    this.savedRecipes.unshift(recipe.id);
   }
   return this;
 };
 
-UserSchema.methods.removeRecipe = function(this: IUser, recipeId) {
+UserSchema.methods.unsaveRecipe = function(this: IUser, recipe) {
   // @ts-ignore
-  const position = this.savedRecipes.findIndex(recipeId);
+  const position = this.savedRecipes.findIndex((r: IRecipe) => r == recipe.id ||   recipe.id == r.id);
   if (position !== -1) {
     this.savedRecipes.splice(position, 1);
   }
@@ -155,9 +155,9 @@ UserSchema.methods.deleteRecipe = function(this: IUser, recipeId) {
   // delete recipe from all collections
 
   // @ts-ignore
-  const position = this.savedRecipes.findIndex(recipeId);
+  const position = this.createdRecipes.findIndex(recipeId);
   if (position !== -1) {
-    this.savedRecipes.splice(position, 1);
+    this.createdRecipes.splice(position, 1);
   }
   return this;
 };
@@ -209,16 +209,25 @@ UserSchema.methods.toAuthJSON = function() {
   };
 };
 
-UserSchema.methods.didCreateRecipe = function(this: IUser, recipeId: string) {
-  return this.createdRecipes.includes(recipeId);
+UserSchema.methods.didCreateRecipe = function(this: IUser, recipe: IRecipe) {
+  return this.createdRecipes
+    .findIndex(
+      (r: any ) => r == recipe.id || r.id == recipe.id
+    ) !== -1;
 };
 
 UserSchema.methods.canEdit = function(this: IUser, doc: IRecipe | ICollection) {
   return this.id == doc.createdBy || this.admin;
 };
 
-UserSchema.methods.didSaveRecipe = function(this: IUser, recipeId: string) {
-  return this.savedRecipes.includes(recipeId);
+UserSchema.methods.didSaveRecipe = function(this: IUser, recipe: IRecipe) {
+  return this.savedRecipes
+    .findIndex(
+      (r: any ) => {
+        console.log('day ne', typeof recipe);
+        return r == recipe.id || r.id == recipe.id;
+      }
+    ) !== -1;
 };
 
 UserSchema.statics.findOneByEmailOrUsername = function(term: string) {

@@ -48,7 +48,6 @@ export interface IRatingModel extends Model<IRating> {
 
 RatingSchema.statics.rate = async function(userId: string, recipeId: string, rateValue: number) {
   let ratingObj = await Rating.findOne({ userId, recipeId }).exec();
-  console.log(ratingObj);
   // user already rated;
   if (ratingObj) {
     ratingObj.rateValue = rateValue;

@@ -3,12 +3,11 @@ import { Request, Response, NextFunction } from "express";
 
 // app
 import { Collection } from "../models/collection.model";
-import { HTTP404Error, HTTP400Error, HTTP403Error } from "../util/httpErrors";
+import { HTTP404Error } from "../util/httpErrors";
 import { Recipe } from "../models/recipe.model";
 
 export class CollectionController {
   public static preloadCollection(req: Request, res: Response, next: NextFunction, collectionId: string) {
-    console.log('collection', Date.now());
     Collection
       .findById(collectionId)
       .then((collection) => {
@@ -22,7 +21,6 @@ export class CollectionController {
   }
 
   public static preloadRecipe(req: Request, res: Response, next: NextFunction, recipeId: string) {
-    console.log('recipe', Date.now());
     Recipe.findById(recipeId)
       .then((recipe) => {
         if (!recipe) {

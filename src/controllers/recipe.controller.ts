@@ -33,15 +33,20 @@ export class RecipeController {
   }
 
   public static getRecipeByID(req: Request, res: Response) {
-    res.sendAndWrap(req.recipe);
+    console.log(req['auth']);
+
+    req.recipe.populate('createdBy', 'username')
+      .execPopulate()
+      .then(x => {
+          if (req.isAuthenticated()) {
+            x = x.toJSONFor(req.user);
+          }
+          return res.sendAndWrap(x);
+        });
   }
 
   public static createRecipe(req: Request, res: Response, next: NextFunction) {
-    if (req.isUnauthenticated()) {
-      
-    }
     const { body } = req;
-    console.log(req.user);
     Recipe.create({
       name: body.name,
       category: body.category,
@@ -54,9 +59,8 @@ export class RecipeController {
       createdBy: req.payload.id,
     })
       .then((recipe) => {
-        console.log(req.user.username);
         req.user.createdRecipes.push(recipe._id);
-        req.user.save().then(() => res.sendMessage('created successfully'));
+        req.user.save().then(() => res.sendAndWrap(recipe, 'recipe'));
       })
       .catch(next);
   }
@@ -88,7 +92,7 @@ export class RecipeController {
 
   public static async saveRecipe(req: Request, res: Response, next: NextFunction) {
     try {
-      req.user.saveRecipe(req.recipe.id);
+      req.user.saveRecipe(req.recipe);
       await req.user.save();
       res.sendMessage('saved successfully');
     } catch (err) {
@@ -96,15 +100,24 @@ export class RecipeController {
     }
   }
 
-  public static async removeRecipe(req: Request, res: Response, next: NextFunction) {
+  public static async unsaveRecipe(req: Request, res: Response, next: NextFunction) {
     try {
-      req.user.removeRecipe(req.recipe.id);
+      req.user.unsaveRecipe(req.recipe);
       await req.user.save();
       res.sendMessage('remove successfully');
     } catch (err) {
       next(err);
     }
   }
+
+  public static async deleteRecipe({user, recipe}: Request, res: Response, next: NextFunction) {
+    try {
+      user.deleteRecipe(recipe.id);
+      recipe.remove();
+    } catch (err) {
+      next(err);
+    }  
+}
 
   public static onlySameUserOrAdmin(req: Request, res: Response, next: NextFunction) {
     if (req.isUnauthenticated()) {

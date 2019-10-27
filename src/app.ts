@@ -21,8 +21,6 @@ class App {
   constructor() {
     this.app = express();
     this._config();
-
-    // this._addErrorHandlers();
     this._mongoSetup();
   }
 

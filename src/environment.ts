@@ -2,6 +2,7 @@ import * as dotenv from "dotenv";
 dotenv.config();
 
 export const { 
+  NODE_ENV,
   PORT = 3000,
   DB_URI,
   JWT_SECRET = 'secret',
@@ -9,4 +10,6 @@ export const {
   PATH_IMAGE = '/public/uploads/'
 } = process.env;
 
-export const IS_PROD = false;
+console.log(process.env.NODE_ENV);
+
+export const IS_PROD = NODE_ENV === 'production';

@@ -29,5 +29,3 @@ Array.prototype.toJSONFor = function(this: any[], something) {
 };
 
 // ~Array
-
-console.log();
