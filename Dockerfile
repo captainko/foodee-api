@@ -2,12 +2,13 @@ FROM node:10
 
 WORKDIR /usr/src/app
 
-COPY package*.json ./
+# COPY package*.json ./
 
-RUN npm install
+# RUN npm install
 
-COPY . .
+COPY dist dist
+COPY .env .
 
 EXPOSE 4500
 
-CMD ["npm", "start"]
+CMD ["node","./dist/index.js"]

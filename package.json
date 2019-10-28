@@ -9,12 +9,10 @@
         "ts-node-dev": "ts-node-dev",
         "start": "npm run watch",
         "watch": "ts-node-dev --respawn --transpileOnly src/server.ts",
-        "prod": "tsc && node ./dist/server.js",
+        "prod": "node ./dist/index.js",
         "build": "webpack --mode production --optimize-minimize=true"
     },
     "dependencies": {
-        "@types/connect-mongo": "0.0.44",
-        "@types/passport-jwt": "^3.0.2",
         "compression": "^1.7.4",
         "connect-mongo": "^3.1.0",
         "cookie-parser": "^1.4.4",
@@ -38,6 +36,8 @@
         "passport-local": "^1.0.0"
     },
     "devDependencies": {
+        "@types/connect-mongo": "0.0.44",
+        "@types/passport-jwt": "^3.0.2",
         "@types/compression": "^1.0.1",
         "@types/cookie-parser": "^1.4.2",
         "@types/cors": "^2.8.6",

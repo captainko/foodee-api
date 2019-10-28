@@ -14,7 +14,7 @@ module.exports = {
       parallel: true,
       terserOptions: {
         ecma: 6,
-      }
+      },
     })],
   },
   output: {
@@ -25,6 +25,7 @@ module.exports = {
     extensions: ['.ts', '.js','html', 'css'],
   },
   // externals: [nodeExternals(), ],
+  // externals: [{buffer: 'root Buffer'}],
   module: {
     rules: [
       {
