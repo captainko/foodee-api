@@ -37,7 +37,7 @@ export class UserController {
           return res.sendAndWrap(user.toAuthJSON(), 'user');
         });
       } else {
-        return res.status(422).sendAndWrap(info);
+        return res.status(422).sendMessage(info.message);
       }
     })(req, res, next);
   }

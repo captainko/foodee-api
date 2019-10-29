@@ -9,6 +9,7 @@ declare namespace Express {
   
   export interface Response {
     sendAndWrap(obj: any, key?: string): Response;
+    sendError(obj: any): Response;
     sendMessage(str: string): Response;
     jsonAndWrap(obj: any, key?: string): Response;
   }

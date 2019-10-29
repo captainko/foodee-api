@@ -3,6 +3,9 @@ import * as passportLocal from "passport-local";
 import express = require("express");
 import { User } from "../models/user.model";
 import "./extends";
+// import { validationError } from "../util/ErrorHandlers";
+import { Error } from "mongoose";
+const { ValidationError, CastError } = Error;
 
 // express
 express.response.sendAndWrap = function(obj, key = 'data') {
@@ -15,6 +18,25 @@ express.response.sendAndWrap = function(obj, key = 'data') {
 express.response.sendMessage = function(message) {
   return this.sendAndWrap(message, 'message');
 };
+
+express.response.sendError = function(error: any) {
+  let res;
+  if (error instanceof Object) {
+    res = {};
+    if (error.errors) {
+      for (const key in error.errors) {
+        if (error.errors.hasOwnProperty(key)) {
+          const element = error.errors[key];
+          res[key] = element.message;
+        }
+      }
+    } else
+      res = error.toString();
+  } else {
+    res = error
+  }
+  return this.sendAndWrap(res, 'error');
+}
 
 // ~express
 

@@ -24,7 +24,8 @@
         "no-shadowed-variable":false,
         "no-empty-interface":false,
         "triple-equals":false,
-        "arrow-parens":false
+        "arrow-parens":false,
+        "max-classes-per-file":false,
 
     },
     "rulesDirectory": []
