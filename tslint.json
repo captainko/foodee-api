@@ -18,15 +18,13 @@
         "no-debugger": [false],
         "no-trailing-whitespace": [false],
         "no-var-requires": [false],
-        // "max-classes-per-file": [false],
         "eofline":[false],
         "no-string-literal": [false],
         "no-shadowed-variable":false,
         "no-empty-interface":false,
         "triple-equals":false,
         "arrow-parens":false,
-        "max-classes-per-file":false,
-
+        "max-classes-per-file":false
     },
     "rulesDirectory": []
 
