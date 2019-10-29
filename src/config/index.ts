@@ -16,6 +16,25 @@ express.response.sendMessage = function(message) {
   return this.sendAndWrap(message, 'message');
 };
 
+express.response.sendError = function(error: any) {
+  let res;
+  if (error instanceof Object) {
+    res = {};
+    if (error.errors) {
+      for (const key in error.errors) {
+        if (error.errors.hasOwnProperty(key)) {
+          const element = error.errors[key];
+          res[key] = element.message;
+        }
+      }
+    } else
+      res = error.toString();
+  } else {
+    res = error
+  }
+  return this.sendAndWrap(res, 'error');
+}
+
 // ~express
 
 // passport
