@@ -20,6 +20,7 @@
     "maxlength",
     "mimetype",
     "minlength",
+    "mongodata",
     "mongodb",
     "originalname",
     "quotemark",
