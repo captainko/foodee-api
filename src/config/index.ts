@@ -27,13 +27,14 @@ express.response.sendError = function(error: any) {
           res[key] = element.message;
         }
       }
-    } else
+    } else {
       res = error.toString();
+    }
   } else {
-    res = error
+    res = error;
   }
   return this.sendAndWrap(res, 'error');
-}
+};
 
 // ~express
 
