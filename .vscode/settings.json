@@ -9,7 +9,7 @@
     "**/node_modules/**": true
   },
   "typescript.format.insertSpaceAfterFunctionKeywordForAnonymousFunctions": false,
-  "workbench.colorTheme": "Shades of Purple",
+  "workbench.colorTheme": "One Dark Pro",
   "workbench.iconTheme": "vs-seti",
   "cSpell.words": [
     "Interop",

@@ -191,12 +191,11 @@ UserSchema.methods.generateJWT = function(this: IUser) {
   const today = new Date();
   const exp = new Date(today);
   exp.setDate(today.getDate() + 60);
-
+  
   return jwt.sign({
     id: this._id,
     username: this.username,
     exp: Math.floor(exp.getTime() / 1000),
-
   }, JWT_SECRET);
 };
 

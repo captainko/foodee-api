@@ -67,7 +67,7 @@ export const RecipeSchema = new Schema<IRecipe>({
   },
   description: {
     type: String,
-    trim: true,
+    trim: [true, 'is required'],
   },
   status: {
     type: Boolean,

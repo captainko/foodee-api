@@ -1,6 +1,7 @@
 import * as jwt from 'express-jwt';
-import { Request } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import { JWT_SECRET } from '../environment';
+import {  } from 'connect';
 
 function getTokenFromHeader(req: Request) {
   const authorization = req.headers.authorization;
@@ -14,15 +15,9 @@ function getTokenFromHeader(req: Request) {
 }
 
 export const auth = {
-  required: jwt({
-    secret: JWT_SECRET,
-    userProperty: 'payload',
-    getToken: getTokenFromHeader,
-  }),
-  optional: jwt({
-    secret: JWT_SECRET,
-    userProperty: 'payload',
-    credentialsRequired: false,
-    getToken: getTokenFromHeader, 
-  }),
+  required(req: Request, res: Response, next: NextFunction) {
+    if (req.isUnauthenticated()) {
+      throw new jwt.UnauthorizedError("credentials_required", {message: 'Unauthorized'});
+    }
+  }
 };

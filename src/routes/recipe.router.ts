@@ -4,13 +4,13 @@ import { RecipeController as RecipeCtrl, RecipeController } from "../controllers
 import { auth } from './auth';
 
 const RecipeRouter = Router();
-RecipeRouter.all('*', auth.optional).param('recipe', RecipeCtrl.preloadRecipe);
-RecipeRouter.get('/', auth.optional, RecipeCtrl.getRecipes);
+RecipeRouter.all('*').param('recipe', RecipeCtrl.preloadRecipe);
+RecipeRouter.get('/', RecipeCtrl.getRecipes);
 RecipeRouter.delete('/', RecipeCtrl.removeAll);
 RecipeRouter.post('/', auth.required, RecipeCtrl.createRecipe);
 
 RecipeRouter.get('/category/:category', RecipeCtrl.getRecipesByCategory);
-RecipeRouter.get('/:recipe/', auth.optional, RecipeCtrl.onlyPermitted, RecipeCtrl.getRecipeByID);
+RecipeRouter.get('/:recipe/', RecipeCtrl.onlyPermitted, RecipeCtrl.getRecipeByID);
 RecipeRouter.put('/:recipe/', auth.required, RecipeCtrl.onlySameUserOrAdmin, RecipeCtrl.updateRecipe);
 
 RecipeRouter.post('/:recipe/rating', auth.required, RecipeCtrl.onlyPermitted, RecipeCtrl.rateRecipe);
