@@ -1,9 +1,12 @@
 // libs
 import { Request, Response, NextFunction } from "express";
 import passport = require("passport");
+import { createTransport } from "nodemailer";
+import jwt = require("jsonwebtoken");
 
 // app
-import { User } from "../models/user.model";
+import { User, IUser } from "../models/user.model";
+import { GMAIL_USER, GMAIL_PASS, EMAIL_SECRET } from "../environment";
 
 export class UserController {
   public static addUser(req: Request, res: Response, next: NextFunction) {
@@ -13,8 +16,40 @@ export class UserController {
     user.setPassword(req.body.password);
 
     user.save().then(() => {
-      return res.sendAndWrap({ user: user.toAuthJSON() });
+
+      jwt.sign(
+        {
+          user: user.id.toString(),
+        },
+        EMAIL_SECRET,
+        {
+          expiresIn: '1d',
+        },
+        (err, emailToken) => {
+          const url = `http://localhost:4500/api/v1/user/confirmation/${emailToken}`;
+
+          transporter.sendMail({
+            to: user.email,
+            subject: 'Confirm Email',
+            html: `Please click this email to confirm your email: <a href="${url}">${url}</a>`,
+          });
+        },
+      );
+      return res.sendMessage("Please check your email before login");
     }).catch(next);
+  }
+
+  public static async verify(req: Request, res: Response, next: NextFunction) {
+      try {
+        const decoded = jwt.verify(req.params.token, EMAIL_SECRET) as any;
+        console.log(decoded);
+        await User.updateOne({_id: decoded.user}, {isVerified: true});
+        res.send("Email is verified");
+
+      } catch (e) {
+        res.send("Error");
+      }
+    
   }
 
   public static login(req: Request, res: Response, next: NextFunction) {
@@ -32,6 +67,9 @@ export class UserController {
 
       if (user) {
         user.token = user.generateJWT();
+        if (!user.isVerified) {
+          return res.status(401).sendError(new Error("Account is not verified!"));
+        }
         req.logIn(user, (err) => {
           if (err) { return next(err); }
           return res.sendAndWrap(user.toAuthJSON(), 'user');
@@ -65,3 +103,11 @@ export class UserController {
     }).catch(next);
   }
 }
+
+const transporter = createTransport({
+  service: 'Gmail',
+  auth: {
+    user: GMAIL_USER,
+    pass: GMAIL_PASS,
+  },
+});

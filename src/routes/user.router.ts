@@ -6,6 +6,7 @@ const UserRouter = Router();
 
 UserRouter
   .get('/', auth.required, UserController.getLoggedUser)
+  .get('/confirmation/:token', UserController.verify)
   .put('/', auth.required, UserController.updateUser)
   .post('/signup', UserController.addUser)
   .post('/login', UserController.login);

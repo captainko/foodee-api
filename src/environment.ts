@@ -7,7 +7,10 @@ export const {
   DB_URI,
   JWT_SECRET = 'secret',
   SESSION_SECRET = 'foodee-api',
-  PATH_IMAGE = '/public/uploads/'
+  EMAIL_SECRET = 'foodee-email',
+  PATH_IMAGE = '/public/uploads/',
+  GMAIL_USER = 'akstartforme@gmail.com',
+  GMAIL_PASS = '65689099'
 } = process.env;
 
 console.log(process.env.NODE_ENV);

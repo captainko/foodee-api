@@ -36,6 +36,7 @@ export interface IUserMethods {
 export interface IUser extends Document, IUserMethods {
   id: string;
   username?: string;
+  isVerified?: boolean;
   admin?: boolean;
   email?: string;
   image_url?: string;
@@ -71,6 +72,7 @@ export const UserSchema = new Schema<IUser>({
     match: [/\S+@\S+\.\S+/, 'is invalid'],
     index: true,
   },
+  isVerified: { type: Boolean, default: false },
   admin: {
     type: Boolean,
     required: true,
