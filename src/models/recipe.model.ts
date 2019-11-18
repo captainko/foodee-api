@@ -61,7 +61,6 @@ export const RecipeSchema = new Schema<IRecipe>({
   category: {
     type: String,
     lowercase: true,
-    unique: true,
     trim: true,
     required: [true, 'is required'],
   },
