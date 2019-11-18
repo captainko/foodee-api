@@ -132,7 +132,7 @@ UserSchema.methods.addRating = function(this: IUser, ratingId: string) {
 };
 
 UserSchema.methods.saveRecipe = function(this: IUser, recipe: IRecipe) {
-
+  console.log(this);
   if (!this.didSaveRecipe(recipe)) {
     this.savedRecipes.unshift(recipe.id);
   }

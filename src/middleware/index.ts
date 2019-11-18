@@ -4,6 +4,7 @@ import {
   handleBodyRequest,
   handleCompression,
   handlePassportSession,
+  // handleUpload,
 } from "./common";
 
 export default [
@@ -13,4 +14,5 @@ export default [
   handleBodyRequest,
   // handleSession,
   handlePassportSession,
+  // handleUpload,
 ];

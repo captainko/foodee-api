@@ -54,7 +54,7 @@ export class RecipeController {
       servings: body.servings,
       status: body.status,
       ingredients: body.ingredients,
-      createdBy: req.payload.id,
+      createdBy: req.user.id,
     })
       .then((recipe) => {
         req.user.createdRecipes.push(recipe._id);
@@ -123,13 +123,14 @@ export class RecipeController {
     }
     if (req.user.canEdit(req.recipe)) {
       next();
-    } else {
-      throw new HTTP403Error();
+    
     }
+    throw new HTTP403Error();
   }
 
   public static onlyPermitted(req: Request, res: Response, next: NextFunction) {
     // public recipe
+    console.log('lol2');
     if (req.recipe.status) { return next(); }
 
     if (req.isUnauthenticated()) {

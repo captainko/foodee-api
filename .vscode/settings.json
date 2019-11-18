@@ -12,8 +12,10 @@
   "workbench.colorTheme": "One Dark Pro",
   "workbench.iconTheme": "vs-seti",
   "cSpell.words": [
+    "CLOUDINARY",
     "Gmail",
     "Interop",
+    "datauri",
     "deserialize",
     "eofline",
     "esnext",
@@ -29,6 +31,7 @@
     "respawn",
     "signup",
     "uglifyjs",
+    "uploader",
     "virtuals"
   ]
 }

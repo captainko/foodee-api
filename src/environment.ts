@@ -10,8 +10,10 @@ export const {
   EMAIL_SECRET = 'foodee-email',
   PATH_IMAGE = '/public/uploads/',
   GMAIL_USER = 'akstartforme@gmail.com',
-  GMAIL_PASS = '65689099'
-  
+  GMAIL_PASS = '65689099',
+  CLOUDINARY_CLOUD_NAME,
+  CLOUDINARY_API_KEY,
+  CLOUDINARY_API_SECRET,
 } = process.env;
 
 export const IS_PROD = NODE_ENV === 'production';
