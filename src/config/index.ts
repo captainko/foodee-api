@@ -38,11 +38,6 @@ express.response.sendError = function(error: any) {
   return this.sendAndWrap(res, 'error');
 };
 
-// express.request.isAuthenticated = function() {
-//   console.log(this.payload);
-//   return !!this.payload;
-// };
-
 // ~express
 
 // passport

@@ -1,7 +1,6 @@
 import multer = require("multer");
 import cloudinary = require("cloudinary");
 import cloudinaryStorage = require("multer-storage-cloudinary");
-import { Request } from "express";
 import { CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET } from "../environment";
 
 // const storage = multer.diskStorage({
@@ -19,12 +18,12 @@ cloudinary.v2.config({
   api_secret: CLOUDINARY_API_SECRET,
 });
 const storage = cloudinaryStorage({
-  cloudinary: cloudinary.v2,
+  cloudinary,
   folder: "foodee",
   format: "jpg",
   allowedFormats: ["jpg", "png"],
 });
-
+// cloudinary.v2.api.resource()
 // const fileFilter = (req: Request, file: Express.Multer.File, cb) => {
 //   if (acceptedTypes.includes(file.mimetype)) {
 //     cb(null, true);

@@ -5,12 +5,13 @@ import {
   SchemaTypes,
   PaginateModel,
   DocumentQuery,
-  Collection
 } from "mongoose";
 import mongoosePagination = require('mongoose-paginate');
+import mongooseAutoPopulate = require('mongoose-autopopulate');
+
 import { Rating, IRating } from "./rating.model";
-import { IUser, User } from "./user.model";
-import { PATH_IMAGE } from "../environment";
+import { IUser } from "./user.model";
+import { IImage } from "./image.model";
 
 export interface ICategory {
   name: string;
@@ -88,14 +89,18 @@ export const RecipeSchema = new Schema<IRecipe>({
     required: [true, 'is required'],
   },
   banners: {
-    type: [String],
+    type: [{
+      type: SchemaTypes.ObjectId,
+      ref: 'image'
+    }],
+    autopopulate: true,
     minlength: 1,
     maxlength: 4,
     required: true,
     trim: true,
-    get(banners) {
-      return banners.map(b => PATH_IMAGE + b);
-    }
+    // get(banners) {
+    //   return banners.map(b => PATH_IMAGE + b);
+    // }
   },
   ingredients: {
     type: [{
@@ -163,7 +168,7 @@ export const RecipeSchema = new Schema<IRecipe>({
     }
   },
 });
-RecipeSchema.plugin(mongoosePagination);
+RecipeSchema.plugin(mongooseAutoPopulate);
 
 RecipeSchema.virtual('image_url').get(function(this: IRecipe) {
   if (!this.banners) {

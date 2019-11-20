@@ -1,4 +1,5 @@
 import { Router } from "express";
+import cloudinary = require("cloudinary");
 
 type Wrapper = (router: Router) => void;
 
@@ -11,3 +12,4 @@ export const applyMiddleware = (
   }
 };
 
+export const checkIfExists = cloudinary.v2.api.resource;

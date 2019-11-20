@@ -3,6 +3,8 @@ import { Request, Response, NextFunction, } from "express";
 import { Recipe } from "../models/recipe.model";
 import { Rating } from "../models/rating.model";
 import { HTTP404Error, HTTP403Error } from "../util/httpErrors";
+import { checkIfExists } from "../util";
+import { Image, ImageModel } from "../models/image.model";
 
 export class RecipeController {
 
@@ -43,27 +45,33 @@ export class RecipeController {
         });
   }
 
-  public static createRecipe(req: Request, res: Response, next: NextFunction) {
-    const { body } = req;
-    Recipe.create({
-      name: body.name,
-      category: body.category,
-      description: body.description,
-      banners: body.banners,
-      time: body.time,
-      servings: body.servings,
-      status: body.status,
-      ingredients: body.ingredients,
-      createdBy: req.user.id,
-    })
-      .then((recipe) => {
-        req.user.createdRecipes.push(recipe._id);
-        req.user.save().then(() => res.sendAndWrap(recipe, 'recipe'));
-      })
-      .catch(next);
+  public static async createRecipe(req: Request, res: Response, next: NextFunction) {
+    const {body} = req;
+    try {
+      console.log("lol", ImageModel.checkImagesExists);
+      await ImageModel.checkImagesExists(body.banners);
+      const recipe = await Recipe.create({
+        name: body.name,
+        category: body.category,
+        description: body.description,
+        banners: body.banners,
+        time: body.time,
+        servings: body.servings,
+        status: body.status,
+        ingredients: body.ingredients,
+        createdBy: req.user.id,
+      });
+      req.user.createdRecipes.push(recipe._id);
+      await req.user.save();
+      res.sendAndWrap(recipe, 'recipe');
+    } catch (err) {
+      next(err);
+    }
   }
 
   public static updateRecipe(req: Request, res: Response, next: NextFunction) {
+    const {body} = req;
+    
     req.recipe.update(req.body)
       .then((value) => res.sendAndWrap(value, 'recipe'))
       .catch(next);
@@ -110,8 +118,8 @@ export class RecipeController {
 
   public static async deleteRecipe({user, recipe}: Request, res: Response, next: NextFunction) {
     try {
-      user.deleteRecipe(recipe.id);
-      recipe.remove();
+      // user.deleteRecipe(recipe.id);
+     await recipe.remove();
     } catch (err) {
       next(err);
     }  
@@ -121,16 +129,14 @@ export class RecipeController {
     if (req.isUnauthenticated()) {
       throw new HTTP403Error();
     }
-    if (req.user.canEdit(req.recipe)) {
-      next();
-    
+    if (!req.user.canEdit(req.recipe)) {
+      throw new HTTP403Error();
     }
-    throw new HTTP403Error();
+    return next();
   }
 
   public static onlyPermitted(req: Request, res: Response, next: NextFunction) {
     // public recipe
-    console.log('lol2');
     if (req.recipe.status) { return next(); }
 
     if (req.isUnauthenticated()) {
@@ -138,15 +144,26 @@ export class RecipeController {
     }
 
     if (req.user.canEdit(req.recipe)) {
-      return next();
+      throw new HTTP403Error();
     }
 
-    throw new HTTP403Error();
+    return next();
   }
 
   public static removeAll(req: Request, res: Response, next: NextFunction) {
     Recipe.deleteMany({})
       .then(result => res.sendAndWrap(result))
       .catch(next);
+  }
+}
+
+async function resolveImages(banners: string[]) {
+  try {
+    const images$ = banners.map(b => checkIfExists(b));
+    const images = await Promise.all(images$);
+    console.log(images);
+    return images.map(x => x.secure_url);
+  } catch (error) {
+    throw new Error(error.message);
   }
 }

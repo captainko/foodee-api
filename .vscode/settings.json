@@ -15,6 +15,7 @@
     "CLOUDINARY",
     "Gmail",
     "Interop",
+    "autopopulate",
     "datauri",
     "deserialize",
     "eofline",
