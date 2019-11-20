@@ -3,7 +3,7 @@ import { Request, Response, NextFunction } from "express";
 
 // app
 import { Collection } from "../models/collection.model";
-import { HTTP404Error } from "../util/httpErrors";
+import { HTTP404Error, HTTP403Error } from "../util/httpErrors";
 import { Recipe } from "../models/recipe.model";
 
 export class CollectionController {
@@ -21,12 +21,11 @@ export class CollectionController {
   }
 
   public static preloadRecipe(req: Request, res: Response, next: NextFunction, recipeId: string) {
-    Recipe.findById(recipeId)
+    Recipe .findById(recipeId, {},  {autopopulate: false})
       .then((recipe) => {
         if (!recipe) {
           throw new HTTP404Error('Recipe not found');
         }
-
       })
       .catch(next);
   }
@@ -64,9 +63,26 @@ export class CollectionController {
       .catch(next);
   }
 
-  public static onlySameUserOrAdmin(req: Request, res: Response, next: NextFunction) {
-    if (req.user.canEdit(req.collection)) {
+  public static addRecipe(req: Request, res: Response, next: NextFunction) {
+    const { collection , recipe} = req;
+    collection.addRecipe(recipe.id);
+    collection.save()
+      .then((c) => res.sendAndWrap(c, 'collection'))
+      .catch(next);
+  }
 
+  public static removeRecipe(req: Request, res: Response, next: NextFunction) {
+    const {collection, recipe} = req;
+    collection.removeRecipe(recipe.id);
+    collection.save()
+    .then((c) => res.sendAndWrap(c, 'collection'))
+    .catch(next);
+  }
+
+  public static onlySameUserOrAdmin(req: Request, res: Response, next: NextFunction) {
+    if (!req.user.canEdit(req.collection)) {
+      throw new HTTP403Error();
     }
+    next();
   }
 }

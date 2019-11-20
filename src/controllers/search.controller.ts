@@ -15,6 +15,7 @@ export class SearchController {
       perPage = 5,
       // tslint:disable-next-line: prefer-const
       sortBy = 'score',
+      // tslint:disable-next-line: prefer-const
       q
     } = req.query;
     page = +page;
@@ -30,7 +31,7 @@ export class SearchController {
       score: { $meta: 'textScore' }
     };
 
-    const counted$ = Recipe.find(queries).count();
+    const counted$ = Recipe.find(queries).countDocuments();
     const paginated$ = Recipe.find(queries, project)
       // .sort({ [sortBy]: { $meta: "textScore" } })
       .skip(page * perPage)
@@ -48,16 +49,16 @@ export class SearchController {
           if (nextPage >= pages) { nextPage = null; }
         }
 
-        if (req.isAuthenticated()) {
-          recipes = recipes.map(r => r.toSearchResultFor(req.user));
-        }
+        // if (req.isAuthenticated()) {
+          // }
+        recipes = recipes.map(r => r.toSearchResultFor(req.user));
         res.sendAndWrap({ nextPage, pages, total, recipes }, 'paginate');
       });
   }
   // tslint:disable-next-line: variable-name
   private static _sorts = {
     name: { name: 1 },
-    score: { score: -1 }, // relevant
+    score: { score: { $meta: "textScore" }  }, // relevant
     rating: { "rating.total": -1, "rating.avg": -1 },
   };
 }

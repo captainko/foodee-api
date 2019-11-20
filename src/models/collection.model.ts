@@ -2,20 +2,18 @@
 import { Document, Model, model, Schema, SchemaTypes } from "mongoose";
 
 // app
-import { PATH_IMAGE } from "../environment";
 import { IUser } from "./user.model";
-import { IRecipeModel, IRecipe } from "./recipe.model";
 
 export interface ICollectionMethods {
-
 }
 
 export interface ICollection extends Document, ICollectionMethods {
   name?: string;
   createdBy?: string | IUser;
-  image?: string;
   image_url?: string;
   recipes?: Array<string | ICollection>;
+  addRecipe(recipeId: string): ICollection;
+  removeRecipe(recipeId: string): ICollection;
 }
 
 export interface ICollectionModel extends Model<ICollection> {
@@ -26,16 +24,18 @@ export const CollectionSchema = new Schema({
     type: String,
     minlength: 1,
     maxlength: 50,
-    required: [true, 'is required'],
+    required: [true, ' is required'],
   },
   createdBy: {
     type: SchemaTypes.ObjectId,
     ref: 'user',
     required: true,
   },
-  image: {
-    type: String,
-  },
+  // image_url: {
+  //   type: SchemaTypes.ObjectId,
+  //   ref: 'image',
+  //   required: [true, ' is required']
+  // },
   recipes: {
     type: [{
       type: SchemaTypes.ObjectId,
@@ -64,18 +64,19 @@ export const CollectionSchema = new Schema({
   },
 });
 
-CollectionSchema.virtual('image_url').get(function(this: ICollection) {
-  return this.image ? PATH_IMAGE + this.image : null;
-});
-
 CollectionSchema.methods.addRecipe = function(this: ICollection, recipeId: string) {
   this.recipes.push(recipeId);
-  if (this.recipes.length === 1) {
-    this.image = (this.recipes[0] as IRecipe).banners[0];
-  }
+
   return this;
 };
 
-export const CollectionModel = model<ICollection, IRecipeModel>('collection', CollectionSchema);
+CollectionSchema.methods.removeRecipe = function(this: ICollection, recipeId: string) {
+  const index = this.recipes.findIndex((r: any) => r == recipeId || r.id == recipeId);
+  this.recipes.splice(index, 1);
+
+  return this;
+};
+
+export const CollectionModel = model<ICollection, ICollectionModel>('collection', CollectionSchema);
 
 export { CollectionModel as Collection };

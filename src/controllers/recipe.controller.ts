@@ -4,13 +4,13 @@ import { Recipe } from "../models/recipe.model";
 import { Rating } from "../models/rating.model";
 import { HTTP404Error, HTTP403Error } from "../util/httpErrors";
 import { checkIfExists } from "../util";
-import { Image, ImageModel } from "../models/image.model";
+import { ImageModel } from "../models/image.model";
 
 export class RecipeController {
 
   public static preloadRecipe(req: Request, res: Response, next, id: string) {
     Recipe
-      .findById(id)
+      .findById(id, {},  {autopopulate: false})
       .then((recipe) => {
         if (!recipe) {
           throw new HTTP404Error();
@@ -34,22 +34,25 @@ export class RecipeController {
       .catch(next);
   }
 
-  public static getRecipeByID(req: Request, res: Response) {
+  public static getRecipeByID(req: Request, res: Response, next: NextFunction) {
     req.recipe.populate('createdBy', 'username')
       .execPopulate()
       .then(x => {
           if (req.isAuthenticated()) {
             x = x.toJSONFor(req.user);
           }
-          return res.sendAndWrap(x);
-        });
+          res.sendAndWrap(x);
+        })
+      .catch(next);
+  }
+
+  public static getRecipeByIDToEdit({recipe}: Request, res: Response, next: NextFunction) {
+   res.sendAndWrap(recipe.toEditObj(), "recipe");
   }
 
   public static async createRecipe(req: Request, res: Response, next: NextFunction) {
     const {body} = req;
     try {
-      console.log("lol", ImageModel.checkImagesExists);
-      await ImageModel.checkImagesExists(body.banners);
       const recipe = await Recipe.create({
         name: body.name,
         category: body.category,
@@ -61,17 +64,16 @@ export class RecipeController {
         ingredients: body.ingredients,
         createdBy: req.user.id,
       });
-      req.user.createdRecipes.push(recipe._id);
+      await recipe.populate('banners').execPopulate();
+      req.user.createRecipe(recipe.id);
       await req.user.save();
-      res.sendAndWrap(recipe, 'recipe');
+      res.sendAndWrap(recipe.toJSONFor(req.user), 'recipe');
     } catch (err) {
       next(err);
     }
   }
 
-  public static updateRecipe(req: Request, res: Response, next: NextFunction) {
-    const {body} = req;
-    
+  public static updateRecipe(req: Request, res: Response, next: NextFunction) {    
     req.recipe.update(req.body)
       .then((value) => res.sendAndWrap(value, 'recipe'))
       .catch(next);
@@ -79,9 +81,9 @@ export class RecipeController {
 
   public static async rateRecipe(req: Request, res: Response, next: NextFunction) {
     try {
-      const rateObj = await Rating.rate(req.payload.id, req.recipe._id, req.body.rateValue);
+      const rateObj = await Rating.rate(req.user.id, req.recipe.id, req.body.rateValue);
       const { user, recipe } = req;
-
+      console.log(recipe);
       recipe.addRating(rateObj._id);
       user.addRating(rateObj._id);
 

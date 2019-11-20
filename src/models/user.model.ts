@@ -224,15 +224,13 @@ UserSchema.methods.canEdit = function(this: IUser, doc: IRecipe | ICollection) {
 UserSchema.methods.didSaveRecipe = function(this: IUser, recipe: IRecipe) {
   return this.savedRecipes
     .findIndex(
-      (r: any ) => {
-        return r == recipe.id || r.id == recipe.id;
-      }
+      (r: any ) => r == recipe.id || r.id == recipe.id
     ) !== -1;
 };
 
 UserSchema.statics.findOneByEmailOrUsername = function(term: string) {
-  return User.findOne({ $or: [{ email: term }, { username: term }] });
+  return UserModel.findOne({ $or: [{ email: term }, { username: term }] });
 };
 
 export const UserModel = model<IUser, IUserModel>('user', UserSchema);
-export const User = UserModel;
+export {UserModel as User};

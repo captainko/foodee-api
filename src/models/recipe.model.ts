@@ -11,7 +11,7 @@ import mongooseAutoPopulate = require('mongoose-autopopulate');
 
 import { Rating, IRating } from "./rating.model";
 import { IUser } from "./user.model";
-import { IImage } from "./image.model";
+import { IImage, Image, ImageModel } from "./image.model";
 
 export interface ICategory {
   name: string;
@@ -28,7 +28,7 @@ export interface IRecipe extends Document {
   servings?: number;
   time?: number;
   tags?: string[];
-  banners?: string[];
+  banners?: Array<string|IImage>;
   image_url?: string;
   ingredients?: [{ quantity: string, ingredient: string }];
   methods?: string[];
@@ -37,20 +37,21 @@ export interface IRecipe extends Document {
   createdAt?: string;
   updatedAt?: string;
 
-  isCreatedBy: (user: string | IUser) => boolean;
-  toJSONFor: (user: IUser) => IRecipe;
-  toThumbnailFor: (user?: IUser) => IRecipe;
-  toSearchResultFor: (user?: IUser) => IRecipe;
-  addRating: (ratingId: string) => IRating;
-  updateRating: () => Promise<any>;
+  addRating(ratingId: string): IRating;
+  updateRating(): Promise<any>;
+  isCreatedBy(user: string | IUser): boolean;
+  toJSONFor(user: IUser): IRecipe;
+  toThumbnailFor(user?: IUser): IRecipe;
+  toEditObj(): IRecipe;
+  toSearchResultFor(user?: IUser): IRecipe;
 }
 
 export interface IRecipeModel extends PaginateModel<IRecipe> {
-  getNewRecipes: () => DocumentQuery<IRecipe[], IRecipe, {}>;
-  getHighRatedRecipes: () => DocumentQuery<IRecipe[], IRecipe, {}>;
-  getPublicRecipes: () => DocumentQuery<IRecipe[], IRecipe, {}>;
-  getCategories: (limit?: number) => Promise<Array<ICategory>>;
-  getRecipesByCategory: (category: string) => DocumentQuery<IRecipe[], IRecipe, {}>;
+  getRecipesByCategory(category: string): DocumentQuery<IRecipe[], IRecipe, {}>;
+  getPublicRecipes(): DocumentQuery<IRecipe[], IRecipe, {}>;
+  getCategories(limit?: number): Promise<Array<ICategory>>;
+  getNewRecipes(): DocumentQuery<IRecipe[], IRecipe, {}>;
+  getHighRatedRecipes(): DocumentQuery<IRecipe[], IRecipe, {}>;
 }
 
 export const RecipeSchema = new Schema<IRecipe>({
@@ -91,13 +92,13 @@ export const RecipeSchema = new Schema<IRecipe>({
   banners: {
     type: [{
       type: SchemaTypes.ObjectId,
-      ref: 'image'
+      ref: 'image',
+      autopopulate: true,
+      trim: true,
     }],
-    autopopulate: true,
     minlength: 1,
     maxlength: 4,
     required: true,
-    trim: true,
     // get(banners) {
     //   return banners.map(b => PATH_IMAGE + b);
     // }
@@ -168,6 +169,14 @@ export const RecipeSchema = new Schema<IRecipe>({
     }
   },
 });
+
+RecipeSchema.path('banners').validate({
+  async validator(v) {
+    return await Image.checkImagesExist(v);
+  },
+  msg: 'Image not exists'
+});
+
 RecipeSchema.plugin(mongooseAutoPopulate);
 
 RecipeSchema.virtual('image_url').get(function(this: IRecipe) {
@@ -189,7 +198,7 @@ RecipeSchema.index({
     description: 5,
     category: 7,
     tags: 6,
-    'ingredients.ingredient':  6,
+    'ingredients.ingredient': 6,
   }
 });
 
@@ -213,7 +222,6 @@ RecipeSchema.methods.toThumbnailFor = function(this: IRecipe, user?: IUser) {
 RecipeSchema.methods.toSearchResultFor = function(this: IRecipe, user?: IUser) {
   const recipe = user ? this.toJSONFor(user) : this.toJSON();
 
-  delete recipe.createdBy;
   delete recipe.banners;
   delete recipe.createdAt;
   delete recipe.createdBy;
@@ -229,13 +237,24 @@ RecipeSchema.methods.toSearchResultFor = function(this: IRecipe, user?: IUser) {
   return recipe;
 };
 
+RecipeSchema.methods.toEditObj = function(this: IRecipe) {
+  const recipe = {
+    ...this.toObject(),
+    banners: this.banners.map((x: IImage) => x.toEditObject())
+  };
+  delete recipe.createdBy;
+  delete recipe.createdAt;
+
+  return recipe;
+};
+
 RecipeSchema.methods.isCreatedBy = function(this: IRecipe, user: IUser) {
   return this.createdBy == user.id;
 };
 
 RecipeSchema.methods.toJSONFor = function(this: IRecipe, user: IUser) {
   return {
-    ... this.toObject(),
+    ... this.toJSON(),
     savedByUser: user.didSaveRecipe(this),
     createdByUser: this.isCreatedBy(user),
   };

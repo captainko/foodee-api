@@ -13,6 +13,8 @@ RecipeRouter.get('/category/:category', RecipeCtrl.getRecipesByCategory);
 RecipeRouter.get('/:recipe/', RecipeCtrl.onlyPermitted, RecipeCtrl.getRecipeByID);
 RecipeRouter.put('/:recipe/', auth.required, RecipeCtrl.onlySameUserOrAdmin, RecipeCtrl.updateRecipe);
 
+RecipeRouter.get('/:recipe/edit', auth.required, RecipeCtrl.onlySameUserOrAdmin, RecipeCtrl.getRecipeByIDToEdit);
+
 RecipeRouter.post('/:recipe/rating', auth.required, RecipeCtrl.onlyPermitted, RecipeCtrl.rateRecipe);
 RecipeRouter.post('/:recipe/save', auth.required, RecipeCtrl.onlyPermitted, RecipeCtrl.saveRecipe);
 RecipeRouter.post('/:recipe/unsave', auth.required, RecipeCtrl.onlyPermitted, RecipeCtrl.unsaveRecipe);

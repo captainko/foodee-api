@@ -7,6 +7,7 @@ export interface IImage extends Document {
   publicId: string;
   url: string;
   type: ImageType;
+  toEditObject(): IImage;
 }
 
 export const ImageSchema = new Schema({
@@ -28,7 +29,7 @@ export const ImageSchema = new Schema({
   timestamps: true,
   toJSON: {
     virtuals: true,
-    transform: (doc, ret, op) => {
+    transform: (doc, ret) => {
       delete ret._id;
       delete ret.publicId;
       delete ret.createdAt;
@@ -40,22 +41,34 @@ export const ImageSchema = new Schema({
       virtuals: true,
       transform: (doc, ret) => {
       delete ret._id;
+      delete ret.publicId;
+      delete ret.type;
       delete ret.createdAt;
       delete ret.updatedAt;
     }
   },
 });
 
+ImageSchema.methods.toJSON = function(this: IImage) {
+ return this.url;
+};
+
+ImageSchema.methods.toEditObject = function(this: IImage) {
+  return {
+    ...this.toObject(),
+  };
+ };
+
 export interface IImageModel extends Model<IImage> {
-  checkImagesExists: (images: string[]) => Promise<IImage>;
+  checkImagesExist: (images: string[]) => Promise<boolean>;
 }
 
 ImageSchema.statics.checkImagesExist = async function(this: IImage, images: string[]) {
   const imgDocs = await Promise.all(images.map(i => ImageModel.findById(i)));
   if (imgDocs.includes(null)) {
-    throw new HTTP404Error("Image not exists");
+    return false;
   }
-  return imgDocs;
+  return true;
 };
 export const ImageModel = model<IImage, IImageModel>('image', ImageSchema);
 
