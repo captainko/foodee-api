@@ -15,9 +15,11 @@ export interface ICollection extends Document, ICollectionMethods {
   recipes?: Array<string | IRecipe>;
   addRecipe(recipeId: string): ICollection;
   removeRecipe(recipeId: string): ICollection;
+  toSearchResult(): ICollection;
 }
 
 export interface ICollectionModel extends Model<ICollection> {
+  
 }
 
 export const CollectionSchema = new Schema({
@@ -91,11 +93,20 @@ CollectionSchema.methods.toSearchResult = async function(this: ICollection) {
    path: 'recipes', 
    populate: {model: 'image', path: 'banners', options: {limit: 1}}, 
    options: {limit: 1}}).execPopulate();
- console.log();
- return {
+ console.log(this.recipes);
+ const result = {
    ...this.toObject(),
-   image_url: (this.recipes[0] as IRecipe).banners[0]
  };
+ if (this.recipes.length) {
+   // @ts-ignore
+   result.image_url = this.recipes[0].image_url;
+ }
+ console.log(result);
+ delete result.createdBy;
+ delete result.createdAt;
+ delete result.recipes;
+ delete result.score;
+ return result;
 };
 
 export const CollectionModel = model<ICollection, ICollectionModel>('collection', CollectionSchema);

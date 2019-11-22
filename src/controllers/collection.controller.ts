@@ -26,6 +26,8 @@ export class CollectionController {
         if (!recipe) {
           throw new HTTP404Error('Recipe not found');
         }
+        req.recipe = recipe;
+        next();
       })
       .catch(next);
   }

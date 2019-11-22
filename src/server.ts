@@ -17,12 +17,12 @@ if (!IS_PROD) {
     });
 }
 
-https.createServer({
-    key: fs.readFileSync('./key.pem'),
-    cert: fs.readFileSync('./cert.pem'),
-    passphrase: SSL_PASSPHRASE,
-}, app).listen(SERVER_PORT);
+// https.createServer({
+//     key: fs.readFileSync('./key.pem'),
+//     cert: fs.readFileSync('./cert.pem'),
+//     passphrase: SSL_PASSPHRASE,
+// }, app).listen(SERVER_PORT);
 
-// app.listen(PORT, () => {
-//     console.log('Express server listening on port ' + PORT);
-// });
+app.listen(SERVER_PORT, () => {
+    console.log('Express server listening on port ' + SERVER_PORT);
+});

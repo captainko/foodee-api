@@ -177,10 +177,11 @@ RecipeSchema.path('banners').validate({
 });
 
 RecipeSchema.virtual('image_url').get(function(this: IRecipe) {
-  if (!this.banners) {
+  if (!this.banners.length) {
     return '';
   }
-  return this.banners[0];
+  // @ts-ignore
+  return this.banners[0].url;
 });
 
 RecipeSchema.index({

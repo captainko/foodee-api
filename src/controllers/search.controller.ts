@@ -1,12 +1,12 @@
 import { Request, Response, NextFunction } from "express-serve-static-core";
 
 import { Recipe } from "../models/recipe.model";
-
+import { Collection } from '../models/collection.model';
 export class SearchController {
 
   public static searchRecipes(req: Request, res: Response, next: NextFunction) {
     if (req.query.q.length < 3) {
-      return res.sendAndWrap({recipes: [], pages: 0, total: 0, nextPage: null}, 'paginate');
+      return res.sendAndWrap({ recipes: [], pages: 0, total: 0, nextPage: null }, 'paginate');
     }
 
     const sorts = SearchController._sorts;
@@ -53,55 +53,57 @@ export class SearchController {
         if (nextPage >= pages) {
           nextPage = null;
         }
-  
+
         recipes = recipes.map(r => r.toSearchResultFor(req.user));
         res.sendAndWrap({ nextPage, pages, total, recipes }, 'paginate');
       });
   }
 
-  public static searchCollections(req: Request, res: Response, next: NextFunction) {
-    const {
-      q = ''
-    } = req.query;
+  public static async searchCollections(req: Request, res: Response, next: NextFunction) {
+    try {
+      const {
+        q = ''
+      } = req.query;
 
-    if (req.query.q.length <= 3) {
-        return res.sendAndWrap({recipes: [], pages: 0, total: 0, nextPage: null}, 'paginate');
+      if (req.query.q.length <= 3) {
+        return res.sendAndWrap({ recipes: [], pages: 0, total: 0, nextPage: null }, 'paginate');
+      }
+      let {
+        page = 0,
+        perPage = 10,
+      } = req.query;
+      page = +page;
+      perPage = +perPage;
+
+      const queries: any = {
+        $text: {
+          $search: q,
+          $caseSensitive: false,
+        },
+      };
+
+      const project = {
+        score: { $meta: 'textScore' }
+      };
+
+      const counted$ = Collection.find(queries).countDocuments();
+      const paginated$ = Collection.find(queries, project)
+        .sort({ score: { $meta: 'textScore' } })
+        .skip(page * perPage)
+        .limit(perPage);
+
+      // tslint:disable-next-line: prefer-const
+      let [total, collections] = await Promise.all([counted$, paginated$]);
+      const pages = Math.ceil(total / perPage);
+      let nextPage = page + 1;
+      if (nextPage >= pages) {
+        nextPage = null;
+      }
+      collections = await Promise.all(collections.map(c => c.toSearchResult()));
+      res.sendAndWrap({ nextPage, pages, total, collections }, 'paginate');
+    } catch (err) {
+      next(err);
     }
-    let {
-      page = 0,
-      perPage = 10,
-    } = req.query;
-    page = +page;
-    perPage = +perPage;
-    
-    const queries: any = {
-      $text: {
-        $search: q,
-        $caseSensitive: false,
-      },
-    };
-
-    const project = {
-      score: { $meta: 'textScore' }
-    };
-
-    const counted$ = Recipe.find(queries).countDocuments();
-    const paginated$ = Recipe.find(queries, project)
-      .sort({ score: { $meta: "textScore" } })
-      .skip(page * perPage)
-      .limit(perPage);
-
-    Promise.all([counted$, paginated$])
-      .then(([total, recipes]) => {
-        const pages = Math.ceil(total / perPage);
-        let nextPage = page + 1;
-        if (nextPage >= pages) {
-          nextPage = null;
-        }
-  
-        recipes = recipes.map(r => r.toSearchResultFor(req.user));
-        res.sendAndWrap({ nextPage, pages, total, recipes }, 'paginate');
-      });
   }
 
   // tslint:disable-next-line: variable-name
