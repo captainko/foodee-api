@@ -1,5 +1,9 @@
+// lib
+import fs = require('fs');
+import https = require('https');
+// app
 import app from "./app";
-import { PORT } from "./environment";
+import { SERVER_PORT, SSL_PASSPHRASE } from "./environment";
 
 process.on("uncaughtException", e => {
     console.log(e);
@@ -11,6 +15,12 @@ process.on("unhandledRejection", e => {
     process.exit(1);
 });
 
-app.listen(PORT, () => {
-    console.log('Express server listening on port ' + PORT);
-});
+https.createServer({
+    key: fs.readFileSync('./key.pem'),
+    cert: fs.readFileSync('./cert.pem'),
+    passphrase: SSL_PASSPHRASE,
+}, app).listen(SERVER_PORT);
+
+// app.listen(PORT, () => {
+//     console.log('Express server listening on port ' + PORT);
+// });
