@@ -10,7 +10,8 @@
         "start": "npm run watch",
         "watch": "ts-node-dev --respawn --transpileOnly src/server.ts",
         "prod": "node ./dist/index.js",
-        "build": "webpack --mode production --optimize-minimize=true"
+        "build": "webpack --mode production --optimize-minimize=true",
+        "seed": "ts-node ./src/seeds"
     },
     "dependencies": {
         "cloudinary": "^1.17.0",
@@ -25,10 +26,12 @@
         "express-jwt": "^5.3.1",
         "express-session": "^1.17.0",
         "express-validator": "^6.2.0",
+        "faker": "^4.1.0",
         "jsonwebtoken": "^8.5.1",
         "method-override": "^3.0.0",
         "mongoose": "^5.7.7",
         "mongoose-autopopulate": "^0.9.1",
+        "mongoose-seed": "^0.6.0",
         "mongoose-unique-validator": "^2.0.3",
         "morgan": "^1.9.1",
         "multer": "^1.4.2",
@@ -39,6 +42,7 @@
         "passport-local": "^1.0.0"
     },
     "devDependencies": {
+        "@types/async": "^3.0.3",
         "@types/compression": "^1.0.1",
         "@types/connect-mongo": "0.0.44",
         "@types/cookie-parser": "^1.4.2",
@@ -48,8 +52,10 @@
         "@types/express": "^4.16.0",
         "@types/express-jwt": "0.0.42",
         "@types/express-session": "^1.15.15",
+        "@types/faker": "^4.1.7",
         "@types/fs-extra": "^5.0.4",
         "@types/jsonwebtoken": "^8.3.5",
+        "@types/lodash": "^4.14.149",
         "@types/method-override": "0.0.31",
         "@types/mongoose": "^5.5.23",
         "@types/morgan": "^1.7.35",

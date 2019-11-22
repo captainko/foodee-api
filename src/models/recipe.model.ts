@@ -3,15 +3,14 @@ import {
   model,
   Document,
   SchemaTypes,
-  PaginateModel,
   DocumentQuery,
+  Model,
 } from "mongoose";
-import mongoosePagination = require('mongoose-paginate');
 import mongooseAutoPopulate = require('mongoose-autopopulate');
 
 import { Rating, IRating } from "./rating.model";
 import { IUser } from "./user.model";
-import { IImage, Image, ImageModel } from "./image.model";
+import { IImage, Image } from "./image.model";
 
 export interface ICategory {
   name: string;
@@ -46,7 +45,7 @@ export interface IRecipe extends Document {
   toSearchResultFor(user?: IUser): IRecipe;
 }
 
-export interface IRecipeModel extends PaginateModel<IRecipe> {
+export interface IRecipeModel extends Model<IRecipe> {
   getRecipesByCategory(category: string): DocumentQuery<IRecipe[], IRecipe, {}>;
   getPublicRecipes(): DocumentQuery<IRecipe[], IRecipe, {}>;
   getCategories(limit?: number): Promise<Array<ICategory>>;
@@ -77,6 +76,8 @@ export const RecipeSchema = new Schema<IRecipe>({
   },
   servings: {
     type: Number,
+    min: 1,
+    max: 16,
     required: [true, 'is required'],
   },
   time: {

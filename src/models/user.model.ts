@@ -58,7 +58,7 @@ export const UserSchema = new Schema<IUser>({
   username: {
     type: String,
     required: [true, 'is required'],
-    match: [/^[a-zA-Z0-9]+$/, 'is invalid'],
+    match: [/^[a-zA-Z0-9]+$/, 'includes special characters.'],
     unique: true,
     trim: true,
     index: true,
@@ -78,7 +78,10 @@ export const UserSchema = new Schema<IUser>({
     required: true,
     default: false,
   },
-  image_url: String,
+  image_url: {
+    type: SchemaTypes.ObjectId,
+    ref: 'image',
+  },
   createdRecipes: {
     type: [{
       type: SchemaTypes.ObjectId,

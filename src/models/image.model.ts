@@ -13,7 +13,7 @@ export interface IImage extends Document {
 export const ImageSchema = new Schema({
   publicId: {
     type: String,
-    required: [true, 'is required'],
+    // required: [fa, 'is required'],
   },
   url: {
     type: String,
