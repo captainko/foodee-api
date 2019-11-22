@@ -10,17 +10,15 @@ RecipeRouter.delete('/', RecipeCtrl.removeAll);
 RecipeRouter.post('/', auth.required, RecipeCtrl.createRecipe);
 
 RecipeRouter.get('/category/:category', RecipeCtrl.getRecipesByCategory);
-RecipeRouter.get('/:recipe/', RecipeCtrl.onlyPermitted, RecipeCtrl.getRecipeByID);
+RecipeRouter.get('/:recipe/', RecipeCtrl.getRecipeByID);
 RecipeRouter.put('/:recipe/', auth.required, RecipeCtrl.onlySameUserOrAdmin, RecipeCtrl.updateRecipe);
 
 RecipeRouter.get('/:recipe/edit', auth.required, RecipeCtrl.onlySameUserOrAdmin, RecipeCtrl.getRecipeByIDToEdit);
 
-RecipeRouter.post('/:recipe/rating', auth.required, RecipeCtrl.onlyPermitted, RecipeCtrl.rateRecipe);
-RecipeRouter.post('/:recipe/save', auth.required, RecipeCtrl.onlyPermitted, RecipeCtrl.saveRecipe);
-RecipeRouter.post('/:recipe/unsave', auth.required, RecipeCtrl.onlyPermitted, RecipeCtrl.unsaveRecipe);
+RecipeRouter.post('/:recipe/rating', auth.required, RecipeCtrl.rateRecipe);
+RecipeRouter.post('/:recipe/save', auth.required, RecipeCtrl.saveRecipe);
+RecipeRouter.post('/:recipe/unsave', auth.required, RecipeCtrl.unsaveRecipe);
 
 RecipeRouter.delete('/:recipe/', auth.required, RecipeCtrl.onlySameUserOrAdmin, RecipeController.deleteRecipe);
-
-RecipeRouter.delete('');
 
 export { RecipeRouter };

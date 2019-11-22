@@ -5,9 +5,10 @@ import {
   SchemaTypes,
   DocumentQuery,
   Model,
+  PaginateModel,
 } from "mongoose";
 import mongooseAutoPopulate = require('mongoose-autopopulate');
-
+import mongoosePaginate = require('mongoose-paginate');
 import { Rating, IRating } from "./rating.model";
 import { IUser } from "./user.model";
 import { IImage, Image } from "./image.model";
@@ -45,9 +46,8 @@ export interface IRecipe extends Document {
   toSearchResultFor(user?: IUser): IRecipe;
 }
 
-export interface IRecipeModel extends Model<IRecipe> {
+export interface IRecipeModel extends PaginateModel<IRecipe> {
   getRecipesByCategory(category: string): DocumentQuery<IRecipe[], IRecipe, {}>;
-  getPublicRecipes(): DocumentQuery<IRecipe[], IRecipe, {}>;
   getCategories(limit?: number): Promise<Array<ICategory>>;
   getNewRecipes(): DocumentQuery<IRecipe[], IRecipe, {}>;
   getHighRatedRecipes(): DocumentQuery<IRecipe[], IRecipe, {}>;
@@ -68,11 +68,6 @@ export const RecipeSchema = new Schema<IRecipe>({
   description: {
     type: String,
     trim: [true, 'is required'],
-  },
-  status: {
-    type: Boolean,
-    default: true,
-    required: [true, 'is required'],
   },
   servings: {
     type: Number,
@@ -171,14 +166,15 @@ export const RecipeSchema = new Schema<IRecipe>({
   },
 });
 
+RecipeSchema.plugin(mongoosePaginate);
+RecipeSchema.plugin(mongooseAutoPopulate);
+
 RecipeSchema.path('banners').validate({
   async validator(v) {
     return await Image.checkImagesExist(v);
   },
   msg: 'Image not exists'
 });
-
-RecipeSchema.plugin(mongooseAutoPopulate);
 
 RecipeSchema.virtual('image_url').get(function(this: IRecipe) {
   if (!this.banners) {
@@ -313,22 +309,16 @@ RecipeSchema.statics.getCategories = async function(limit: number = null) {
   return categories;
 };
 
-RecipeSchema.statics.getPublicRecipes = function() {
-  return Recipe.where('status', true);
-};
-
 RecipeSchema.statics.getNewRecipes = function() {
-  return Recipe.getPublicRecipes().sort('-createdAt');
-
-  //  return Recipe.find().sort('-createdAt');
+  return Recipe.find().sort('-createdAt');
 };
 
 RecipeSchema.statics.getHighRatedRecipes = function() {
-  return Recipe.getPublicRecipes().sort({ "rating.total": -1, "rating.avg": -1 });
+  return Recipe.find().sort({ "rating.total": -1, "rating.avg": -1 });
 };
 
 RecipeSchema.statics.getRecipesByCategory = function(category: string) {
-  return Recipe.getPublicRecipes().find({ category });
+  return Recipe.find({ category });
 };
 
 // RecipeSchema.pre("remove", async function(this: IRecipe) {

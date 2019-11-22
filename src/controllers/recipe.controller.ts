@@ -4,7 +4,6 @@ import { Recipe } from "../models/recipe.model";
 import { Rating } from "../models/rating.model";
 import { HTTP404Error, HTTP403Error } from "../util/httpErrors";
 import { checkIfExists } from "../util";
-import { ImageModel } from "../models/image.model";
 
 export class RecipeController {
 
@@ -28,8 +27,15 @@ export class RecipeController {
   }
 
   public static getRecipesByCategory(req: Request, res: Response, next: NextFunction) {
+    const {
+      perPage = 10,
+      page = 0,
+    } = req.query;
     Recipe.paginate({
       category: req.params.category
+    }, {
+      limit: perPage,
+      offset: page,
     }).then(x => res.sendAndWrap(x))
       .catch(next);
   }
@@ -60,7 +66,6 @@ export class RecipeController {
         banners: body.banners,
         time: body.time,
         servings: body.servings,
-        status: body.status,
         ingredients: body.ingredients,
         createdBy: req.user.id,
       });
