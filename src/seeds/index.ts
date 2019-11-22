@@ -168,7 +168,7 @@ new Promise((res) => {
         }
       ], (err, results) => { console.log(err); done(); });
     }), (err, result) => res(result));
-  });
+  }, );
  
 }).then((value) => {
   console.log(value);
