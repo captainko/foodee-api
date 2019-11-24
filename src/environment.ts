@@ -3,7 +3,8 @@ dotenv.config();
 
 export const { 
   NODE_ENV = 'production',
-  PORT: SERVER_PORT = 4500,
+  SERVER_PORT = 4500,
+  WEB_PORT = 80,
   DB_URI,
   JWT_SECRET = 'secret',
   SESSION_SECRET = 'foodee-api',

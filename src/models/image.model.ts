@@ -1,4 +1,4 @@
-import { Schema, model, SchemaTypes, Document, Model } from 'mongoose';
+import { Schema, model, Document, Model, SchemaDefinition } from 'mongoose';
 import { HTTP404Error } from '../util/httpErrors';
 
 type ImageType = 'profile' | 'recipe';
@@ -10,10 +10,9 @@ export interface IImage extends Document {
   toEditObject(): IImage;
 }
 
-export const ImageSchema = new Schema({
+export const ImageFields: SchemaDefinition = {
   publicId: {
     type: String,
-    // required: [fa, 'is required'],
   },
   url: {
     type: String,
@@ -22,25 +21,27 @@ export const ImageSchema = new Schema({
   type: {
     type: String,
     enum: ['profile', 'recipe'],
-    required: true
+    required: true,
   }
-}, {
+};
+
+export const ImageSchema = new Schema(ImageFields, {
   versionKey: false,
   timestamps: true,
   toJSON: {
     virtuals: true,
     transform: (doc, ret) => {
-      delete ret._id;
+      // delete ret._id;
       delete ret.publicId;
       delete ret.createdAt;
       delete ret.updatedAt;
       delete ret.type;
-    } 
+    }
   },
   toObject: {
-      virtuals: true,
-      transform: (doc, ret) => {
-      delete ret._id;
+    virtuals: true,
+    transform: (doc, ret) => {
+      // delete ret._id;
       delete ret.publicId;
       delete ret.type;
       delete ret.createdAt;
@@ -50,14 +51,14 @@ export const ImageSchema = new Schema({
 });
 
 ImageSchema.methods.toJSON = function(this: IImage) {
- return this.url;
+  return this.url;
 };
 
 ImageSchema.methods.toEditObject = function(this: IImage) {
   return {
     ...this.toObject(),
   };
- };
+};
 
 export interface IImageModel extends Model<IImage> {
   checkImagesExist: (images: string[]) => Promise<boolean>;
@@ -70,6 +71,6 @@ ImageSchema.statics.checkImagesExist = async function(this: IImage, images: stri
   }
   return true;
 };
-export const ImageModel = model<IImage, IImageModel>('image', ImageSchema);
+export const ImageModel = model<IImage, IImageModel>('image', ImageSchema, 'images');
 
-export {ImageModel as Image};
+export { ImageModel as Image };

@@ -1,5 +1,5 @@
 // lib
-import { Document, Model, model, Schema, SchemaTypes } from "mongoose";
+import { Document, Model, model, Schema, SchemaTypes, SchemaDefinition } from "mongoose";
 
 // app
 import { IUser } from "./user.model";
@@ -19,26 +19,22 @@ export interface ICollection extends Document, ICollectionMethods {
 }
 
 export interface ICollectionModel extends Model<ICollection> {
-  
+
 }
 
-export const CollectionSchema = new Schema({
+export const CollectionFields = {
   name: {
     type: String,
     minlength: 1,
     maxlength: 50,
     required: [true, ' is required'],
+
   },
   createdBy: {
     type: SchemaTypes.ObjectId,
     ref: 'user',
     required: true,
   },
-  // image_url: {
-  //   type: SchemaTypes.ObjectId,
-  //   ref: 'image',
-  //   required: [true, ' is required']
-  // },
   recipes: {
     type: [{
       type: SchemaTypes.ObjectId,
@@ -46,26 +42,30 @@ export const CollectionSchema = new Schema({
     }],
     default: [],
   },
-}, {
-  versionKey: false,
-  timestamps: true,
-  toJSON: {
-    virtuals: true,
-    transform: (doc, ret) => {
-      delete ret._id;
-      delete ret.image;
-      delete ret.updatedAt;
-    }
-  },
-  toObject: {
-    virtuals: true,
-    transform: (doc, ret) => {
-      delete ret._id;
-      delete ret.image;
-      delete ret.updatedAt;
-    }
-  },
-});
+};
+
+export const CollectionSchema = new Schema(
+  CollectionFields,
+  {
+    versionKey: false,
+    timestamps: true,
+    toJSON: {
+      virtuals: true,
+      transform: (doc, ret) => {
+        delete ret._id;
+        delete ret.image;
+        delete ret.updatedAt;
+      }
+    },
+    toObject: {
+      virtuals: true,
+      transform: (doc, ret) => {
+        delete ret._id;
+        delete ret.image;
+        delete ret.updatedAt;
+      }
+    },
+  });
 
 CollectionSchema.index({
   name: 'text',
@@ -89,24 +89,25 @@ CollectionSchema.methods.removeRecipe = function(this: ICollection, recipeId: st
 };
 
 CollectionSchema.methods.toSearchResult = async function(this: ICollection) {
- await this.populate({
-   path: 'recipes', 
-   populate: {model: 'image', path: 'banners', options: {limit: 1}}, 
-   options: {limit: 1}}).execPopulate();
- console.log(this.recipes);
- const result = {
-   ...this.toObject(),
- };
- if (this.recipes.length) {
-   // @ts-ignore
-   result.image_url = this.recipes[0].image_url;
- }
- console.log(result);
- delete result.createdBy;
- delete result.createdAt;
- delete result.recipes;
- delete result.score;
- return result;
+  await this.populate({
+    path: 'recipes',
+    populate: { model: 'image', path: 'banners', options: { limit: 1 } },
+    options: { limit: 1 }
+  }).execPopulate();
+  console.log(this.recipes);
+  const result = {
+    ...this.toObject(),
+  };
+  if (this.recipes.length) {
+    // @ts-ignore
+    result.image_url = this.recipes[0].image_url;
+  }
+  console.log(result);
+  delete result.createdBy;
+  delete result.createdAt;
+  delete result.recipes;
+  delete result.score;
+  return result;
 };
 
 export const CollectionModel = model<ICollection, ICollectionModel>('collection', CollectionSchema);

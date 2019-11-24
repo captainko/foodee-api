@@ -6,8 +6,7 @@ export interface IRating extends Document {
   userId?: string;
   rateValue?: number;
 }
-
-export const RatingSchema = new Schema({
+export const RatingFields = {
   recipeId: {
     type: SchemaTypes.ObjectId,
     ref: 'recipe',
@@ -24,23 +23,27 @@ export const RatingSchema = new Schema({
     min: 1,
     max: 5,
   },
-}, {
-  toJSON: {
-    virtuals: true,
-    transform: (doc, ret) => {
-      // ret.id = ret._id;
-      delete ret._id;
-      delete ret.ratings;
+};
+
+export const RatingSchema = new Schema(
+  RatingFields,
+  {
+    toJSON: {
+      virtuals: true,
+      transform: (doc, ret) => {
+        // ret.id = ret._id;
+        delete ret._id;
+        delete ret.ratings;
+      },
     },
-  },
-  toObject: {
-    virtuals: true,
-    transform: (doc, ret) => {
-      // ret.id = ret._id;
-      delete ret._id;
+    toObject: {
+      virtuals: true,
+      transform: (doc, ret) => {
+        // ret.id = ret._id;
+        delete ret._id;
+      }
     }
-  }
-});
+  });
 
 export interface IRatingModel extends Model<IRating> {
   rate: (userId: string, recipeId: string, rateValue: number) => Promise<IRating>;
@@ -69,13 +72,17 @@ export interface IRatingResult extends Document {
     totalRating: number;
   };
 }
-export const RatingResultSchema = new Schema({
+
+export const RatingResultFields = {
   _id: {
     type: Schema.Types.ObjectId,
     ref: 'recipe',
   },
   avgRating: Number
-}, {
+};
+
+export const RatingResultSchema = new Schema(
+  RatingResultFields, {
   timestamps: false,
   versionKey: false,
 });
