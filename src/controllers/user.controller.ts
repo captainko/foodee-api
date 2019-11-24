@@ -7,6 +7,8 @@ import jwt = require("jsonwebtoken");
 // app
 import { User, IUser } from "../models/user.model";
 import { GMAIL_USER, GMAIL_PASS, EMAIL_SECRET } from "../environment";
+import { Image } from "../models/image.model";
+import { HTTP422Error } from "../util/httpErrors";
 
 export class UserController {
   public static addUser(req: Request, res: Response, next: NextFunction) {
@@ -40,16 +42,14 @@ export class UserController {
   }
 
   public static async verify(req: Request, res: Response, next: NextFunction) {
-      try {
-        const decoded = jwt.verify(req.params.token, EMAIL_SECRET) as any;
-        console.log(decoded);
-        await User.updateOne({_id: decoded.user}, {isVerified: true});
-        res.send("Email is verified");
-
-      } catch (e) {
-        res.send("Error");
-      }
-    
+    try {
+      const decoded = jwt.verify(req.params.token, EMAIL_SECRET) as any;
+      console.log(decoded);
+      await User.updateOne({ _id: decoded.user }, { isVerified: true });
+      res.send("Email is verified");
+    } catch (e) {
+      res.send("Error");
+    }
   }
 
   public static login(req: Request, res: Response, next: NextFunction) {
@@ -84,23 +84,60 @@ export class UserController {
     return res.sendAndWrap(req.user.toAuthJSON(), 'user');
   }
 
-  public static updateUser(req: Request, res: Response, next: NextFunction) {
+  public static async updateUser(req: Request, res: Response, next: NextFunction) {
+    try {
+      // tslint:disable-next-line
+      let { body, user } = req;
 
-    const { body, user } = req;
+      if (body.username) {
+        user.username = body.username;
+      }
 
-    if (body.username) {
-      user.username = body.username;
-    }
-    if (body.email) {
-      user.email = body.email;
-    }
-    if (body.password) {
-      user.setPassword(body.password);
-    }
+      if (body.email) {
+        user.email = body.email;
+      }
 
-    return user.save().then(() => {
+      if (body.password) {
+        user.setPassword(body.password);
+      }
+
+      if (body.image) {
+        const isFound = await Image.checkImagesExist([body.image]);
+        if (!isFound) {
+          throw new HTTP422Error("Image not exists");
+        }
+        user.image_url = body.image;
+      }
+
+      user = await user.save();
+
       return res.sendAndWrap(user.toAuthJSON(), 'user');
-    }).catch(next);
+
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  public static forgotPassword(req: Request, res: Response, next) {
+    
+  }
+
+  public static getSavedRecipes(req: Request, res: Response, next: NextFunction) {
+    // return res.sendAndWrap(req.user.populate('recipes').)
+    req.user.populate('savedRecipes').execPopulate()
+      .then((user) => {
+        res.sendAndWrap(user.savedRecipes.toJSONFor(user), 'recipes');
+      })
+      .catch(next);
+  }
+
+  public static getCreatedRecipes(req: Request, res: Response, next: NextFunction) {
+    // return res.sendAndWrap(req.user.populate('recipes').)
+    req.user.populate('createdRecipes').execPopulate()
+      .then((user) => {
+        res.sendAndWrap(user.createdRecipes.toJSONFor(user), 'recipes');
+      })
+      .catch(next);
   }
 }
 

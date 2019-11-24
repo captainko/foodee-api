@@ -9,6 +9,7 @@ UserRouter
   .get('/confirmation/:token', UserController.verify)
   .put('/', auth.required, UserController.updateUser)
   .post('/signup', UserController.addUser)
-  .post('/login', UserController.login);
+  .post('/login', UserController.login)
+  .post('/forgot', UserController.forgotPassword);
 
 export { UserRouter };

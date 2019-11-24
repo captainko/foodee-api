@@ -9,4 +9,9 @@ export class CategoryController {
     }).catch(next);
   }
  
+  // public static getCategoriesByName(req: Request, res: Response, next: NextFunction) {
+  //   Recipe.getRecipesByCategory(req.query.category)
+  //     .then(x => res.sendAndWrap(x, 'recipes'))
+  //     .catch(next);
+  // }
 }

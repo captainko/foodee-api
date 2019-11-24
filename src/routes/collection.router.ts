@@ -11,7 +11,7 @@ router.all('*')
   .param('recipe', CollectionCtrl.preloadRecipe);
 router.post('/', auth.required, CollectionCtrl.createCollection);
 
-router.get('/:collection', auth.required, CollectionCtrl.onlySameUserOrAdmin, CollectionCtrl.getCollection);
+router.get('/:collection', auth.required, CollectionCtrl.getCollection);
 router.post('/:collection', auth.required, CollectionCtrl.onlySameUserOrAdmin, CollectionCtrl.updateCollection);
 router.post('/:collection/add/:recipe', auth.required, CollectionCtrl.onlySameUserOrAdmin, CollectionCtrl.addRecipe);
 // tslint:disable-next-line: max-line-length

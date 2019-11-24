@@ -14,6 +14,7 @@
         "seed": "ts-node ./src/seeds"
     },
     "dependencies": {
+        "@types/mongoose-paginate": "^5.0.8",
         "cloudinary": "^1.17.0",
         "compression": "^1.7.4",
         "connect-mongo": "^3.1.0",
@@ -31,6 +32,7 @@
         "method-override": "^3.0.0",
         "mongoose": "^5.7.7",
         "mongoose-autopopulate": "^0.9.1",
+        "mongoose-paginate": "^5.0.3",
         "mongoose-seed": "^0.6.0",
         "mongoose-unique-validator": "^2.0.3",
         "morgan": "^1.9.1",
