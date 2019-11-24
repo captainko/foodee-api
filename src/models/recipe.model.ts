@@ -314,15 +314,15 @@ RecipeSchema.statics.getCategories = async function(limit: number = null) {
 };
 
 RecipeSchema.statics.getNewRecipes = function() {
-  return Recipe.find().sort('-createdAt');
+  return Recipe.find({}, {}, {autopopulate: false}).sort('-createdAt');
 };
 
 RecipeSchema.statics.getHighRatedRecipes = function() {
-  return Recipe.find().sort({ "rating.total": -1, "rating.avg": -1 });
+  return  Recipe.find({}, {}, {autopopulate: false}).sort({ "rating.total": -1, "rating.avg": -1 });
 };
 
 RecipeSchema.statics.getRecipesByCategory = function(category: string) {
-  return Recipe.find({ category });
+  return Recipe.find({ category }, {}, {autopopulate: false});
 };
 
 // RecipeSchema.pre("remove", async function(this: IRecipe) {
