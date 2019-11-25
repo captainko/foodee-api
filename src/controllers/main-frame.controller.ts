@@ -8,7 +8,7 @@ export class MainFrameController {
     const recipeFields = "id name image_url rating banners createdBy";
 
     // tslint:disable-next-line: max-line-length
-    const newRecipes$ = await Recipe.getNewRecipes().select(recipeFields).limit(20).then(x => x.toThumbnailFor(user));
+    const newRecipes$ = Recipe.getNewRecipes().select(recipeFields).limit(20).then(x => x.toThumbnailFor(user));
     // tslint:disable-next-line: max-line-length
     const highRatedRecipes$ = Recipe.getHighRatedRecipes().select(recipeFields).limit(20).then(x => x.toThumbnailFor(user));
     const categories$ = Recipe.getCategories(5);
