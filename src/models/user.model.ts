@@ -54,7 +54,7 @@ export interface IUserModel extends Model<IUser> {
   findOneByEmailOrUsername(term: string): DocumentQuery<IUser, IUser, {}>;
 }
 
-export const UserSchema = new Schema<IUser>({
+export const UserFields = {
   username: {
     type: String,
     required: [true, 'is required'],
@@ -86,13 +86,15 @@ export const UserSchema = new Schema<IUser>({
     type: [{
       type: SchemaTypes.ObjectId,
       ref: 'recipe'
-    }]
+    }],
+    default: [],
   },
   savedRecipes: {
     type: [{
       type: SchemaTypes.ObjectId,
       ref: 'recipe',
-    }]
+    }],
+    default: [],
   },
   ratings: {
     type: [{
@@ -105,10 +107,15 @@ export const UserSchema = new Schema<IUser>({
       type: SchemaTypes.ObjectId,
       ref: 'collection',
     }],
+    default: [],
   },
   hash: String,
   salt: String,
-}, {
+};
+
+export const UserSchema = new Schema<IUser>(
+  UserFields, 
+  {
   versionKey: false,
   timestamps: true,
   toJSON: {

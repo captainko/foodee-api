@@ -3,19 +3,20 @@ import fs = require('fs');
 import https = require('https');
 // app
 import app from "./app";
-import { SERVER_PORT, SSL_PASSPHRASE, IS_PROD } from "./environment";
+import admin from './admin';
+import { SERVER_PORT, SSL_PASSPHRASE, IS_PROD, WEB_PORT } from "./environment";
 
-if (!IS_PROD) {
-    process.on("uncaughtException", e => {
-        console.log(e);
-        process.exit(1);
-    });
+// if (!IS_PROD) {
+//     process.on("uncaughtException", e => {
+//         console.log(e);
+//         process.exit(1);
+//     });
     
-    process.on("unhandledRejection", e => {
-        console.log(e);
-        process.exit(1);
-    });
-}
+//     process.on("unhandledRejection", e => {
+//         console.log(e);
+//         process.exit(1);
+//     });
+// }
 
 // https.createServer({
 //     key: fs.readFileSync('./key.pem'),
@@ -25,4 +26,8 @@ if (!IS_PROD) {
 
 app.listen(SERVER_PORT, () => {
     console.log('Express server listening on port ' + SERVER_PORT);
+});
+
+admin.listen(WEB_PORT, () => {
+    console.log('Admin server listening on port ' + WEB_PORT);
 });

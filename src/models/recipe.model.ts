@@ -53,7 +53,7 @@ export interface IRecipeModel extends PaginateModel<IRecipe> {
   getHighRatedRecipes(): DocumentQuery<IRecipe[], IRecipe, {}>;
 }
 
-export const RecipeSchema = new Schema<IRecipe>({
+export const RecipeFields = {
   name: {
     type: String,
     required: [true, 'is required'],
@@ -141,7 +141,10 @@ export const RecipeSchema = new Schema<IRecipe>({
     trim: true,
     lowercase: true,
   }
-}, {
+};
+
+export const RecipeSchema = new Schema<IRecipe>(
+  RecipeFields, {
   versionKey: false,
   timestamps: true,
   toJSON: {
