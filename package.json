@@ -14,7 +14,8 @@
         "seed": "ts-node ./src/seeds"
     },
     "dependencies": {
-        "@types/mongoose-paginate": "^5.0.8",
+        "@types/jest": "^24.0.23",
+        "@types/mocha": "^5.2.7",
         "admin-bro": "^1.4.2",
         "admin-bro-expressjs": "^0.3.0",
         "admin-bro-mongoose": "^0.3.0",
@@ -64,6 +65,7 @@
         "@types/lodash": "^4.14.149",
         "@types/method-override": "0.0.31",
         "@types/mongoose": "^5.5.32",
+        "@types/mongoose-paginate": "^5.0.8",
         "@types/morgan": "^1.7.35",
         "@types/multer": "^1.3.10",
         "@types/node": "^10.17.5",
