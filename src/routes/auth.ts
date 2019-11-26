@@ -14,7 +14,6 @@ import { Request, Response, NextFunction } from 'express';
 
 export const auth = {
   required(req: Request, res: Response, next: NextFunction) {
-    console.log('lol');
     if (req.isUnauthenticated()) {
       throw new jwt.UnauthorizedError("credentials_required", {message: 'Unauthorized'});
     }

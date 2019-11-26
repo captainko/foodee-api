@@ -11,7 +11,7 @@ import {
   IS_PROD,
 } from "./environment";
 
-import { UserResource, ImageResource, RecipeResource, RatingResource, RatingResultResource, CollectionResource } from './admin-src/resources';
+import { UserResource, ImageResource, RecipeResource, RatingResource, RatingResultResource, CollectionResource } from './web/resources';
 import { UserModel, RatingResultModel } from "./models";
 AdminBro.registerAdapter(require('admin-bro-mongoose'));
 

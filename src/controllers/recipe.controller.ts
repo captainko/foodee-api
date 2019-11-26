@@ -9,7 +9,7 @@ export class RecipeController {
 
   public static preloadRecipe(req: Request, res: Response, next, id: string) {
     Recipe
-      .findById(id, {},  {autopopulate: false})
+      .findById(id, {}, { autopopulate: false })
       .then((recipe) => {
         if (!recipe) {
           throw new HTTP404Error();
@@ -44,20 +44,21 @@ export class RecipeController {
     req.recipe.populate('createdBy', 'username')
       .execPopulate()
       .then(x => {
-          if (req.isAuthenticated()) {
-            x = x.toJSONFor(req.user);
-          }
-          res.sendAndWrap(x);
-        })
+        if (req.isAuthenticated()) {
+          x = x.toJSONFor(req.user);
+        }
+        res.sendAndWrap(x);
+      })
       .catch(next);
   }
 
-  public static getRecipeByIDToEdit({recipe}: Request, res: Response, next: NextFunction) {
-   res.sendAndWrap(recipe.toEditObj(), "recipe");
+  public static async getRecipeByIDToEdit({ recipe }: Request, res: Response, next: NextFunction) {
+    recipe = await recipe.populate('banners').execPopulate();
+    res.sendAndWrap(recipe.toEditObj(), "recipe");
   }
 
   public static async createRecipe(req: Request, res: Response, next: NextFunction) {
-    const {body} = req;
+    const { body } = req;
     try {
       const recipe = await Recipe.create({
         name: body.name,
@@ -78,7 +79,9 @@ export class RecipeController {
     }
   }
 
-  public static updateRecipe(req: Request, res: Response, next: NextFunction) {    
+  public static updateRecipe(req: Request, res: Response, next: NextFunction) {
+    req.body.createdBy = req.user.id;
+    console.log(req.body);
     req.recipe.update(req.body)
       .then((value) => res.sendAndWrap(value, 'recipe'))
       .catch(next);
@@ -123,14 +126,14 @@ export class RecipeController {
     }
   }
 
-  public static async deleteRecipe({user, recipe}: Request, res: Response, next: NextFunction) {
+  public static async deleteRecipe({ user, recipe }: Request, res: Response, next: NextFunction) {
     try {
       // user.deleteRecipe(recipe.id);
-     await recipe.remove();
+      await recipe.remove();
     } catch (err) {
       next(err);
-    }  
-}
+    }
+  }
 
   public static onlySameUserOrAdmin(req: Request, res: Response, next: NextFunction) {
     if (req.isUnauthenticated()) {

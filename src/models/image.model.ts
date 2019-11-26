@@ -41,7 +41,7 @@ export const ImageSchema = new Schema(ImageFields, {
   toObject: {
     virtuals: true,
     transform: (doc, ret) => {
-      // delete ret._id;
+      delete ret._id;
       delete ret.publicId;
       delete ret.type;
       delete ret.createdAt;

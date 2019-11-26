@@ -239,6 +239,7 @@ RecipeSchema.methods.toSearchResultFor = function(this: IRecipe, user?: IUser) {
 };
 
 RecipeSchema.methods.toEditObj = function(this: IRecipe) {
+  console.log(this.banners);
   const recipe = {
     ...this.toObject(),
     banners: this.banners.map((x: IImage) => x.toEditObject())
