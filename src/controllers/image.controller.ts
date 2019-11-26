@@ -13,7 +13,7 @@ export class ImageController {
         url: file.secure_url,
         type: 'recipe'
       });
-      res.sendAndWrap(image, "image");
+      res.sendAndWrap(image.toEditObject(), "image");
     } catch (err) {
       next(err);
     }
