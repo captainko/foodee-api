@@ -40,16 +40,16 @@ export class RecipeController {
       .catch(next);
   }
 
-  public static getRecipeByID(req: Request, res: Response, next: NextFunction) {
-    req.recipe.populate('createdBy', 'username')
-      .execPopulate()
-      .then(x => {
-        if (req.isAuthenticated()) {
-          x = x.toJSONFor(req.user);
-        }
-        res.sendAndWrap(x);
-      })
-      .catch(next);
+  public static async getRecipeByID({recipe, user}: Request, res: Response, next: NextFunction) {
+    try {
+      await Promise.all([
+        recipe.populateBanners(),
+        recipe.populateUser(),
+      ]);
+      res.sendAndWrap(recipe.toJSONFor(user));
+    } catch (err) {
+      next(err);
+    }
   }
 
   public static async getRecipeByIDToEdit({ recipe }: Request, res: Response, next: NextFunction) {
@@ -87,6 +87,12 @@ export class RecipeController {
       .catch(next);
   }
 
+  public static removeRecipe(req: Request, res: Response, next: NextFunction) {
+    req.recipe.remove()
+      .then(() => res.sendMessage("Deleted"))
+      .catch(next);
+  }
+
   public static async rateRecipe(req: Request, res: Response, next: NextFunction) {
     try {
       const rateObj = await Rating.rate(req.user.id, req.recipe.id, req.body.rateValue);
@@ -120,7 +126,7 @@ export class RecipeController {
     try {
       req.user.unsaveRecipe(req.recipe);
       await req.user.save();
-      res.sendMessage('remove successfully');
+      res.sendMessage("unsaved successfully");
     } catch (err) {
       next(err);
     }
@@ -128,8 +134,9 @@ export class RecipeController {
 
   public static async deleteRecipe({ user, recipe }: Request, res: Response, next: NextFunction) {
     try {
-      // user.deleteRecipe(recipe.id);
       await recipe.remove();
+      res.sendMessage('removed successfully');
+
     } catch (err) {
       next(err);
     }

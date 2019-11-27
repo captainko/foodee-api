@@ -6,6 +6,7 @@ declare global {
     to(key: ToSomething, something: any): T[];
     toJSONFor(something: any): T[];
     toThumbnailFor(something: any): T[];
+    toSearchResult(): Promise<T[]>;
   }
 }
 
@@ -28,4 +29,11 @@ Array.prototype.toJSONFor = function(this: any[], something) {
   return this.to("toJSONFor", something);
 };
 
+Array.prototype.toSearchResult = async function(this: any[]) {
+  const $result = [];
+  for (const v of this) { 
+    $result[$result.length] =  v.toSearchResult();
+  }
+  return Promise.all($result);
+};
 // ~Array

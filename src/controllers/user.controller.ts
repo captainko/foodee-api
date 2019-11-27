@@ -119,25 +119,32 @@ export class UserController {
   }
 
   public static forgotPassword(req: Request, res: Response, next) {
-    
+
   }
 
   public static getSavedRecipes(req: Request, res: Response, next: NextFunction) {
-    // return res.sendAndWrap(req.user.populate('recipes').)
     req.user.populate('savedRecipes').execPopulate()
       .then((user) => {
-        res.sendAndWrap(user.savedRecipes.toJSONFor(user), 'recipes');
+        res.sendAndWrap(user.savedRecipes.toThumbnailFor(user), 'recipes');
       })
       .catch(next);
   }
 
   public static getCreatedRecipes(req: Request, res: Response, next: NextFunction) {
-    // return res.sendAndWrap(req.user.populate('recipes').)
     req.user.populate('createdRecipes').execPopulate()
       .then((user) => {
-        res.sendAndWrap(user.createdRecipes.toJSONFor(user), 'recipes');
+        res.sendAndWrap(user.createdRecipes.toThumbnailFor(user), 'recipes');
       })
       .catch(next);
+  }
+
+  public static async getCreatedCollections(req: Request, res: Response, next: NextFunction) {
+    try {
+      await req.user.populate('collections').execPopulate();
+      res.sendAndWrap(await req.user.collections.toSearchResult());
+    } catch (err) {
+      next(err);
+    }
   }
 }
 

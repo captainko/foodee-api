@@ -9,8 +9,8 @@
         "ts-node-dev": "ts-node-dev",
         "start": "npm run watch",
         "watch": "ts-node-dev --respawn --transpileOnly src/server.ts",
-        "prod": "node ./dist/index.js",
-        "build": "webpack --display-error-details --mode production --optimize-minimize=true",
+        "prod": "node ./dist/server.js",
+        "build": "tsc",
         "seed": "ts-node ./src/seeds"
     },
     "dependencies": {

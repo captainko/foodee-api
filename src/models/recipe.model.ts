@@ -10,8 +10,9 @@ import {
 import mongooseAutoPopulate = require('mongoose-autopopulate');
 import mongoosePaginate = require('mongoose-paginate');
 import { Rating, IRating } from "./rating.model";
-import { IUser } from "./user.model";
+import { IUser, User } from "./user.model";
 import { IImage, Image } from "./image.model";
+import { Collection } from './collection.model';
 
 export interface ICategory {
   name: string;
@@ -28,7 +29,7 @@ export interface IRecipe extends Document {
   servings?: number;
   time?: number;
   tags?: string[];
-  banners?: Array<string|IImage>;
+  banners?: Array<string | IImage>;
   image_url?: string;
   ingredients?: [{ quantity: string, ingredient: string }];
   methods?: string[];
@@ -44,6 +45,8 @@ export interface IRecipe extends Document {
   toThumbnailFor(user?: IUser): IRecipe;
   toEditObj(): IRecipe;
   toSearchResultFor(user?: IUser): IRecipe;
+  populateBanners(): Promise<IRecipe>;
+  populateUser(): Promise<IRecipe>;
 }
 
 export interface IRecipeModel extends PaginateModel<IRecipe> {
@@ -239,27 +242,33 @@ RecipeSchema.methods.toSearchResultFor = function(this: IRecipe, user?: IUser) {
 };
 
 RecipeSchema.methods.toEditObj = function(this: IRecipe) {
-  console.log(this.banners);
   const recipe = {
     ...this.toObject(),
     banners: this.banners.map((x: IImage) => x.toEditObject())
   };
   delete recipe.createdBy;
   delete recipe.createdAt;
-
+  delete recipe.rating;
+  delete recipe.image_url;
   return recipe;
 };
 
 RecipeSchema.methods.isCreatedBy = function(this: IRecipe, user: IUser) {
+  if (!user) { return false; }
   return this.createdBy == user.id;
 };
 
 RecipeSchema.methods.toJSONFor = function(this: IRecipe, user: IUser) {
-  return {
+  const result = {
     ... this.toJSON(),
-    savedByUser: user.didSaveRecipe(this),
-    createdByUser: this.isCreatedBy(user),
+    savedByUser: false,
+    createdByUser: false,
   };
+  if (user) {
+    result.savedByUser = user.didSaveRecipe(this);
+    result.createdByUser = this.isCreatedBy(user);
+  }
+  return result; 
 };
 
 RecipeSchema.methods.updateRating = async function(this: IRecipe) {
@@ -280,6 +289,16 @@ RecipeSchema.methods.updateRating = async function(this: IRecipe) {
   delete results[0]._id;
   this.rating = results[0];
   return await this.save();
+};
+
+RecipeSchema.methods.populateUser = async function(this: IRecipe) {
+    await this.populate('createdBy', 'username').execPopulate();
+    return this;
+};
+
+RecipeSchema.methods.populateBanners = async function(this: IRecipe) {
+  await this.populate('banners').execPopulate();
+  return this;
 };
 
 RecipeSchema.methods.addRating = function(this: IRecipe, ratingId: string) {
@@ -319,18 +338,34 @@ RecipeSchema.statics.getNewRecipes = function() {
 };
 
 RecipeSchema.statics.getHighRatedRecipes = function() {
-  return  Recipe.find().sort({ "rating.total": -1, "rating.avg": -1 });
+  return Recipe.find().sort({ "rating.total": -1, "rating.avg": -1 });
 };
 
 RecipeSchema.statics.getRecipesByCategory = function(category: string) {
   return Recipe.find({ category });
 };
 
-// RecipeSchema.pre("remove", async function(this: IRecipe) {
-//   const users$ = User.find({ savedRecipes: { $contains: this.id } });
-//   const collections$ = Collection.find({ recipes: { $contains: this.id } });
+RecipeSchema.post("remove", function(this: IRecipe) {
+  console.log(typeof this._id);
+  User.updateMany({
+    $or: [
+      { createdRecipes: { $in: [this.id] } },
+      { savedRecipes: { $in: [this.id] } }
+    ]}, {
+    $pull: {
+      createdRecipes: this._id,
+      savedRecipes: this._id,
+    }
+  }).then(console.log);
 
-// });
+  Collection.updateMany({ recipes: { $in: [this.id] } }, {
+    $pull: {
+      recipes: this._id,
+    }
+  }).then(console.log);
+
+  Rating.deleteMany({ recipeId: { $in: [this.id] } }).then(console.log);
+});
 
 export const RecipeModel = model<IRecipe, IRecipeModel>('recipe', RecipeSchema);
 
