@@ -42,14 +42,25 @@ export class CollectionController {
       
       await user.createCollection(collection.id).save();
 
-      res.sendMessage('created successfully');
+      res.sendAndWrap(collection, 'collection');
     } catch (err) {
       next(err);
     }
   }
 
-  public static getCollection({ collection }: Request, res: Response) {
-    return res.sendAndWrap(collection, 'collection');
+  public static async getCollection({ collection, user }: Request, res: Response, next: NextFunction) {
+    // collection.populate('recipes').execPopulate()
+    //   .then(c => res.sendAndWrap(c.toSearchResult(), 'collection'))
+    //   .catch(next);
+try {
+  collection = await collection.populate('recipes').execPopulate();
+  const result = await collection.toDetailFor(user);
+  res.sendAndWrap(result, 'collection');
+} catch (err) {
+  next(err);
+}
+
+    // return res.sendAndWrap(collection, 'collection');
   }
 
   public static updateCollection(req: Request, res: Response, next: NextFunction) {

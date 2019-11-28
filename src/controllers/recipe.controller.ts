@@ -9,7 +9,7 @@ export class RecipeController {
 
   public static preloadRecipe(req: Request, res: Response, next, id: string) {
     Recipe
-      .findById(id, {},  {autopopulate: false})
+      .findById(id, {}, { autopopulate: false })
       .then((recipe) => {
         if (!recipe) {
           throw new HTTP404Error();
@@ -40,24 +40,25 @@ export class RecipeController {
       .catch(next);
   }
 
-  public static getRecipeByID(req: Request, res: Response, next: NextFunction) {
-    req.recipe.populate('createdBy', 'username')
-      .execPopulate()
-      .then(x => {
-          if (req.isAuthenticated()) {
-            x = x.toJSONFor(req.user);
-          }
-          res.sendAndWrap(x);
-        })
-      .catch(next);
+  public static async getRecipeByID({recipe, user}: Request, res: Response, next: NextFunction) {
+    try {
+      await Promise.all([
+        recipe.populateBanners(),
+        recipe.populateUser(),
+      ]);
+      res.sendAndWrap(recipe.toJSONFor(user));
+    } catch (err) {
+      next(err);
+    }
   }
 
-  public static getRecipeByIDToEdit({recipe}: Request, res: Response, next: NextFunction) {
-   res.sendAndWrap(recipe.toEditObj(), "recipe");
+  public static async getRecipeByIDToEdit({ recipe }: Request, res: Response, next: NextFunction) {
+    recipe = await recipe.populate('banners').execPopulate();
+    res.sendAndWrap(recipe.toEditObj(), "recipe");
   }
 
   public static async createRecipe(req: Request, res: Response, next: NextFunction) {
-    const {body} = req;
+    const { body } = req;
     try {
       const recipe = await Recipe.create({
         name: body.name,
@@ -78,9 +79,17 @@ export class RecipeController {
     }
   }
 
-  public static updateRecipe(req: Request, res: Response, next: NextFunction) {    
+  public static updateRecipe(req: Request, res: Response, next: NextFunction) {
+    req.body.createdBy = req.user.id;
+    console.log(req.body);
     req.recipe.update(req.body)
       .then((value) => res.sendAndWrap(value, 'recipe'))
+      .catch(next);
+  }
+
+  public static removeRecipe(req: Request, res: Response, next: NextFunction) {
+    req.recipe.remove()
+      .then(() => res.sendMessage("Deleted"))
       .catch(next);
   }
 
@@ -117,20 +126,21 @@ export class RecipeController {
     try {
       req.user.unsaveRecipe(req.recipe);
       await req.user.save();
-      res.sendMessage('remove successfully');
+      res.sendMessage("unsaved successfully");
     } catch (err) {
       next(err);
     }
   }
 
-  public static async deleteRecipe({user, recipe}: Request, res: Response, next: NextFunction) {
+  public static async deleteRecipe({ user, recipe }: Request, res: Response, next: NextFunction) {
     try {
-      // user.deleteRecipe(recipe.id);
-     await recipe.remove();
+      await recipe.remove();
+      res.sendMessage('removed successfully');
+
     } catch (err) {
       next(err);
-    }  
-}
+    }
+  }
 
   public static onlySameUserOrAdmin(req: Request, res: Response, next: NextFunction) {
     if (req.isUnauthenticated()) {

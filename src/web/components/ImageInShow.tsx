@@ -1,15 +1,15 @@
 
 import React from 'react';
-import { PropertyInShow, Label } from "admin-bro";
+import { Label } from "admin-bro";
 
 const ImageInShow = (props) => {
   const { url } = props.record.params;
   console.log(props);
-  
+
   return (
     <>
-    <Label>Image</Label>
-    <img src={url} />
+      <Label>Image</Label>
+      <img src={url} />
     </>
   );
 };
