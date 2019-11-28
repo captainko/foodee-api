@@ -62,7 +62,7 @@ const users: IUserData[] = [
           category:'Cake',
           description:'Diana shows you how to bake a perfect sponge cake with a creamy passion fruit filling',
           servings:8,
-          tags:['cake'],
+          tags:['Cake'],
           time:60,
           ingredients:[
             {quantity:'175g / 6oz',ingredient:'self-raising flour'},
