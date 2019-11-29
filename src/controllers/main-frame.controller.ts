@@ -4,29 +4,40 @@ import { IUser } from "../models/user.model";
 
 export class MainFrameController {
   public static async getMainFrame(req: Request, res: Response, next: NextFunction) {
-    let { user } = req;
-    const recipeFields = "id name image_url rating banners createdBy";
+    try {
 
-    // tslint:disable-next-line: max-line-length
-    const newRecipes$ = Recipe.getNewRecipes().select(recipeFields).limit(20).then(x => x.toThumbnailFor(user));
-    // tslint:disable-next-line: max-line-length
-    const highRatedRecipes$ = Recipe.getHighRatedRecipes().select(recipeFields).limit(20).then(x => x.toThumbnailFor(user));
-    const categories$ = Recipe.getCategories(5);
+      let { user } = req;
+      const recipeFields = "id name image_url rating banners createdBy";
 
-    const lists = await Promise.all([newRecipes$, highRatedRecipes$, categories$]).catch(next);
-    const mainFrame = {
-      newRecipes: lists[0],
-      highRatedRecipes: lists[1],
-      categories: lists[2],
-    };
-    if (req.isAuthenticated()) {
-      user = await user.populate('savedRecipes', recipeFields).populate('createdRecipes', recipeFields).execPopulate();
-      // @ts-ignore
-      mainFrame.savedRecipes = user.savedRecipes.toThumbnailFor(user);
-      // @ts-ignore
-      mainFrame.createdRecipes = user.createdRecipes.toThumbnailFor(user);
+      // tslint:disable-next-line: max-line-length
+      const newRecipes$ = Recipe.getNewRecipes().select(recipeFields).limit(20).then(x => x.toThumbnailFor(user));
+      // tslint:disable-next-line: max-line-length
+      const highRatedRecipes$ = Recipe.getHighRatedRecipes().select(recipeFields).limit(20).then(x => x.toThumbnailFor(user));
+      const recommendRecipes$ = await Recipe.getRecommendRecipes();
+        // .then(x => x.toThumbnailFor(user));
+      const categories$ = Recipe.getCategories(5);
+
+      const lists = await Promise.all([newRecipes$, highRatedRecipes$, recommendRecipes$, categories$]);
+      const mainFrame = {
+        newRecipes: lists[0],
+        highRatedRecipes: lists[1],
+        recommendRecipes: lists[2],
+        categories: lists[3],
+      };
+      console.log(mainFrame.recommendRecipes[0].toJSON());
+      if (req.isAuthenticated()) {
+        user = await user
+          .populate('savedRecipes', recipeFields)
+          .populate('createdRecipes', recipeFields).execPopulate();
+        // @ts-ignore
+        mainFrame.savedRecipes = user.savedRecipes.toThumbnailFor(user);
+        // @ts-ignore
+        mainFrame.createdRecipes = user.createdRecipes.toThumbnailFor(user);
+      }
+      res.sendAndWrap(mainFrame, 'mainFrame');
+    } catch (err) {
+      next(err);
     }
-    res.sendAndWrap(mainFrame, 'mainFrame');
   }
 
 }

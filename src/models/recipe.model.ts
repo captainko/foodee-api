@@ -6,6 +6,7 @@ import {
   DocumentQuery,
   Model,
   PaginateModel,
+  Aggregate,
 } from "mongoose";
 import mongooseAutoPopulate = require('mongoose-autopopulate');
 import mongoosePaginate = require('mongoose-paginate');
@@ -54,6 +55,7 @@ export interface IRecipeModel extends PaginateModel<IRecipe> {
   getCategories(limit?: number): Promise<Array<ICategory>>;
   getNewRecipes(): DocumentQuery<IRecipe[], IRecipe, {}>;
   getHighRatedRecipes(): DocumentQuery<IRecipe[], IRecipe, {}>;
+  getRecommendRecipes(): Aggregate<IRecipe[]>;
 }
 
 export const RecipeFields = {
@@ -268,7 +270,7 @@ RecipeSchema.methods.toJSONFor = function(this: IRecipe, user: IUser) {
     result.savedByUser = user.didSaveRecipe(this);
     result.createdByUser = this.isCreatedBy(user);
   }
-  return result; 
+  return result;
 };
 
 RecipeSchema.methods.updateRating = async function(this: IRecipe) {
@@ -292,8 +294,8 @@ RecipeSchema.methods.updateRating = async function(this: IRecipe) {
 };
 
 RecipeSchema.methods.populateUser = async function(this: IRecipe) {
-    await this.populate('createdBy', 'username').execPopulate();
-    return this;
+  await this.populate('createdBy', 'username').execPopulate();
+  return this;
 };
 
 RecipeSchema.methods.populateBanners = async function(this: IRecipe) {
@@ -325,11 +327,9 @@ RecipeSchema.statics.getCategories = async function(limit: number = 10) {
         image_url: { $first: { $arrayElemAt: ["$banners", 0] } },
       }, // ~$group
     },
-    {
-      $limit: limit,
-    }
+    { $sample: { size: limit } }
   ]);
-  await Image.populate(categories, {path: 'image_url'});
+  await Image.populate(categories, { path: 'image_url' });
   return categories;
 };
 
@@ -345,13 +345,18 @@ RecipeSchema.statics.getRecipesByCategory = function(category: string) {
   return Recipe.find({ category });
 };
 
+RecipeSchema.statics.getRecommendRecipes = function(limit = 20) {
+  return Recipe.aggregate([{$sample: {size: limit }}]);
+};
+
 RecipeSchema.post("remove", function(this: IRecipe) {
   console.log(typeof this._id);
   User.updateMany({
     $or: [
       { createdRecipes: { $in: [this.id] } },
       { savedRecipes: { $in: [this.id] } }
-    ]}, {
+    ]
+  }, {
     $pull: {
       createdRecipes: this._id,
       savedRecipes: this._id,
