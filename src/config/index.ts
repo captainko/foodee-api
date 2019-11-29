@@ -1,8 +1,10 @@
 import * as passport from "passport";
 import * as passportLocal from "passport-local";
+import { Strategy as JwtStrategy, ExtractJwt } from "passport-jwt";
 import express = require("express");
 import { User } from "../models/user.model";
 import "./extends";
+import { JWT_SECRET } from "../environment";
 
 // express
 express.response.sendAndWrap = function(obj, key = 'data') {
@@ -27,13 +29,14 @@ express.response.sendError = function(error: any) {
           res[key] = element.message;
         }
       }
-    } else
+    } else {
       res = error.toString();
+    }
   } else {
-    res = error
+    res = error;
   }
   return this.sendAndWrap(res, 'error');
-}
+};
 
 // ~express
 
@@ -48,7 +51,30 @@ passport.deserializeUser((id, done) => {
   });
 });
 
+const jwtOptions = {  
+  // Telling Passport to check authorization headers for JWT
+  jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+  // Telling Passport where to find the secret
+  secretOrKey: JWT_SECRET,
+  passReqToCallback: true,
+};
+
+const jwtLogin = new JwtStrategy(jwtOptions, function(req, payload, done) {
+  User.findById(payload.id, function(err, user) {
+    if (err) { return done(err, false); }
+
+    if (user) {
+      req.user = user; // <= Add this line
+      done(null, user);
+    } else {
+      done(null, false);
+    }
+  });
+});
+passport.use(jwtLogin);
+
 const LocalStrategy = passportLocal.Strategy;
+
 passport.use(new LocalStrategy({
   usernameField: 'email',
   passwordField: 'password',

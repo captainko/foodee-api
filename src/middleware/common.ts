@@ -8,11 +8,13 @@ import session = require("express-session");
 import bodyParser = require("body-parser");
 import logger = require('morgan');
 import * as connectMongo from 'connect-mongo';
+import * as jsonwebtoken from "jsonwebtoken";
 const MongoStore = connectMongo(session);
 
 // app
-import { IS_PROD, SESSION_SECRET, DB_URI } from "../environment";
+import { IS_PROD, SESSION_SECRET, DB_URI, JWT_SECRET } from "../environment";
 import passport = require("passport");
+import { User } from "../models/user.model";
 
 type Handle = (router: Router) => void;
 
@@ -54,5 +56,34 @@ export const handleSession: Handle = (router) => {
 
 export const handlePassportSession: Handle = (router) => {
   router.use(passport.initialize());
-  router.use(passport.session());
+  router.use(function(req, res, next) {
+    if (req.headers && req.headers.authorization) {
+      const [type, token] = req.headers.authorization.split(' ');
+      if (type === 'Bearer') {
+        jsonwebtoken.verify(token, JWT_SECRET, function(err, decode: any) {
+          if (err) { 
+            req.user = undefined; 
+            next();
+          } else {
+             User.findById(decode.id).then(user => {
+               req.user = user;
+               next();
+             });
+          }
+          
+        });
+      } else {
+        req.user = undefined;
+        next();  
+      }
+    } else {
+      req.user = undefined;
+      next();
+    }
+  });
+  // router.use(passport.session());
 };
+
+// export const handleUpload: Handle = (router) => {
+//   router.use(cloudinaryConfig);
+// };

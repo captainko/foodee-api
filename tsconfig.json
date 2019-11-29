@@ -7,7 +7,7 @@
         "noUnusedLocals": false,
         "noUnusedParameters": false,
         "moduleResolution": "node",
-        "target": "es6",
+        "target": "esnext",
         "outDir": "dist",
         "sourceMap": false,
         "declaration": true,
@@ -15,7 +15,9 @@
             "es2017.object",
             "es2015",
             "es2017"
-        ]
+        ],
+        "jsx": "react",
+        "removeComments": true,
     },
     "moduleResolution": "node",
     "sourceMap": true,
@@ -24,5 +26,8 @@
     "watch": true,
     "include": [
         "src/**/*"
+    ],
+    "exclude": [
+        "node_modules"
     ]
 }

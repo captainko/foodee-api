@@ -22,6 +22,7 @@
         "no-string-literal": [false],
         "no-shadowed-variable":false,
         "no-empty-interface":false,
+        "no-angle-bracket-type-assertion":false,
         "triple-equals":false,
         "arrow-parens":false,
         "max-classes-per-file":false

@@ -36,6 +36,7 @@ export interface IUserMethods {
 export interface IUser extends Document, IUserMethods {
   id: string;
   username?: string;
+  isVerified?: boolean;
   admin?: boolean;
   email?: string;
   image_url?: string;
@@ -53,11 +54,11 @@ export interface IUserModel extends Model<IUser> {
   findOneByEmailOrUsername(term: string): DocumentQuery<IUser, IUser, {}>;
 }
 
-export const UserSchema = new Schema<IUser>({
+export const UserFields = {
   username: {
     type: String,
     required: [true, 'is required'],
-    match: [/^[a-zA-Z0-9]+$/, 'is invalid'],
+    match: [/^[a-zA-Z0-9]+$/, 'includes special characters.'],
     unique: true,
     trim: true,
     index: true,
@@ -71,23 +72,29 @@ export const UserSchema = new Schema<IUser>({
     match: [/\S+@\S+\.\S+/, 'is invalid'],
     index: true,
   },
+  isVerified: { type: Boolean, default: false },
   admin: {
     type: Boolean,
     required: true,
     default: false,
   },
-  image_url: String,
+  image_url: {
+    type: SchemaTypes.ObjectId,
+    ref: 'image',
+  },
   createdRecipes: {
     type: [{
       type: SchemaTypes.ObjectId,
       ref: 'recipe'
-    }]
+    }],
+    default: [],
   },
   savedRecipes: {
     type: [{
       type: SchemaTypes.ObjectId,
       ref: 'recipe',
-    }]
+    }],
+    default: [],
   },
   ratings: {
     type: [{
@@ -100,10 +107,15 @@ export const UserSchema = new Schema<IUser>({
       type: SchemaTypes.ObjectId,
       ref: 'collection',
     }],
+    default: [],
   },
   hash: String,
   salt: String,
-}, {
+};
+
+export const UserSchema = new Schema<IUser>(
+  UserFields, 
+  {
   versionKey: false,
   timestamps: true,
   toJSON: {
@@ -130,7 +142,7 @@ UserSchema.methods.addRating = function(this: IUser, ratingId: string) {
 };
 
 UserSchema.methods.saveRecipe = function(this: IUser, recipe: IRecipe) {
-
+  console.log(this);
   if (!this.didSaveRecipe(recipe)) {
     this.savedRecipes.unshift(recipe.id);
   }
@@ -191,12 +203,11 @@ UserSchema.methods.generateJWT = function(this: IUser) {
   const today = new Date();
   const exp = new Date(today);
   exp.setDate(today.getDate() + 60);
-
+  
   return jwt.sign({
     id: this._id,
     username: this.username,
     exp: Math.floor(exp.getTime() / 1000),
-
   }, JWT_SECRET);
 };
 
@@ -223,15 +234,13 @@ UserSchema.methods.canEdit = function(this: IUser, doc: IRecipe | ICollection) {
 UserSchema.methods.didSaveRecipe = function(this: IUser, recipe: IRecipe) {
   return this.savedRecipes
     .findIndex(
-      (r: any ) => {
-        return r == recipe.id || r.id == recipe.id;
-      }
+      (r: any ) => r == recipe.id || r.id == recipe.id
     ) !== -1;
 };
 
 UserSchema.statics.findOneByEmailOrUsername = function(term: string) {
-  return User.findOne({ $or: [{ email: term }, { username: term }] });
+  return UserModel.findOne({ $or: [{ email: term }, { username: term }] });
 };
 
 export const UserModel = model<IUser, IUserModel>('user', UserSchema);
-export const User = UserModel;
+export {UserModel as User};

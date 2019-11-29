@@ -2,9 +2,9 @@ import {
   handleCors,
   handleCookies,
   handleBodyRequest,
-  handleSession,
   handleCompression,
   handlePassportSession,
+  // handleUpload,
 } from "./common";
 
 export default [
@@ -12,6 +12,7 @@ export default [
   handleCompression,
   handleCookies,
   handleBodyRequest,
-  handleSession,
+  // handleSession,
   handlePassportSession,
+  // handleUpload,
 ];

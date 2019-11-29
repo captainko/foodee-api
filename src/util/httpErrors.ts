@@ -5,7 +5,6 @@ export abstract class HTTPClientError extends Error {
   public readonly name!: string;
 
   constructor(message: object | string) {
-    console.log('lol',message);
     if (message instanceof Object) {
       super(JSON.stringify(message));
     } else {

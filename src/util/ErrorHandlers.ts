@@ -9,7 +9,6 @@ export const notFoundError = () => {
 };
 
 export const validationError = (err: Error, res: Response, next: NextFunction) => {
-  console.log(err.message);
   if (err instanceof ValidationError || err instanceof CastError) {
     res.status(422).sendError(err);
   } else {

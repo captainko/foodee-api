@@ -2,6 +2,6 @@ node_modules/
 dist/
 .tscache/
 package-lock.json
-# .env
-./src/uploads/
 data/
+.env
+./src/uploads/

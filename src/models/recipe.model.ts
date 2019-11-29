@@ -3,14 +3,17 @@ import {
   model,
   Document,
   SchemaTypes,
-  PaginateModel,
   DocumentQuery,
-  Collection
+  Model,
+  PaginateModel,
+  Aggregate,
 } from "mongoose";
-import mongoosePagination = require('mongoose-paginate');
+import mongooseAutoPopulate = require('mongoose-autopopulate');
+import mongoosePaginate = require('mongoose-paginate');
 import { Rating, IRating } from "./rating.model";
 import { IUser, User } from "./user.model";
-import { PATH_IMAGE } from "../environment";
+import { IImage, Image } from "./image.model";
+import { Collection } from './collection.model';
 
 export interface ICategory {
   name: string;
@@ -27,7 +30,7 @@ export interface IRecipe extends Document {
   servings?: number;
   time?: number;
   tags?: string[];
-  banners?: string[];
+  banners?: Array<string | IImage>;
   image_url?: string;
   ingredients?: [{ quantity: string, ingredient: string }];
   methods?: string[];
@@ -36,23 +39,26 @@ export interface IRecipe extends Document {
   createdAt?: string;
   updatedAt?: string;
 
-  isCreatedBy: (user: string | IUser) => boolean;
-  toJSONFor: (user: IUser) => IRecipe;
-  toThumbnailFor: (user?: IUser) => IRecipe;
-  toSearchResultFor: (user?: IUser) => IRecipe;
-  addRating: (ratingId: string) => IRating;
-  updateRating: () => Promise<any>;
+  addRating(ratingId: string): IRating;
+  updateRating(): Promise<any>;
+  isCreatedBy(user: string | IUser): boolean;
+  toJSONFor(user: IUser): IRecipe;
+  toThumbnailFor(user?: IUser): IRecipe;
+  toEditObj(): IRecipe;
+  toSearchResultFor(user?: IUser): IRecipe;
+  populateBanners(): Promise<IRecipe>;
+  populateUser(): Promise<IRecipe>;
 }
 
 export interface IRecipeModel extends PaginateModel<IRecipe> {
-  getNewRecipes: () => DocumentQuery<IRecipe[], IRecipe, {}>;
-  getHighRatedRecipes: () => DocumentQuery<IRecipe[], IRecipe, {}>;
-  getPublicRecipes: () => DocumentQuery<IRecipe[], IRecipe, {}>;
-  getCategories: (limit?: number) => Promise<Array<ICategory>>;
-  getRecipesByCategory: (category: string) => DocumentQuery<IRecipe[], IRecipe, {}>;
+  getRecipesByCategory(category: string): DocumentQuery<IRecipe[], IRecipe, {}>;
+  getCategories(limit?: number): Promise<Array<ICategory>>;
+  getNewRecipes(): DocumentQuery<IRecipe[], IRecipe, {}>;
+  getHighRatedRecipes(): DocumentQuery<IRecipe[], IRecipe, {}>;
+  getRecommendRecipes(): Aggregate<IRecipe[]>;
 }
 
-export const RecipeSchema = new Schema<IRecipe>({
+export const RecipeFields = {
   name: {
     type: String,
     required: [true, 'is required'],
@@ -61,21 +67,17 @@ export const RecipeSchema = new Schema<IRecipe>({
   category: {
     type: String,
     lowercase: true,
-    unique: true,
     trim: true,
     required: [true, 'is required'],
   },
   description: {
     type: String,
-    trim: true,
-  },
-  status: {
-    type: Boolean,
-    default: true,
-    required: [true, 'is required'],
+    trim: [true, 'is required'],
   },
   servings: {
     type: Number,
+    min: 1,
+    max: 16,
     required: [true, 'is required'],
   },
   time: {
@@ -89,14 +91,18 @@ export const RecipeSchema = new Schema<IRecipe>({
     required: [true, 'is required'],
   },
   banners: {
-    type: [String],
+    type: [{
+      type: SchemaTypes.ObjectId,
+      ref: 'image',
+      autopopulate: true,
+      trim: true,
+    }],
     minlength: 1,
     maxlength: 4,
     required: true,
-    trim: true,
-    get(banners) {
-      return banners.map(b => PATH_IMAGE + b);
-    }
+    // get(banners) {
+    //   return banners.map(b => PATH_IMAGE + b);
+    // }
   },
   ingredients: {
     type: [{
@@ -140,7 +146,10 @@ export const RecipeSchema = new Schema<IRecipe>({
     trim: true,
     lowercase: true,
   }
-}, {
+};
+
+export const RecipeSchema = new Schema<IRecipe>(
+  RecipeFields, {
   versionKey: false,
   timestamps: true,
   toJSON: {
@@ -164,13 +173,23 @@ export const RecipeSchema = new Schema<IRecipe>({
     }
   },
 });
-RecipeSchema.plugin(mongoosePagination);
+
+RecipeSchema.plugin(mongoosePaginate);
+RecipeSchema.plugin(mongooseAutoPopulate);
+
+RecipeSchema.path('banners').validate({
+  async validator(v) {
+    return await Image.checkImagesExist(v);
+  },
+  msg: 'Image not exists'
+});
 
 RecipeSchema.virtual('image_url').get(function(this: IRecipe) {
-  if (!this.banners) {
+  if (!this.banners.length) {
     return '';
   }
-  return this.banners[0];
+  // @ts-ignore
+  return this.banners[0].url;
 });
 
 RecipeSchema.index({
@@ -185,7 +204,7 @@ RecipeSchema.index({
     description: 5,
     category: 7,
     tags: 6,
-    'ingredients.ingredient':  6,
+    'ingredients.ingredient': 6,
   }
 });
 
@@ -209,7 +228,6 @@ RecipeSchema.methods.toThumbnailFor = function(this: IRecipe, user?: IUser) {
 RecipeSchema.methods.toSearchResultFor = function(this: IRecipe, user?: IUser) {
   const recipe = user ? this.toJSONFor(user) : this.toJSON();
 
-  delete recipe.createdBy;
   delete recipe.banners;
   delete recipe.createdAt;
   delete recipe.createdBy;
@@ -225,16 +243,34 @@ RecipeSchema.methods.toSearchResultFor = function(this: IRecipe, user?: IUser) {
   return recipe;
 };
 
+RecipeSchema.methods.toEditObj = function(this: IRecipe) {
+  const recipe = {
+    ...this.toObject(),
+    banners: this.banners.map((x: IImage) => x.toEditObject())
+  };
+  delete recipe.createdBy;
+  delete recipe.createdAt;
+  delete recipe.rating;
+  delete recipe.image_url;
+  return recipe;
+};
+
 RecipeSchema.methods.isCreatedBy = function(this: IRecipe, user: IUser) {
+  if (!user) { return false; }
   return this.createdBy == user.id;
 };
 
 RecipeSchema.methods.toJSONFor = function(this: IRecipe, user: IUser) {
-  return {
-    ... this.toObject(),
-    savedByUser: user.didSaveRecipe(this),
-    createdByUser: this.isCreatedBy(user),
+  const result = {
+    ... this.toJSON(),
+    savedByUser: false,
+    createdByUser: false,
   };
+  if (user) {
+    result.savedByUser = user.didSaveRecipe(this);
+    result.createdByUser = this.isCreatedBy(user);
+  }
+  return result;
 };
 
 RecipeSchema.methods.updateRating = async function(this: IRecipe) {
@@ -257,6 +293,16 @@ RecipeSchema.methods.updateRating = async function(this: IRecipe) {
   return await this.save();
 };
 
+RecipeSchema.methods.populateUser = async function(this: IRecipe) {
+  await this.populate('createdBy', 'username').execPopulate();
+  return this;
+};
+
+RecipeSchema.methods.populateBanners = async function(this: IRecipe) {
+  await this.populate('banners').execPopulate();
+  return this;
+};
+
 RecipeSchema.methods.addRating = function(this: IRecipe, ratingId: string) {
   if (!this.ratings.includes(ratingId)) {
     this.ratings.push(ratingId);
@@ -265,53 +311,66 @@ RecipeSchema.methods.addRating = function(this: IRecipe, ratingId: string) {
   return this;
 };
 
-RecipeSchema.statics.getCategories = async function(limit: number = null) {
+RecipeSchema.statics.getCategories = async function(limit: number = 10) {
   const categories = await Recipe.aggregate([
-    {
-      $match: {
-        status: true,
-        category: { $ne: null }
-      }
-    },
+    // {
+    //   $match: {
+    //     category: { $ne: null }
+    //   }
+    // },
     {
       $group: {
         // _id: { $ifNull: ["$category", "Unknown"] },
         _id: "$category",
         total: { $sum: 1 },
         // should change to first in product
-        image_url: { $last: { $arrayElemAt: ["$banners", 0] } },
+        image_url: { $first: { $arrayElemAt: ["$banners", 0] } },
       }, // ~$group
     },
-    // {
-    //   $limit: limit,
-    // }
+    { $sample: { size: limit } }
   ]);
+  await Image.populate(categories, { path: 'image_url' });
   return categories;
 };
 
-RecipeSchema.statics.getPublicRecipes = function() {
-  return Recipe.where('status', true);
-};
-
 RecipeSchema.statics.getNewRecipes = function() {
-  return Recipe.getPublicRecipes().sort('-createdAt');
-
-  //  return Recipe.find().sort('-createdAt');
+  return Recipe.find().sort('-createdAt');
 };
 
 RecipeSchema.statics.getHighRatedRecipes = function() {
-  return Recipe.getPublicRecipes().sort({ "rating.total": -1, "rating.avg": -1 });
+  return Recipe.find().sort({ "rating.total": -1, "rating.avg": -1 });
 };
 
 RecipeSchema.statics.getRecipesByCategory = function(category: string) {
-  return Recipe.getPublicRecipes().find({ category });
+  return Recipe.find({ category });
 };
 
-// RecipeSchema.pre("remove", async function(this: IRecipe) {
-//   const users$ = User.find({ savedRecipes: { $contains: this.id } });
-//   const collections$ = Collection.find({ recipes: { $contains: this.id } });
+RecipeSchema.statics.getRecommendRecipes = function(limit = 20) {
+  return Recipe.aggregate([{$sample: {size: limit }}]);
+};
 
-// });
+RecipeSchema.post("remove", function(this: IRecipe) {
+  console.log(typeof this._id);
+  User.updateMany({
+    $or: [
+      { createdRecipes: { $in: [this.id] } },
+      { savedRecipes: { $in: [this.id] } }
+    ]
+  }, {
+    $pull: {
+      createdRecipes: this._id,
+      savedRecipes: this._id,
+    }
+  }).then(console.log);
+
+  Collection.updateMany({ recipes: { $in: [this.id] } }, {
+    $pull: {
+      recipes: this._id,
+    }
+  }).then(console.log);
+
+  Rating.deleteMany({ recipeId: { $in: [this.id] } }).then(console.log);
+});
 
 export const RecipeModel = model<IRecipe, IRecipeModel>('recipe', RecipeSchema);
 

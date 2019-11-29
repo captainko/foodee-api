@@ -1,10 +1,10 @@
 import { Router } from "express";
 import { SearchController } from "../controllers/search.controller";
-import { auth } from "./auth";
 
 const SearchRouter = Router();
 
 SearchRouter
-  .get('/recipe', auth.optional, SearchController.searchRecipes);
+  .get('/recipe', SearchController.searchRecipes)
+  .get('/collection', SearchController.searchCollections); 
 
 export { SearchRouter };

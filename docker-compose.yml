@@ -6,15 +6,14 @@ services:
     build: .
     ports:
       - '4500:4500'
-    volumes:
-      - ./uploads:/src/public/uploads
+      - '80:80'
     networks:
       - foodee-net
   mongo:
     container_name: mongo
     image: mongo
     volumes: 
-      - ./data/:/data/db
+      - mongodata:
     networks:
       foodee-net:
 volumes:
