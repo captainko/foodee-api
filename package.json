@@ -14,7 +14,6 @@
         "seed": "ts-node ./src/seeds"
     },
     "dependencies": {
-        
         "admin-bro": "^1.4.2",
         "admin-bro-expressjs": "^0.3.0",
         "admin-bro-mongoose": "^0.3.0",
@@ -33,7 +32,6 @@
         "express-session": "^1.17.0",
         "express-validator": "^6.3.0",
         "faker": "^4.1.0",
-        
         "jsonwebtoken": "^8.5.1",
         "method-override": "^3.0.0",
         "mongoose": "^5.7.12",
@@ -85,7 +83,6 @@
         "gulp-uglify": "^3.0.2",
         "gulp-wait": "0.0.2",
         "del": "^5.1.0",
-
         "babel-cli": "^6.26.0",
         "babel-core": "^6.26.3",
         "browser-sync": "^2.26.7",
