@@ -24,7 +24,7 @@ export class MainFrameController {
         recommendRecipes: lists[2],
         categories: lists[3],
       };
-      console.log(mainFrame.recommendRecipes[0].toJSON());
+      // console.log(mainFrame.recommendRecipes[0].toJSON());
       if (req.isAuthenticated()) {
         user = await user
           .populate('savedRecipes', recipeFields)
