@@ -4,3 +4,4 @@ dist/
 package-lock.json
 # .env
 ./src/uploads/
+data/

@@ -6,15 +6,19 @@ services:
     build: .
     ports:
       - '4500:4500'
-    links:
-      - mongo
+    volumes:
+      - ./uploads:/src/public/uploads
+    networks:
+      - foodee-net
   mongo:
     container_name: mongo
     image: mongo
     volumes: 
-      - mongodata:/data/db
-    ports:
-      - '27017:27017'
+      - ./data/:/data/db
+    networks:
+      foodee-net:
 volumes:
   mongodata:
     driver: local
+networks:
+  foodee-net:
