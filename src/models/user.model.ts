@@ -3,12 +3,14 @@ import { Document, Schema, model, Model, DocumentQuery, SchemaTypes, Mongoose } 
 import * as uniqueValidator from 'mongoose-unique-validator';
 import * as crypto from 'crypto';
 import * as jwt from 'jsonwebtoken';
-
+import Validator from 'validator';
 // app
 import { JWT_SECRET } from "../environment";
 import { IRating } from "./rating.model";
 import { IRecipe } from "./recipe.model";
 import { ICollection } from "./collection.model";
+
+// const validator;
 
 export interface IAuthJSON {
   username: string;
@@ -114,24 +116,24 @@ export const UserFields = {
 };
 
 export const UserSchema = new Schema<IUser>(
-  UserFields, 
+  UserFields,
   {
-  versionKey: false,
-  timestamps: true,
-  toJSON: {
-    virtuals: true,
-    transform: (doc, ret) => {
-      delete ret._id;
-      delete ret.ratings;
+    versionKey: false,
+    timestamps: true,
+    toJSON: {
+      virtuals: true,
+      transform: (doc, ret) => {
+        delete ret._id;
+        delete ret.ratings;
+      },
     },
-  },
-  toObject: {
-    virtuals: true,
-    transform: (doc, ret) => {
-      delete ret._id;
+    toObject: {
+      virtuals: true,
+      transform: (doc, ret) => {
+        delete ret._id;
+      }
     }
-  }
-});
+  });
 
 UserSchema.plugin(uniqueValidator, { message: 'is already taken.' });
 
@@ -151,7 +153,7 @@ UserSchema.methods.saveRecipe = function(this: IUser, recipe: IRecipe) {
 
 UserSchema.methods.unsaveRecipe = function(this: IUser, recipe) {
   // @ts-ignore
-  const position = this.savedRecipes.findIndex((r: IRecipe) => r == recipe.id ||   recipe.id == r.id);
+  const position = this.savedRecipes.findIndex((r: IRecipe) => r == recipe.id || recipe.id == r.id);
   if (position !== -1) {
     this.savedRecipes.splice(position, 1);
   }
@@ -190,6 +192,10 @@ UserSchema.methods.deleteCollection = function(this: IUser, collectionId) {
 };
 
 UserSchema.methods.setPassword = function(this: IUser, password) {
+
+  if (!password || password.length < 6) {
+    this.invalidate('password', 'must be at least 6 characters.');
+  }
   this.salt = crypto.randomBytes(16).toString('hex');
   this.hash = crypto.pbkdf2Sync(password, this.salt, 10000, 512, 'sha512').toString('hex');
 };
@@ -203,7 +209,7 @@ UserSchema.methods.generateJWT = function(this: IUser) {
   const today = new Date();
   const exp = new Date(today);
   exp.setDate(today.getDate() + 60);
-  
+
   return jwt.sign({
     id: this._id,
     username: this.username,
@@ -223,7 +229,7 @@ UserSchema.methods.toAuthJSON = function() {
 UserSchema.methods.didCreateRecipe = function(this: IUser, recipe: IRecipe) {
   return this.createdRecipes
     .findIndex(
-      (r: any ) => r == recipe.id || r.id == recipe.id
+      (r: any) => r == recipe.id || r.id == recipe.id
     ) !== -1;
 };
 
@@ -234,7 +240,7 @@ UserSchema.methods.canEdit = function(this: IUser, doc: IRecipe | ICollection) {
 UserSchema.methods.didSaveRecipe = function(this: IUser, recipe: IRecipe) {
   return this.savedRecipes
     .findIndex(
-      (r: any ) => r == recipe.id || r.id == recipe.id
+      (r: any) => r == recipe.id || r.id == recipe.id
     ) !== -1;
 };
 
@@ -243,4 +249,4 @@ UserSchema.statics.findOneByEmailOrUsername = function(term: string) {
 };
 
 export const UserModel = model<IUser, IUserModel>('user', UserSchema);
-export {UserModel as User};
+export { UserModel as User };
