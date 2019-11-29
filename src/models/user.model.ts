@@ -1,5 +1,5 @@
 // lib
-import { Document, Schema, model, Model, DocumentQuery, SchemaTypes, Mongoose } from "mongoose";
+import { Document, Schema, model, Model, DocumentQuery, SchemaTypes, Mongoose, Collection, ModelPopulateOptions } from "mongoose";
 import * as uniqueValidator from 'mongoose-unique-validator';
 import * as crypto from 'crypto';
 import * as jwt from 'jsonwebtoken';
@@ -17,20 +17,21 @@ export interface IAuthJSON {
   image_url: string;
 }
 export interface IUserMethods {
-  addRating: (ratingId: string) => void;
-  setPassword: (password: string) => void;
-  validPassword: (password: string) => boolean;
-  generateJWT: () => string;
-  toAuthJSON: () => IAuthJSON;
-  didCreateRecipe: (recipe: IRecipe) => boolean;
-  createRecipe: (recipeId: string) => IUser;
-  deleteRecipe: (recipeId: string) => IUser;
-  createCollection: (collectionId: string) => IUser;
-  deleteCollection: (collectionId: string) => IUser;
-  canEdit: (this: IUser, recipe: IRecipe | ICollection) => boolean;
-  saveRecipe: (this: IUser, recipe: IRecipe) => IUser;
-  unsaveRecipe: (this: IUser, recipe: IRecipe) => IUser;
-  didSaveRecipe: (recipe: IRecipe) => boolean;
+  addRating(ratingId: string): void;
+  setPassword(password: string): void;
+  validPassword(password: string): boolean;
+  generateJWT(): string;
+  toAuthJSON(): IAuthJSON;
+  didCreateRecipe(recipe: IRecipe): boolean;
+  createRecipe(recipeId: string): IUser;
+  deleteRecipe(recipeId: string): IUser;
+  createCollection(collectionId: string): IUser;
+  deleteCollection(collectionId: string): IUser;
+  canEdit(this: IUser, recipe: IRecipe | ICollection): boolean;
+  saveRecipe(this: IUser, recipe: IRecipe): IUser;
+  unsaveRecipe(this: IUser, recipe: IRecipe): IUser;
+  didSaveRecipe(recipe: IRecipe): boolean;
+  getCollections(limit?: number): Promise<IUser>;
 }
 
 export interface IUser extends Document, IUserMethods {
@@ -187,6 +188,16 @@ UserSchema.methods.deleteCollection = function(this: IUser, collectionId) {
     this.savedRecipes.splice(position, 1);
   }
   return this;
+};
+
+UserSchema.methods.getCollections =  function(this: IUser, limit?: number) {
+  const popOptions: ModelPopulateOptions = {
+    path: 'collections',
+    options: {
+      limit
+    }
+  };
+  return this.populate(popOptions).execPopulate();
 };
 
 UserSchema.methods.setPassword = function(this: IUser, password) {

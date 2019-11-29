@@ -106,16 +106,15 @@ CollectionSchema.methods.toSearchResult = async function(this: ICollection) {
     populate: { model: 'image', path: 'banners', options: { limit: 1 } },
     options: { limit: 1 }
   }).execPopulate();
-  console.log(this);
   const result = {
     ...this.toObject(),
+    total: this.recipes.length,
   };
   if (this.recipes.length) {
     // @ts-ignore
     result.image_url = this.recipes[0].image_url;
   }
   // console.log(this.toObject());
-  console.log(result);
   delete result.createdBy;
   delete result.createdAt;
   delete result.recipes;

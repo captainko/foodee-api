@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { Recipe, IRecipe } from "../models/recipe.model";
-import { IUser } from "../models/user.model";
+import { IUser, User } from "../models/user.model";
 
 export class MainFrameController {
   public static async getMainFrame(req: Request, res: Response, next: NextFunction) {
@@ -15,15 +15,15 @@ export class MainFrameController {
       const highRatedRecipes$ = Recipe.getHighRatedRecipes().select(recipeFields).limit(20).then(x => x.toThumbnailFor(user));
       // tslint:disable-next-line: max-line-length
       const recommendRecipes$ = Recipe.getRecommendRecipes().then(x => x.toThumbnailFor(req.user));
-        // .then(x => x.toThumbnailFor(user));
       const categories$ = Recipe.getCategories(5);
-
-      const lists = await Promise.all([newRecipes$, highRatedRecipes$, recommendRecipes$, categories$]);
+      const collections$ = user.getCollections().then(x => x.collections.toSearchResult());
+      const lists = await Promise.all([newRecipes$, highRatedRecipes$, recommendRecipes$, categories$, collections$]);
       const mainFrame = {
         newRecipes: lists[0],
         highRatedRecipes: lists[1],
         recommendRecipes: lists[2],
         categories: lists[3],
+        collections: lists[4],
       };
       // console.log(mainFrame.recommendRecipes[0].toJSON());
       if (req.isAuthenticated()) {
