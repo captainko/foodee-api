@@ -28,7 +28,9 @@ https.createServer({
 // app.listen(SERVER_PORT, () => {
 //     console.log('Express server listening on port ' + SERVER_PORT);
 // });
-
-admin.listen(WEB_PORT, () => {
-    console.log('Admin server listening on port ' + WEB_PORT);
-});
+https.createServer({
+    ca: fs.readFileSync('./ca_bundle.crt'),
+    key: fs.readFileSync('./private.key'),
+    cert: fs.readFileSync('./certificate.crt'),
+    passphrase: SSL_PASSPHRASE,
+}, admin).listen(WEB_PORT);
