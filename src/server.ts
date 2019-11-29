@@ -18,15 +18,16 @@ import { SERVER_PORT, SSL_PASSPHRASE, IS_PROD, WEB_PORT } from "./environment";
 //     });
 // }
 
-// https.createServer({
-//     key: fs.readFileSync('./key.pem'),
-//     cert: fs.readFileSync('./cert.pem'),
-//     passphrase: SSL_PASSPHRASE,
-// }, app).listen(SERVER_PORT);
+https.createServer({
+    ca: fs.readFileSync('./ca_bundle.crt'),
+    key: fs.readFileSync('./private.key'),
+    cert: fs.readFileSync('./certificate.crt'),
+    passphrase: SSL_PASSPHRASE,
+}, app).listen(SERVER_PORT);
 
-app.listen(SERVER_PORT, () => {
-    console.log('Express server listening on port ' + SERVER_PORT);
-});
+// app.listen(SERVER_PORT, () => {
+//     console.log('Express server listening on port ' + SERVER_PORT);
+// });
 
 admin.listen(WEB_PORT, () => {
     console.log('Admin server listening on port ' + WEB_PORT);
