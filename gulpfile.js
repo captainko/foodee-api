@@ -8,7 +8,7 @@ const csscomb = require('gulp-csscomb');
 const cleanCss = require('gulp-clean-css');
 const del = require('del');
 const gulp = require('gulp');
-const postcss = require(' ');
+const postcss = require('gulp-postcss');
 const sass = require('gulp-sass');
 const uglify = require('gulp-uglify');
 const rename = require('gulp-rename');
@@ -32,15 +32,15 @@ const paths = {
     node: 'node_modules',
   },
   src: {
-    base: './public',
-    css: 'public/css/**/*.css',
-    js: 'public/js/**/*.js',
+    base: './scr/public',
+    css: './src/public/css/**/*.css',
+    js: './src/public/js/**/*.js',
     html: '**/*.html',
-    img: 'public/img/**/*.+(png|jpg|gif|svg)',
-    ejs: 'views/**/*.ejs',
-    fonts: 'public/fonts/**/*.+(eot|svg|ttf|woff|woff2)',
-    vendor: 'public/vendor/**/*',
-    scss: 'public/scss/**/*.scss',
+    img: './src/public/img/**/*.+(png|jpg|gif|svg)',
+    ejs: './src/views/**/*.ejs',
+    fonts: './src/public/fonts/**/*.+(eot|svg|ttf|woff|woff2)',
+    vendor: './src/public/vendor/**/*',
+    scss: './src/public/scss/**/*.scss',
   },
 };
 

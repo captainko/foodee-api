@@ -145,39 +145,39 @@ const users: IUserData[] = [
       }]
     }
   },
-  {
-    username: faker.name.firstName() + faker.name.lastName(),
-    admin: true,
-    isVerified: true,
-    collec_: [],
-    email: faker.internet.email(),
-    // avatar
-    img: faker.image.avatar(),
-    password: faker.internet.password(10),
-    recipes: {
-      created: [{
-        name: faker.name.title(),
-        category: faker.random.arrayElement(CATEGORIES),
-        time: faker.random.number({ min: 10, max: 200 }),
-        servings: faker.random.arrayElement(SERVINGS),
-        methods: fakeMethods(),
-        // recipe images
-        banners: fakeImages(),
-        description: faker.lorem.sentences(2),
-        ingredients: [
-          { quantity: '1/2 spoon', ingredient: 'sugar' },
-          { quantity: '500g', ingredient: 'beef' },
-        ]
-      }],
-      saved: [],
-    }
-  },
   // {
-  //   username: 'Foodee',
+  //   username: faker.name.firstName() + faker.name.lastName(),
   //   admin: true,
   //   isVerified: true,
+  //   collec_: [],
+  //   email: faker.internet.email(),
+  //   // avatar
+  //   img: faker.image.avatar(),
+  //   password: faker.internet.password(10),
+  //   recipes: {
+  //     created: [{
+  //       name: faker.name.title(),
+  //       category: faker.random.arrayElement(CATEGORIES),
+  //       time: faker.random.number({ min: 10, max: 200 }),
+  //       servings: faker.random.arrayElement(SERVINGS),
+  //       methods: fakeMethods(),
+  //       // recipe images
+  //       banners: fakeImages(),
+  //       description: faker.lorem.sentences(2),
+  //       ingredients: [
+  //         { quantity: '1/2 spoon', ingredient: 'sugar' },
+  //         { quantity: '500g', ingredient: 'beef' },
+  //       ]
+  //     }],
+  //     saved: [],
+  //   }
+  // },
+  // // {
+  // //   username: 'Foodee',
+  // //   admin: true,
+  // //   isVerified: true,
 
-  // }
+  // // }
 
   {
     username: 'Amadeus',
@@ -274,7 +274,7 @@ const users: IUserData[] = [
   }
   ,
   {
-    username: 'Nam Em',
+    username: 'NamEm',
     admin: false,
     email: 'NamEm@gmail.com',
     collec_: [],
@@ -386,26 +386,27 @@ new Promise((res) => {
           (newUser: IUser, cb) => {
             const recipes = user.recipes.created;
             const createRecipeFuncs = recipes.map((r) => (rDone) => {
+
               Promise.all(r.banners.map(b => {
                 return Image.create({
                   url: b,
                   type: 'recipe',
                 });
               }))
-                .then(images => {
+                .then(async images => {
                   const recipe = new Recipe(r);
                   recipe.banners = images.map(x => x.id);
                   // @ts-ignore
                   recipe.createdBy = newUser.id;
                   newUser.createdRecipes.unshift(recipe.id);
-                  newUser.save();
-                  return recipe.save();
+                  await newUser.save();
+                  return await recipe.save();
                 })
                 .then(newRecipe => rDone(null, newRecipe))
                 .catch(err => rDone(err, null));
 
             });
-            async.parallel(createRecipeFuncs, (err, recipes) => {
+            async.series(createRecipeFuncs, (err, recipes) => {
               console.log(err);
               console.log(recipes);
               cb(recipes);

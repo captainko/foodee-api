@@ -14,6 +14,7 @@ import {
 
 import { UserResource, ImageResource, RecipeResource, RatingResource, RatingResultResource, CollectionResource } from './web/resources';
 import { UserModel, RatingResultModel } from "./models";
+import { resetPassword } from "./routes/reset-password.router";
 AdminBro.registerAdapter(require('admin-bro-mongoose'));
 
 class Admin {
@@ -57,13 +58,17 @@ class Admin {
     );
     // const AdminRouter = AdminBroExpress.buildRouter(adminBro);
     console.log(adminBro.options.rootPath);
-
+    
+    const staticFolder = IS_PROD ? 'dist' : 'public';
     this.app.set('views', path.join(__dirname, 'views'));
     this.app.set('view engine', 'ejs');
+    this.app.use(express.static(path.join(__dirname, staticFolder)));
     this.app.use(expressLayouts);
-
     this.app.use(adminBro.options.rootPath, adminRouter);
-
+    this.app.use(resetPassword);
+    this.app.use((req, res) => {
+      res.status(404).render('pages/404');
+    });
     // Passing resources one by one
     // const AdminBro = new AdminBro({
     //   resources: [User, Admin],
