@@ -309,27 +309,27 @@ RecipeSchema.methods.addRating = function(this: IRecipe, ratingId: string) {
   return this;
 };
 
-RecipeSchema.statics.getCategories = async function(limit: number = null) {
+RecipeSchema.statics.getCategories = async function(limit: number = 10) {
   const categories = await Recipe.aggregate([
-    {
-      $match: {
-        status: true,
-        category: { $ne: null }
-      }
-    },
+    // {
+    //   $match: {
+    //     category: { $ne: null }
+    //   }
+    // },
     {
       $group: {
         // _id: { $ifNull: ["$category", "Unknown"] },
         _id: "$category",
         total: { $sum: 1 },
         // should change to first in product
-        image_url: { $last: { $arrayElemAt: ["$banners", 0] } },
+        image_url: { $first: { $arrayElemAt: ["$banners", 0] } },
       }, // ~$group
     },
-    // {
-    //   $limit: limit,
-    // }
+    {
+      $limit: limit,
+    }
   ]);
+  await Image.populate(categories, {path: 'image_url'});
   return categories;
 };
 
