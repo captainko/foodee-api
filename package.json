@@ -15,6 +15,7 @@
     },
     "dependencies": {
         "@types/jest": "^24.0.23",
+        "@types/mongoose-simple-random": "^0.4.6",
         "admin-bro": "^1.4.2",
         "admin-bro-expressjs": "^0.3.0",
         "admin-bro-mongoose": "^0.3.0",
@@ -38,6 +39,7 @@
         "mongoose-autopopulate": "^0.9.1",
         "mongoose-paginate": "^5.0.3",
         "mongoose-seed": "^0.6.0",
+        "mongoose-simple-random": "^0.4.1",
         "mongoose-unique-validator": "^2.0.3",
         "morgan": "^1.9.1",
         "multer": "^1.4.2",

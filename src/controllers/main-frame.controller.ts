@@ -13,7 +13,8 @@ export class MainFrameController {
       const newRecipes$ = Recipe.getNewRecipes().select(recipeFields).limit(20).then(x => x.toThumbnailFor(user));
       // tslint:disable-next-line: max-line-length
       const highRatedRecipes$ = Recipe.getHighRatedRecipes().select(recipeFields).limit(20).then(x => x.toThumbnailFor(user));
-      const recommendRecipes$ = await Recipe.getRecommendRecipes();
+      // tslint:disable-next-line: max-line-length
+      const recommendRecipes$ = Recipe.getRecommendRecipes().then(x => x.toThumbnailFor(req.user));
         // .then(x => x.toThumbnailFor(user));
       const categories$ = Recipe.getCategories(5);
 

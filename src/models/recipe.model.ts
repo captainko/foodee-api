@@ -10,6 +10,7 @@ import {
 } from "mongoose";
 import mongooseAutoPopulate = require('mongoose-autopopulate');
 import mongoosePaginate = require('mongoose-paginate');
+import mongooseRandom = require('mongoose-simple-random');
 import { Rating, IRating } from "./rating.model";
 import { IUser, User } from "./user.model";
 import { IImage, Image } from "./image.model";
@@ -176,6 +177,7 @@ export const RecipeSchema = new Schema<IRecipe>(
 
 RecipeSchema.plugin(mongoosePaginate);
 RecipeSchema.plugin(mongooseAutoPopulate);
+RecipeSchema.plugin(mongooseRandom);
 
 RecipeSchema.path('banners').validate({
   async validator(v) {
@@ -345,8 +347,15 @@ RecipeSchema.statics.getRecipesByCategory = function(category: string) {
   return Recipe.find({ category });
 };
 
-RecipeSchema.statics.getRecommendRecipes = function(limit = 20) {
-  return Recipe.aggregate([{$sample: {size: limit }}]);
+RecipeSchema.statics.getRecommendRecipes = function(limit: number = 20) {
+  return new Promise((resolve, reject) => {
+    Recipe.findRandom({}, {}, {limit}, (err, result) => {
+      if (err) {
+        return reject(err);
+      } 
+      return resolve(result);
+    });
+  });
 };
 
 RecipeSchema.post("remove", function(this: IRecipe) {
