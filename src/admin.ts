@@ -1,9 +1,10 @@
 // lib
 import express = require("express");
+import expressLayouts = require("express-ejs-layouts");
 import mongoose = require("mongoose");
 import AdminBro from "admin-bro";
 import AdminBroExpress = require('admin-bro-expressjs');
-import * as crypto from 'crypto';
+import path = require('path');
 
 // app
 import {
@@ -56,6 +57,11 @@ class Admin {
     );
     // const AdminRouter = AdminBroExpress.buildRouter(adminBro);
     console.log(adminBro.options.rootPath);
+
+    this.app.set('views', path.join(__dirname, 'views'));
+    this.app.set('view engine', 'ejs');
+    this.app.use(expressLayouts);
+
     this.app.use(adminBro.options.rootPath, adminRouter);
 
     // Passing resources one by one
