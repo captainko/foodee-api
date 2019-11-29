@@ -8,14 +8,14 @@ services:
       - '4500:4500'
       - '80:80'
     networks:
-      - foodee-net
+      - foodee-net:
   mongo:
     container_name: mongo
     image: mongo
     volumes: 
-      - mongodata:
+      - mongodata:/data/db
     networks:
-      foodee-net:
+      - foodee-net:
 volumes:
   mongodata:
     driver: local
