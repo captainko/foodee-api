@@ -16,7 +16,7 @@ export class MainFrameController {
       // tslint:disable-next-line: max-line-length
       const recommendRecipes$ = Recipe.getRecommendRecipes().then(x => x.toThumbnailFor(req.user));
       const categories$ = Recipe.getCategories(5);
-      const collections$ = user.getCollections().then(x => x.collections.toSearchResult());
+      const collections$ = user ? user.getCollections().then(x => x.collections.toSearchResult()) : [];
       const lists = await Promise.all([newRecipes$, highRatedRecipes$, recommendRecipes$, categories$, collections$]);
       const mainFrame = {
         newRecipes: lists[0],
