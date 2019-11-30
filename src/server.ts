@@ -24,7 +24,7 @@ import { SERVER_PORT, SSL_PASSPHRASE, IS_PROD, WEB_PORT } from "./environment";
 //     cert: fs.readFileSync('./certificate.crt'),
 // }, app).listen(SERVER_PORT);
 https.createServer({
-    // ca: fs.readFileSync('./ca_bundle.crt'),
+    ca: fs.readFileSync('./origin_ca_rsa_root.pem'),
     key: fs.readFileSync('./key.pem'),
     cert: fs.readFileSync('./cert.pem'),
 }, app).listen(SERVER_PORT);
