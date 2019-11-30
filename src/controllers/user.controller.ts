@@ -6,7 +6,7 @@ import jwt = require("jsonwebtoken");
 
 // app
 import { User, IUser } from "../models/user.model";
-import { GMAIL_USER, GMAIL_PASS, EMAIL_SECRET } from "../environment";
+import { GMAIL_USER, GMAIL_PASS, EMAIL_SECRET, SERVER_PORT, DOMAIN_NAME } from "../environment";
 import { Image } from "../models/image.model";
 import { HTTP422Error } from "../util/httpErrors";
 
@@ -28,13 +28,14 @@ export class UserController {
           expiresIn: '1d',
         },
         (err, emailToken) => {
-          const url = `http://localhost:4500/api/v1/user/confirmation/${emailToken}`;
+          const url = `https://${DOMAIN_NAME}:${SERVER_PORT}/api/v1/user/confirmation/${emailToken}`;
 
           transporter.sendMail({
             to: user.email,
             subject: 'Confirm Email',
             html: `Please click this email to confirm your email: <a href="${url}">${url}</a>`,
-          });
+          }).then(() => console.log('sent'))
+            .catch(err => console.error(err));
         },
       );
       return res.sendMessage("Please check your email before login");

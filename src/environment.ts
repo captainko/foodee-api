@@ -3,7 +3,8 @@ dotenv.config();
 
 export const { 
   NODE_ENV = 'production',
-  SERVER_PORT = 4500,
+  DOMAIN_NAME = 'foodee.cf',
+  SERVER_PORT = 8443,
   WEB_PORT = 80,
   DB_URI,
   JWT_SECRET = 'secret',
