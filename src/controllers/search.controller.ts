@@ -13,7 +13,7 @@ export class SearchController {
     const {
       sortBy = 'score',
       minTime = 0,
-      maxTime = 200,
+      maxTime = 999,
       categories = [],
       q = '',
     } = req.query;
@@ -47,15 +47,15 @@ export class SearchController {
       .limit(perPage);
 
     Promise.all([counted$, paginated$])
-      .then(([total, recipes]) => {
-        const pages = Math.ceil(total / perPage);
+      .then(([totalResults, recipes]) => {
+        const totalPages = Math.ceil(totalResults / perPage);
         let nextPage = page + 1;
-        if (nextPage >= pages) {
+        if (nextPage >= totalPages) {
           nextPage = null;
         }
 
         recipes = recipes.map(r => r.toSearchResultFor(req.user));
-        res.sendAndWrap({ nextPage, pages, total, recipes }, 'paginate');
+        res.sendAndWrap({ nextPage, totalPages, totalResults, recipes }, 'paginate');
       });
   }
 

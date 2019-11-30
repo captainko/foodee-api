@@ -7,9 +7,10 @@ import "./extends";
 import { JWT_SECRET } from "../environment";
 
 // express
-express.response.sendAndWrap = function(obj, key = 'data') {
+express.response.sendAndWrap = function(obj, key = 'data', message = 'success') {
   return this.send({
     status: this.statusCode,
+    message,
     [key]: obj
   });
 };

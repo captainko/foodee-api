@@ -239,7 +239,6 @@ RecipeSchema.methods.toSearchResultFor = function(this: IRecipe, user?: IUser) {
   delete recipe.description;
   delete recipe.category;
   delete recipe.tags;
-  delete recipe.time;
   delete recipe.status;
   delete recipe.score;
   return recipe;
