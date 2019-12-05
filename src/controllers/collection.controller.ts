@@ -76,6 +76,15 @@ export class CollectionController {
       .catch(next);
   }
 
+  public static async deleteCollection(req: Request, res: Response, next: NextFunction) {
+    try {
+      await req.collection.remove();
+      res.sendMessage("Removed collection successfully");
+    } catch (err) {
+      next(err);
+    }
+  }
+
   public static async addRecipe(req: Request, res: Response, next: NextFunction) {
     const { collection, recipe } = req;
     try {
