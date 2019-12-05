@@ -40,7 +40,7 @@ export interface IRecipe extends Document {
   createdAt?: string;
   updatedAt?: string;
 
-  addRating(ratingId: string): IRating;
+  addRating(ratingId: string): Promise<IRating>;
   updateRating(): Promise<any>;
   isCreatedBy(user: string | IUser): boolean;
   toJSONFor(user: IUser): IRecipe;
@@ -49,6 +49,7 @@ export interface IRecipe extends Document {
   toSearchResultFor(user?: IUser): IRecipe;
   populateBanners(): Promise<IRecipe>;
   populateUser(): Promise<IRecipe>;
+  getLatest(): Promise<IRecipe>;
 }
 
 export interface IRecipeModel extends PaginateModel<IRecipe> {
@@ -294,6 +295,10 @@ RecipeSchema.methods.updateRating = async function(this: IRecipe) {
   return await this.save();
 };
 
+RecipeSchema.methods.getLatest = function(this: IRecipe) {
+  return RecipeModel.findById(this.id).exec();
+};
+
 RecipeSchema.methods.populateUser = async function(this: IRecipe) {
   await this.populate('createdBy', 'username').execPopulate();
   return this;
@@ -305,11 +310,12 @@ RecipeSchema.methods.populateBanners = async function(this: IRecipe) {
 };
 
 RecipeSchema.methods.addRating = function(this: IRecipe, ratingId: string) {
-  if (!this.ratings.includes(ratingId)) {
-    this.ratings.push(ratingId);
-  }
-
-  return this;
+ 
+  return this.update({
+    $addToSet: {
+      ratings: ratingId,
+    }
+  }).exec(() => this.getLatest());
 };
 
 RecipeSchema.statics.getCategories = async function(limit: number = 10) {

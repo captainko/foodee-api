@@ -98,13 +98,10 @@ export class RecipeController {
     try {
       const rateObj = await Rating.rate(req.user.id, req.recipe.id, req.body.rateValue);
       const { user, recipe } = req;
-      console.log(recipe);
-      recipe.addRating(rateObj._id);
-      user.addRating(rateObj._id);
+      
+      await Promise.all([user.addRating(rateObj._id), recipe.addRating(rateObj._id)]);
 
       await recipe.updateRating();
-
-      await Promise.all([recipe.save(), user.save()]);
 
       return res.sendMessage('rated successfully');
 
@@ -115,8 +112,7 @@ export class RecipeController {
 
   public static async saveRecipe(req: Request, res: Response, next: NextFunction) {
     try {
-      req.user.saveRecipe(req.recipe);
-      await req.user.save();
+      await req.user.saveRecipe(req.recipe.id);
       res.sendMessage('saved successfully');
     } catch (err) {
       next(err);
@@ -125,8 +121,7 @@ export class RecipeController {
 
   public static async unsaveRecipe(req: Request, res: Response, next: NextFunction) {
     try {
-      req.user.unsaveRecipe(req.recipe);
-      await req.user.save();
+      await req.user.unsaveRecipe(req.recipe.id);
       res.sendMessage("unsaved successfully");
     } catch (err) {
       next(err);

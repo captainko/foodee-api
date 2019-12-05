@@ -1,5 +1,5 @@
 // lib
-import { Document, Schema, model, Model, DocumentQuery, SchemaTypes, Mongoose, Collection, ModelPopulateOptions } from "mongoose";
+import { Document, Schema, model, Model, DocumentQuery, SchemaTypes, ModelPopulateOptions } from "mongoose";
 import * as uniqueValidator from 'mongoose-unique-validator';
 import * as crypto from 'crypto';
 import * as jwt from 'jsonwebtoken';
@@ -8,7 +8,7 @@ import * as jwt from 'jsonwebtoken';
 import { JWT_SECRET } from "../environment";
 import { IRating } from "./rating.model";
 import { IRecipe } from "./recipe.model";
-import { ICollection } from "./collection.model";
+import { ICollection, Collection } from "./collection.model";
 
 export interface IAuthJSON {
   username: string;
@@ -17,21 +17,22 @@ export interface IAuthJSON {
   image_url: string;
 }
 export interface IUserMethods {
-  addRating(ratingId: string): void;
+  addRating(ratingId: string): Promise<IUser>;
   setPassword(password: string): void;
   validPassword(password: string): boolean;
   generateJWT(): string;
   toAuthJSON(): IAuthJSON;
   didCreateRecipe(recipe: IRecipe): boolean;
   createRecipe(recipeId: string): IUser;
-  deleteRecipe(recipeId: string): IUser;
+  deleteRecipe(recipeId: string): Promise<IUser>;
   createCollection(collectionId: string): IUser;
-  deleteCollection(collectionId: string): IUser;
+  deleteCollection(collectionId: string): Promise<IUser>;
   canEdit(this: IUser, recipe: IRecipe | ICollection): boolean;
-  saveRecipe(this: IUser, recipe: IRecipe): IUser;
-  unsaveRecipe(this: IUser, recipe: IRecipe): IUser;
+  saveRecipe(this: IUser, recipe: IRecipe): Promise<IUser>;
+  unsaveRecipe(this: IUser, recipe: IRecipe): Promise<IUser>;
   didSaveRecipe(recipe: IRecipe): boolean;
   getCollections(limit?: number): Promise<IUser>;
+  getLatest(): Promise<IUser>;
 }
 
 export interface IUser extends Document, IUserMethods {
@@ -136,27 +137,46 @@ export const UserSchema = new Schema<IUser>(
 
 UserSchema.plugin(uniqueValidator, { message: 'is already taken.' });
 
+UserSchema.methods.getLatest = function(this: IUser) {
+  return UserModel.findById(this.id).exec();
+};
+
 UserSchema.methods.addRating = function(this: IUser, ratingId: string) {
-  if (!this.ratings.includes(ratingId)) {
-    this.ratings.push(ratingId);
-  }
+  // if (!this.ratings.includes(ratingId)) {
+  //   this.ratings.push(ratingId);
+  // }
+
+  return this.update({
+    $addToSet: {ratings: ratingId}
+  }).exec(() => this.getLatest());
 };
 
-UserSchema.methods.saveRecipe = function(this: IUser, recipe: IRecipe) {
-  console.log(this);
-  if (!this.didSaveRecipe(recipe)) {
-    this.savedRecipes.unshift(recipe.id);
-  }
-  return this;
+UserSchema.methods.saveRecipe = function(this: IUser, recipeId) {
+  // console.log(this);
+  // if (!this.didSaveRecipe(recipe)) {
+  //   this.savedRecipes.unshift(recipe.id);
+  // }
+  // return this;
+
+  return this.update({
+    $push: {savedRecipes: {$each: [recipeId], $position: 0}}
+  }).exec(() => this.getLatest());
 };
 
-UserSchema.methods.unsaveRecipe = function(this: IUser, recipe) {
+UserSchema.methods.unsaveRecipe = function(this: IUser, recipeId) {
   // @ts-ignore
-  const position = this.savedRecipes.findIndex((r: IRecipe) => r == recipe.id ||   recipe.id == r.id);
-  if (position !== -1) {
-    this.savedRecipes.splice(position, 1);
-  }
-  return this;
+  // const position = this.savedRecipes.findIndex((r: IRecipe) => r == recipe.id || recipe.id == r.id);
+  // if (position !== -1) {
+  //   this.savedRecipes.splice(position, 1);
+  //   Collection.removeRecipeFromUser(recipe.id, this.id);
+  // }
+  // return this;
+
+  return this.update({
+    $pull: {
+      savedRecipes: recipeId
+    }
+  }).exec(() => this.getLatest());
 };
 
 UserSchema.methods.createRecipe = function(this: IUser, recipeId) {
@@ -168,11 +188,14 @@ UserSchema.methods.deleteRecipe = function(this: IUser, recipeId) {
   // delete recipe from all collections
 
   // @ts-ignore
-  const position = this.createdRecipes.findIndex(recipeId);
-  if (position !== -1) {
-    this.createdRecipes.splice(position, 1);
-  }
-  return this;
+  // const position = this.createdRecipes.findIndex(recipeId);
+  // if (position !== -1) {
+  //   this.createdRecipes.splice(position, 1);
+  // }
+  // return this;
+  return this.update({
+    $push: {savedRecipes: recipeId}
+  }).exec(() => this.getLatest());
 };
 
 UserSchema.methods.createCollection = function(this: IUser, collectionId) {
@@ -183,11 +206,17 @@ UserSchema.methods.createCollection = function(this: IUser, collectionId) {
 UserSchema.methods.deleteCollection = function(this: IUser, collectionId) {
 
   // @ts-ignore
-  const position = this.savedRecipes.findIndex(collectionId);
-  if (position !== -1) {
-    this.savedRecipes.splice(position, 1);
-  }
-  return this;
+  // const position = this.savedRecipes.findIndex(collectionId);
+  // if (position !== -1) {
+  //   this.savedRecipes.splice(position, 1);
+  // }
+  // return this;
+
+  return this.update({
+    $pull: {
+      collections: collectionId,
+    }
+  }).exec(() => this.getLatest()); 
 };
 
 UserSchema.methods.getCollections =  function(this: IUser, limit?: number) {
