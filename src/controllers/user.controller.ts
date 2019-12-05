@@ -141,7 +141,7 @@ export class UserController {
   public static async getCreatedCollections(req: Request, res: Response, next: NextFunction) {
     try {
       await req.user.populate('collections').execPopulate();
-      res.sendAndWrap(await req.user.collections.toSearchResult());
+      res.sendAndWrap(await req.user.collections.toSearchResult(), 'collections');
     } catch (err) {
       next(err);
     }

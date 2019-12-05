@@ -69,6 +69,7 @@ export class RecipeController {
         servings: body.servings,
         ingredients: body.ingredients,
         createdBy: req.user.id,
+        methods: body.methods,
       });
       await recipe.populate('banners').execPopulate();
       req.user.createRecipe(recipe.id);
