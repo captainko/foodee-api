@@ -4,6 +4,7 @@ import { Document, Model, model, Schema, SchemaTypes } from "mongoose";
 // app
 import { IUser, User } from "./user.model";
 import { IRecipe } from "./recipe.model";
+import { COLLECTION_DEFAULT_IMG } from "../environment";
 
 export interface ICollectionMethods {
   addRecipe(recipeId: string): Promise<ICollection>;
@@ -148,6 +149,8 @@ CollectionSchema.methods.toSearchResult = async function(this: ICollection) {
   if (this.recipes.length) {
     // @ts-ignore
     result.image_url = this.recipes[0].image_url;
+  } else {
+    result.image_url = COLLECTION_DEFAULT_IMG;
   }
   // console.log(this.toObject());
   delete result.createdBy;

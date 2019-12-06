@@ -148,7 +148,10 @@ export class UserController {
     } catch (err) {
       next(err);
     }
+  }
 
+  public static resetPassword(req: Request, res: Response, next: NextFunction) {
+    
   }
 
   public static getSavedRecipes(req: Request, res: Response, next: NextFunction) {
