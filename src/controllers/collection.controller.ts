@@ -40,7 +40,7 @@ export class CollectionController {
         createdBy: user.id,
       });
 
-      await user.createCollection(collection.id).save();
+      await user.createCollection(collection.id);
 
       res.sendAndWrap(collection, 'collection');
     } catch (err) {

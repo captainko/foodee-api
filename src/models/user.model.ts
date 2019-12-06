@@ -28,7 +28,7 @@ export interface IUserMethods {
   didCreateRecipe(recipe: IRecipe): boolean;
   createRecipe(recipeId: string): IUser;
   deleteRecipe(recipeId: string): Promise<IUser>;
-  createCollection(collectionId: string): IUser;
+  createCollection(collectionId: string): Promise<IUser>;
   deleteCollection(collectionId: string): Promise<IUser>;
   canEdit(this: IUser, recipe: IRecipe | ICollection): boolean;
   saveRecipe(this: IUser, recipe: IRecipe): Promise<IUser>;
@@ -210,8 +210,16 @@ UserSchema.methods.deleteRecipe = function(this: IUser, recipeId) {
 };
 
 UserSchema.methods.createCollection = function(this: IUser, collectionId) {
-  this.collections.unshift(collectionId);
-  return this;
+  // this.collections.unshift(collectionId);
+  // return this;
+ return this.update({
+    $addToSet: {
+      collections: {
+        $each: [collectionId],
+        $position: 0
+      }
+    }
+  }).then(() => this.getLatest());
 };
 
 UserSchema.methods.deleteCollection = function(this: IUser, collectionId) {
