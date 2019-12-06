@@ -19,3 +19,4 @@ export const {
 } = process.env;
 
 export const IS_PROD = NODE_ENV === 'production';
+export const WEB_URL = IS_PROD ? 'https://foodee.cf' : 'http://localhost'; 

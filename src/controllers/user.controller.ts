@@ -9,6 +9,7 @@ import { User, IUser } from "../models/user.model";
 import { GMAIL_USER, GMAIL_PASS, EMAIL_SECRET } from "../environment";
 import { Image } from "../models/image.model";
 import { HTTP422Error } from "../util/httpErrors";
+import { renderResetPassword, renderVerifiedEmail, renderConfirmEmail } from "../util/emailTemplate";
 
 export class UserController {
   public static addUser(req: Request, res: Response, next: NextFunction) {
@@ -28,12 +29,11 @@ export class UserController {
           expiresIn: '1d',
         },
         (err, emailToken) => {
-          const url = `http://localhost:4500/api/v1/user/confirmation/${emailToken}`;
-
+          
           transporter.sendMail({
             to: user.email,
-            subject: 'Confirm Email',
-            html: `Please click this email to confirm your email: <a href="${url}">${url}</a>`,
+            subject: 'Foodee - Confirm Email',
+            html: renderConfirmEmail(user, emailToken),
           });
         },
       );
@@ -46,7 +46,14 @@ export class UserController {
       const decoded = jwt.verify(req.params.token, EMAIL_SECRET) as any;
       console.log(decoded);
       await User.updateOne({ _id: decoded.user }, { isVerified: true });
+
       res.send("Email is verified");
+      const user = await User.findById(decoded.user);
+      transporter.sendMail({
+        to: user.email,
+        subject: 'Foodee - Verified Email',
+        html: renderVerifiedEmail(user),
+      });
     } catch (e) {
       res.send("Error");
     }
@@ -118,7 +125,29 @@ export class UserController {
     }
   }
 
-  public static forgotPassword(req: Request, res: Response, next) {
+  public static async forgotPassword(req: Request, res: Response, next: NextFunction) {
+    try {
+
+      const { email } = req.body;
+      if (!email) {
+        throw new HTTP422Error("email is required");
+      }
+      const user = await User.findOneByEmailOrUsername(email);
+      if (!user) {
+        throw new HTTP422Error("email not exists");
+      }
+
+      user.forgetsPassword();
+      transporter.sendMail({
+        from: 'Foodee',
+        to: email,
+        subject: 'Foodee - Reset Password',
+        html: renderResetPassword(user),
+      });
+      res.sendMessage("Please checked your email");
+    } catch (err) {
+      next(err);
+    }
 
   }
 

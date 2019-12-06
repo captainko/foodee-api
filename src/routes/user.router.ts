@@ -13,6 +13,6 @@ UserRouter
   .put('/', auth.required, UserController.updateUser)
   .post('/signup', UserController.addUser)
   .post('/login', UserController.login)
-  .post('/forgot', UserController.forgotPassword);
+  .post('/forgot-password', UserController.forgotPassword);
 
 export { UserRouter };

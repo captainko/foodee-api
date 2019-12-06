@@ -24,6 +24,7 @@ export interface IUserMethods {
   validPassword(password: string): boolean;
   generateJWT(): string;
   toAuthJSON(): IAuthJSON;
+  forgetsPassword(): Promise<IUser>;
   didCreateRecipe(recipe: IRecipe): boolean;
   createRecipe(recipeId: string): IUser;
   deleteRecipe(recipeId: string): Promise<IUser>;
@@ -50,6 +51,8 @@ export interface IUser extends Document, IUserMethods {
   ratings?: Array<IRating | string>;
   hash?: string;
   salt?: string;
+  resetPasswordToken: string;
+  resetPasswordExpires: number;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -116,6 +119,8 @@ export const UserFields = {
   },
   hash: String,
   salt: String,
+  resetPasswordToken: String,
+  resetPasswordExpires: Number,
 };
 
 export const UserSchema = new Schema<IUser>(
@@ -259,6 +264,13 @@ UserSchema.methods.generateJWT = function(this: IUser) {
     username: this.username,
     exp: Math.floor(exp.getTime() / 1000),
   }, JWT_SECRET);
+};
+
+UserSchema.methods.forgetsPassword  = function(this: IUser) {
+  this.resetPasswordToken = crypto.randomBytes(20).toString('hex');
+  this.resetPasswordExpires = Date.now() + 360000;
+
+  return this.save();
 };
 
 UserSchema.methods.toAuthJSON = function() {
