@@ -12,6 +12,7 @@ export interface ICollectionMethods {
   toSearchResult(): Promise<ICollection>;
   toDetailFor(user: IUser): Promise<ICollection>;
   getLatest(): Promise<ICollection>;
+  didIncludeRecipe(recipeId): Promise<boolean>;
 }
 
 export interface ICollection extends Document, ICollectionMethods {
@@ -19,6 +20,7 @@ export interface ICollection extends Document, ICollectionMethods {
   createdBy?: string | IUser;
   image_url?: string;
   recipes?: Array<string | IRecipe>;
+  didSaveRecipe?: boolean;
 }
 
 export interface ICollectionModel extends Model<ICollection> {
@@ -134,6 +136,10 @@ CollectionSchema.methods.removeRecipe = function(this: ICollection, recipeId: st
       recipes: recipeId,
     }
   }).exec().then(() => this.getLatest);
+};
+
+CollectionSchema.methods.didIncludeRecipe = function(this: ICollection, recipeId: string) {
+  return CollectionModel.find({_id: this.id, recipes: recipeId}).then((c) => !!c);
 };
 
 CollectionSchema.methods.toSearchResult = async function(this: ICollection) {

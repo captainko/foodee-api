@@ -14,11 +14,13 @@ export class MainFrameController {
       // tslint:disable-next-line: max-line-length
       const highRatedRecipes$ = Recipe.getHighRatedRecipes().select(recipeFields).limit(20).then(x => x.toThumbnailFor(user));
       // tslint:disable-next-line: max-line-length
-      const recommendRecipes$ = Recipe.getRecommendRecipes().then(x => x.toThumbnailFor(req.user));
+      const recommendRecipes$ = Recipe.getRecommendRecipes().then(x => x.toThumbnailFor(user));
       const categories$ = Recipe.getCategories(5);
-      const collections$ = user ? user.getCollections().then(x => x.collections.toSearchResult()) : [];
+      const collections$ = user ? user.getCollections(10).then(collections => collections.toSearchResult()) : [];
+      
+      // tslint:disable-next-line: max-line-length
       const lists = await Promise.all([newRecipes$, highRatedRecipes$, recommendRecipes$, categories$, collections$]);
-      const mainFrame = {
+      const mainFrame: any = {
         newRecipes: lists[0],
         highRatedRecipes: lists[1],
         recommendRecipes: lists[2],
@@ -27,12 +29,16 @@ export class MainFrameController {
       };
       // console.log(mainFrame.recommendRecipes[0].toJSON());
       if (req.isAuthenticated()) {
-        user = await user
-          .populate('savedRecipes', recipeFields)
-          .populate('createdRecipes', recipeFields).execPopulate();
-        // @ts-ignore
+        user = await user.
+          populate({
+            path: 'savedRecipes createdRecipes',
+            select: recipeFields,
+            options: {
+              limit: 10,
+            }
+          }).execPopulate();
+
         mainFrame.savedRecipes = user.savedRecipes.toThumbnailFor(user);
-        // @ts-ignore
         mainFrame.createdRecipes = user.createdRecipes.toThumbnailFor(user);
       }
       res.sendAndWrap(mainFrame, 'mainFrame');

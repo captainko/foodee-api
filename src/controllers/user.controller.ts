@@ -10,6 +10,7 @@ import { GMAIL_USER, GMAIL_PASS, EMAIL_SECRET } from "../environment";
 import { Image } from "../models/image.model";
 import { HTTP422Error } from "../util/httpErrors";
 import { renderResetPassword, renderVerifiedEmail, renderConfirmEmail } from "../util/emailTemplate";
+import { ICollection } from "../models";
 
 export class UserController {
   public static addUser(req: Request, res: Response, next: NextFunction) {
@@ -151,7 +152,7 @@ export class UserController {
   }
 
   public static resetPassword(req: Request, res: Response, next: NextFunction) {
-    
+
   }
 
   public static getSavedRecipes(req: Request, res: Response, next: NextFunction) {
@@ -174,6 +175,24 @@ export class UserController {
     try {
       await req.user.populate('collections').execPopulate();
       res.sendAndWrap(await req.user.collections.toSearchResult(), 'collections');
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  public static async getCreatedCollectionsWithRecipe(req: Request, res: Response, next: NextFunction) {
+    const {user, recipe} = req;
+    try {
+      await user.populate('collections').execPopulate();
+      const collections$ =  user.collections.map(async (c: ICollection) => {
+        const didSaveRecipe$ = c.didIncludeRecipe(recipe.id);
+        const result$ = c.toSearchResult();
+        const [didSaveRecipe, result] = await Promise.all([didSaveRecipe$, result$]);
+        result.didSaveRecipe = didSaveRecipe;
+        return result;
+      });
+      
+      res.sendAndWrap(await Promise.all(collections$) , 'collections');
     } catch (err) {
       next(err);
     }

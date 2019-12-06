@@ -34,7 +34,8 @@ export interface IUserMethods {
   saveRecipe(this: IUser, recipe: IRecipe): Promise<IUser>;
   unsaveRecipe(this: IUser, recipe: IRecipe): Promise<IUser>;
   didSaveRecipe(recipe: IRecipe): boolean;
-  getCollections(limit?: number): Promise<IUser>;
+  getRecipes(limit?: number): Promise<IRecipe[]>;
+  getCollections(limit?: number): Promise<ICollection[]>;
   getLatest(): Promise<IUser>;
 }
 
@@ -155,7 +156,7 @@ UserSchema.methods.addRating = function(this: IUser, ratingId: string) {
   // }
 
   return this.update({
-    $addToSet: {ratings: ratingId}
+    $addToSet: { ratings: ratingId }
   }).exec(() => this.getLatest());
 };
 
@@ -167,7 +168,7 @@ UserSchema.methods.saveRecipe = function(this: IUser, recipeId) {
   // return this;
 
   return this.update({
-    $push: {savedRecipes: {$each: [recipeId], $position: 0}}
+    $push: { savedRecipes: { $each: [recipeId], $position: 0 } }
   }).exec(() => this.getLatest());
 };
 
@@ -205,14 +206,14 @@ UserSchema.methods.deleteRecipe = function(this: IUser, recipeId) {
   // }
   // return this;
   return this.update({
-    $push: {savedRecipes: recipeId}
+    $push: { savedRecipes: recipeId }
   }).exec(() => this.getLatest());
 };
 
 UserSchema.methods.createCollection = function(this: IUser, collectionId) {
   // this.collections.unshift(collectionId);
   // return this;
- return this.update({
+  return this.update({
     $addToSet: {
       collections: {
         $each: [collectionId],
@@ -235,17 +236,23 @@ UserSchema.methods.deleteCollection = function(this: IUser, collectionId) {
     $pull: {
       collections: collectionId,
     }
-  }).exec(() => this.getLatest()); 
+  }).exec(() => this.getLatest());
 };
 
-UserSchema.methods.getCollections =  function(this: IUser, limit?: number) {
+UserSchema.methods.getCollections = function(this: IUser, limit?: number) {
   const popOptions: ModelPopulateOptions = {
     path: 'collections',
-    options: {
-      limit
-    }
+    options: { limit }
   };
-  return this.populate(popOptions).execPopulate();
+  return this.populate(popOptions).execPopulate().then(u => u.collections as ICollection[]);
+};
+
+UserSchema.methods.getRecipes = function(this: IUser, limit: number) {
+  const popOptions: ModelPopulateOptions = {
+    path: 'recipe',
+    options: { limit }
+  };
+  return this.populate(popOptions).execPopulate().then(u => u.savedRecipes as IRecipe[]);
 };
 
 UserSchema.methods.setPassword = function(this: IUser, password) {
@@ -274,7 +281,7 @@ UserSchema.methods.generateJWT = function(this: IUser) {
   }, JWT_SECRET);
 };
 
-UserSchema.methods.forgetsPassword  = function(this: IUser) {
+UserSchema.methods.forgetsPassword = function(this: IUser) {
   this.resetPasswordToken = crypto.randomBytes(20).toString('hex');
   this.resetPasswordExpires = Date.now() + 360000;
 

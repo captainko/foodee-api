@@ -12,7 +12,7 @@ export class RecipeController {
       .findById(id, {}, { autopopulate: false })
       .then((recipe) => {
         if (!recipe) {
-          throw new HTTP404Error();
+          throw new HTTP404Error("recipe not found");
         }
         req.recipe = recipe;
         return next();
