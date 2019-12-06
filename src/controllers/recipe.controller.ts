@@ -128,7 +128,7 @@ export class RecipeController {
     }
   }
 
-  public static async deleteRecipe({ user, recipe }: Request, res: Response, next: NextFunction) {
+  public static async deleteRecipe({ recipe }: Request, res: Response, next: NextFunction) {
     try {
       await recipe.remove();
       res.sendMessage('removed successfully');

@@ -310,7 +310,7 @@ RecipeSchema.methods.populateBanners = async function(this: IRecipe) {
 };
 
 RecipeSchema.methods.addRating = function(this: IRecipe, ratingId: string) {
- 
+
   return this.update({
     $addToSet: {
       ratings: ratingId,
@@ -354,10 +354,10 @@ RecipeSchema.statics.getRecipesByCategory = function(category: string) {
 
 RecipeSchema.statics.getRecommendRecipes = function(limit: number = 20) {
   return new Promise((resolve, reject) => {
-    Recipe.findRandom({}, {}, {limit}, (err, result) => {
+    Recipe.findRandom({}, {}, { limit }, (err, result) => {
       if (err) {
         return reject(err);
-      } 
+      }
       return resolve(result);
     });
   });
@@ -365,25 +365,11 @@ RecipeSchema.statics.getRecommendRecipes = function(limit: number = 20) {
 
 RecipeSchema.post("remove", function(this: IRecipe) {
   console.log(typeof this._id);
-  User.updateMany({
-    $or: [
-      { createdRecipes: { $in: [this.id] } },
-      { savedRecipes: { $in: [this.id] } }
-    ]
-  }, {
-    $pull: {
-      createdRecipes: this._id,
-      savedRecipes: this._id,
-    }
-  }).then(console.log);
+  User.removeRecipeFromAll(this.id).then(console.log);
 
-  Collection.updateMany({ recipes: { $in: [this.id] } }, {
-    $pull: {
-      recipes: this._id,
-    }
-  }).then(console.log);
+  Collection.removeRecipeFromAll(this.id).then(console.log);
 
-  Rating.deleteMany({ recipeId: { $in: [this.id] } }).then(console.log);
+  Rating.removeRecipe(this.id).then(console.log);
 });
 
 export const RecipeModel = model<IRecipe, IRecipeModel>('recipe', RecipeSchema);

@@ -54,6 +54,7 @@ export interface IUser extends Document, IUserMethods {
 
 export interface IUserModel extends Model<IUser> {
   findOneByEmailOrUsername(term: string): DocumentQuery<IUser, IUser, {}>;
+  removeRecipeFromAll(recipeId): Promise<any>;
 }
 
 export const UserFields = {
@@ -176,7 +177,10 @@ UserSchema.methods.unsaveRecipe = function(this: IUser, recipeId) {
     $pull: {
       savedRecipes: recipeId
     }
-  }).exec(() => this.getLatest());
+  })
+    .exec()
+    .then(() => Collection.removeRecipeFromUser(recipeId, this.id))
+    .then(() => this.getLatest());
 };
 
 UserSchema.methods.createRecipe = function(this: IUser, recipeId) {
@@ -282,5 +286,18 @@ UserSchema.statics.findOneByEmailOrUsername = function(term: string) {
   return UserModel.findOne({ $or: [{ email: term }, { username: term }] });
 };
 
+UserSchema.statics.deleteRecipeFromAll = function(this: IUser, recipeId) {
+  return UserModel.updateMany({
+    $or: [
+      { createdRecipes: recipeId },
+      { savedRecipes: recipeId },
+    ]
+  }, {
+    $pull: {
+      createdRecipes: recipeId,
+      savedRecipes: recipeId,
+    }
+  }).exec();
+};
 export const UserModel = model<IUser, IUserModel>('user', UserSchema);
 export {UserModel as User};

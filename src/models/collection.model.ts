@@ -21,6 +21,7 @@ export interface ICollection extends Document, ICollectionMethods {
 }
 
 export interface ICollectionModel extends Model<ICollection> {
+  removeRecipeFromAll(recipeId): Promise<any>;
   removeRecipeFromUser(recipeId, userId): Promise<any>;
 }
 
@@ -71,13 +72,21 @@ export const CollectionSchema = new Schema(
   }
 );
 
+CollectionSchema.statics.removeRecipeFromAll = function(recipeId) {
+  return CollectionModel.updateMany({
+    recipes: recipeId
+  }, {
+    $pull: { recipes: recipeId }
+  }).exec();
+};
+
 CollectionSchema.statics.removeRecipeFromUser = function(recipeId, userId) {
   return CollectionModel.updateMany({
     createdBy: userId,
-    recipes: {$in: [recipeId]}
+    recipes: recipeId,
   }, {
-    $pull: {recipes: recipeId}
-  });
+    $pull: { recipes: recipeId }
+  }).exec();
 };
 
 CollectionSchema.index({
