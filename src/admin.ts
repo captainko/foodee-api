@@ -22,10 +22,10 @@ class Admin {
   constructor() {
     this.app = express();
     this._config();
-    this._mongoSetup();
+    // this._mongoSetup();
   }
 
-  private async _config() {
+  private _config() {
 
     // Passing resources by giving entire database
     const adminBro = new AdminBro({

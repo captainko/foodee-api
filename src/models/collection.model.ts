@@ -1,15 +1,16 @@
 // lib
-import { Document, Model, model, Schema, SchemaTypes, SchemaDefinition } from "mongoose";
+import { Document, Model, model, Schema, SchemaTypes } from "mongoose";
 
 // app
 import { IUser, User } from "./user.model";
 import { IRecipe } from "./recipe.model";
 
 export interface ICollectionMethods {
-  addRecipe(recipeId: string): ICollection;
-  removeRecipe(recipeId: string): ICollection;
+  addRecipe(recipeId: string): Promise<ICollection>;
+  removeRecipe(recipeId: string): Promise<ICollection>;
   toSearchResult(): Promise<ICollection>;
   toDetailFor(user: IUser): Promise<ICollection>;
+  getLatest(): Promise<ICollection>;
 }
 
 export interface ICollection extends Document, ICollectionMethods {
@@ -20,7 +21,8 @@ export interface ICollection extends Document, ICollectionMethods {
 }
 
 export interface ICollectionModel extends Model<ICollection> {
-
+  removeRecipeFromAll(recipeId): Promise<any>;
+  removeRecipeFromUser(recipeId, userId): Promise<any>;
 }
 
 export const CollectionFields = {
@@ -67,7 +69,25 @@ export const CollectionSchema = new Schema(
 
       }
     },
-  });
+  }
+);
+
+CollectionSchema.statics.removeRecipeFromAll = function(recipeId) {
+  return CollectionModel.updateMany({
+    recipes: recipeId
+  }, {
+    $pull: { recipes: recipeId }
+  }).exec();
+};
+
+CollectionSchema.statics.removeRecipeFromUser = function(recipeId, userId) {
+  return CollectionModel.updateMany({
+    createdBy: userId,
+    recipes: recipeId,
+  }, {
+    $pull: { recipes: recipeId }
+  }).exec();
+};
 
 CollectionSchema.index({
   name: 'text',
@@ -78,26 +98,41 @@ CollectionSchema.index({
 });
 
 CollectionSchema.post("remove", function(this: ICollection) {
-  User.updateMany({collection: {$in: [this._id]}}, {
+  User.updateMany({ collections: this._id }, {
     $pull: {
       collections: this._id,
     }
-  }).then(console.log);  
+  }).then(console.log);
 });
 
-CollectionSchema.methods.addRecipe = function(this: ICollection, recipeId: string) {
-  if (-1 === this.recipes.findIndex((r: any) => r == recipeId || r.id == recipeId)) {
-  this.recipes.push(recipeId);
-  }
+CollectionSchema.methods.getLatest = function() {
+  return CollectionModel.findById(this.id).exec();
+};
 
-  return this;
+CollectionSchema.methods.addRecipe = function(this: ICollection, recipeId: string) {
+  // if (-1 === this.recipes.findIndex((r: any) => r == recipeId || r.id == recipeId)) {
+  //   this.recipes.push(recipeId);
+  // }
+
+  // return this;
+  return this.update({
+    $addToSet: {
+      recipes: recipeId,
+    }
+  }).exec().then(() => this.getLatest());
 };
 
 CollectionSchema.methods.removeRecipe = function(this: ICollection, recipeId: string) {
-  const index = this.recipes.findIndex((r: any) => r == recipeId || r.id == recipeId);
-  this.recipes.splice(index, 1);
+  // const index = this.recipes.findIndex((r: any) => r == recipeId || r.id == recipeId);
+  // this.recipes.splice(index, 1);
 
-  return this;
+  // return this;
+
+  return this.update({
+    $pull: {
+      recipes: recipeId,
+    }
+  }).exec().then(() => this.getLatest);
 };
 
 CollectionSchema.methods.toSearchResult = async function(this: ICollection) {
@@ -106,16 +141,15 @@ CollectionSchema.methods.toSearchResult = async function(this: ICollection) {
     populate: { model: 'image', path: 'banners', options: { limit: 1 } },
     options: { limit: 1 }
   }).execPopulate();
-  console.log(this);
   const result = {
     ...this.toObject(),
+    total: this.recipes.length,
   };
   if (this.recipes.length) {
     // @ts-ignore
     result.image_url = this.recipes[0].image_url;
   }
   // console.log(this.toObject());
-  console.log(result);
   delete result.createdBy;
   delete result.createdAt;
   delete result.recipes;

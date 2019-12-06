@@ -28,6 +28,8 @@ app.listen(SERVER_PORT, () => {
     console.log('Express server listening on port ' + SERVER_PORT);
 });
 
-admin.listen(WEB_PORT, () => {
-    console.log('Admin server listening on port ' + WEB_PORT);
-});
+// https.createServer({
+//     key: fs.readFileSync('./key.pem'),
+//     cert: fs.readFileSync('./cert.pem'),
+//     passphrase: SSL_PASSPHRASE,
+// }, admin).listen(WEB_PORT);
