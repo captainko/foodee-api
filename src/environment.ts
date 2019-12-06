@@ -9,7 +9,6 @@ export const {
   JWT_SECRET = 'secret',
   SESSION_SECRET = 'foodee-api',
   EMAIL_SECRET = 'foodee-email',
-  PATH_IMAGE = '/public/uploads/',
   GMAIL_USER = 'foodeeapplication@gmail.com',
   GMAIL_PASS = 'foodee123',
   CLOUDINARY_CLOUD_NAME,
