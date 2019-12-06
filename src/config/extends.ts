@@ -16,9 +16,7 @@ type ToSomething = "toThumbnailFor" | "toJSONFor";
 Array.prototype.to = function(this: any[], key, something) {
   const length = this.length; let i = 0;
   while (i < length) {
-    console.log(key, typeof this[i]);
-    this[i] = this[i][key](something);
-    i++;
+    this[i] = this[i++][key](something);
   }
   return this;
 };
