@@ -77,14 +77,6 @@ AdminCollectionSchema.index({
   }
 });
 
-AdminCollectionSchema.post("remove", function(this: IAdminCollection) {
-  AdminUser.updateMany({collection: {$in: [this._id]}}, {
-    $pull: {
-      collections: this._id,
-    }
-  }).then(console.log);  
-});
-
 AdminCollectionSchema.methods.addRecipe = function(this: IAdminCollection, recipeId: string) {
   if (-1 === this.recipes.findIndex((r: any) => r == recipeId || r.id == recipeId)) {
   this.recipes.push(recipeId);

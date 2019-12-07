@@ -129,13 +129,13 @@ export const RecipeFields = {
       total: 0,
     }
   },
-  ratings: {
-    type: [{
-      type: SchemaTypes.ObjectId,
-      ref: 'admin-rating',
-    }],
-    default: [],
-  },
+  // ratings: {
+  //   type: [{
+  //     type: SchemaTypes.ObjectId,
+  //     ref: 'admin-rating',
+  //   }],
+  //   default: [],
+  // },
   tags: {
     type: [String],
     trim: true,
@@ -164,6 +164,12 @@ RecipeSchema.virtual('image_url').get(function(this: IAdminRecipe) {
   }
   // @ts-ignore
   return this.banners[0].url;
+});
+
+RecipeSchema.virtual('ratings', {
+  ref: 'admin-rating',
+  localField: '_id',
+  foreignField: 'recipeId',
 });
 
 RecipeSchema.index({

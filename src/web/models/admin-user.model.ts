@@ -77,9 +77,9 @@ export const UserFields: SchemaDefinition = {
     default: false,
   },
   image_url: {
-    
-      type: SchemaTypes.ObjectId,
-      ref: 'admin-image'
+
+    type: SchemaTypes.ObjectId,
+    ref: 'admin-image'
 
   },
   createdRecipes: {
@@ -102,13 +102,13 @@ export const UserFields: SchemaDefinition = {
       ref: 'admin-rating',
     }]
   },
-  collections: {
-    type: [{
-      type: SchemaTypes.ObjectId,
-      ref: 'admin-collection',
-    }],
-    default: [],
-  },
+  // collections: {
+  //   type: [{
+  //     type: SchemaTypes.ObjectId,
+  //     ref: 'admin-collection',
+  //   }],
+  //   default: [],
+  // },
   hash: String,
   salt: String,
 };
@@ -116,6 +116,24 @@ export const UserFields: SchemaDefinition = {
 export const AdminUserSchema = new Schema<IAdminUser>(UserFields);
 
 AdminUserSchema.plugin(uniqueValidator, { message: 'is already taken.' });
+
+AdminUserSchema.virtual('createdRecipes', {
+  ref: 'admin-recipe',
+  localField: '_id',
+  foreignField: 'createdBy',
+  options: {
+    sort: { updatedAt: -1 }
+  }
+});
+
+AdminUserSchema.virtual('collections', {
+  ref: 'admin-collection',
+  localField: '_id',
+  foreignField: 'createdBy',
+  options: {
+    sort: { updatedAt: -1 }
+  }
+});
 
 // AdminUserSchema.methods.addRating = function(this: IUser, ratingId: string) {
 //   if (!this.ratings.includes(ratingId)) {
