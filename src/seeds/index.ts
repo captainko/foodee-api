@@ -398,8 +398,6 @@ new Promise((res) => {
                   recipe.banners = images.map(x => x.id);
                   // @ts-ignore
                   recipe.createdBy = newUser.id;
-                  newUser.createdRecipes.unshift(recipe.id);
-                  await newUser.save();
                   return await recipe.save();
                 })
                 .then(newRecipe => rDone(null, newRecipe))
