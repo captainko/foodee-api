@@ -136,13 +136,13 @@ export const RecipeFields = {
       total: 0,
     }
   },
-  ratings: {
-    type: [{
-      type: SchemaTypes.ObjectId,
-      ref: 'rating',
-    }],
-    default: [],
-  },
+  // ratings: {
+  //   type: [{
+  //     type: SchemaTypes.ObjectId,
+  //     ref: 'rating',
+  //   }],
+  //   default: [],
+  // },
   tags: {
     type: [String],
     trim: true,
@@ -193,6 +193,12 @@ RecipeSchema.virtual('image_url').get(function(this: IRecipe) {
   }
   // @ts-ignore
   return this.banners[0].url;
+});
+
+RecipeSchema.virtual('ratings', {
+  ref: 'rating',
+  localField: '_id',
+  foreignField: 'recipeId'
 });
 
 RecipeSchema.index({
@@ -365,7 +371,6 @@ RecipeSchema.statics.getRecommendRecipes = function(limit: number = 20) {
 
 RecipeSchema.post("remove", function(this: IRecipe) {
   console.log(typeof this._id);
-  User.removeRecipeFromAll(this.id).then(console.log);
 
   Collection.removeRecipeFromAll(this.id).then(console.log);
 

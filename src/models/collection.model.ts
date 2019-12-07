@@ -102,24 +102,11 @@ CollectionSchema.index({
   }
 });
 
-CollectionSchema.post("remove", function(this: ICollection) {
-  User.updateMany({ collections: this._id }, {
-    $pull: {
-      collections: this._id,
-    }
-  }).then(console.log);
-});
-
 CollectionSchema.methods.getLatest = function() {
   return CollectionModel.findById(this.id).exec();
 };
 
 CollectionSchema.methods.addRecipe = function(this: ICollection, recipeId: string) {
-  // if (-1 === this.recipes.findIndex((r: any) => r == recipeId || r.id == recipeId)) {
-  //   this.recipes.push(recipeId);
-  // }
-
-  // return this;
   return this.updateOne({
     $addToSet: {
       recipes: recipeId,

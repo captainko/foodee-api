@@ -39,9 +39,6 @@ export class CollectionController {
         name: body.name,
         createdBy: user.id,
       });
-
-      await user.createCollection(collection.id);
-
       res.sendAndWrap(collection, 'collection');
     } catch (err) {
       next(err);

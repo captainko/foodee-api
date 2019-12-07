@@ -28,7 +28,7 @@ class App {
   private _config() {
 
     applyMiddleware(middleware, this.app);
-    this.routePrv.routes(admin);
+    // this.routePrv.routes(admin);
     this.routePrv.routes(this.app);
     applyMiddleware(errorHandlers, this.app);
   }

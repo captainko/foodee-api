@@ -60,7 +60,6 @@ export interface IUser extends Document, IUserMethods {
 
 export interface IUserModel extends Model<IUser> {
   findOneByEmailOrUsername(term: string): DocumentQuery<IUser, IUser, {}>;
-  removeRecipeFromAll(recipeId): Promise<any>;
 }
 
 export const UserFields = {
@@ -91,13 +90,13 @@ export const UserFields = {
     type: SchemaTypes.ObjectId,
     ref: 'image',
   },
-  createdRecipes: {
-    type: [{
-      type: SchemaTypes.ObjectId,
-      ref: 'recipe'
-    }],
-    default: [],
-  },
+  // createdRecipes: {
+  //   type: [{
+  //     type: SchemaTypes.ObjectId,
+  //     ref: 'recipe'
+  //   }],
+  //   default: [],
+  // },
   savedRecipes: {
     type: [{
       type: SchemaTypes.ObjectId,
@@ -111,13 +110,13 @@ export const UserFields = {
       ref: 'rating',
     }]
   },
-  collections: {
-    type: [{
-      type: SchemaTypes.ObjectId,
-      ref: 'collection',
-    }],
-    default: [],
-  },
+  // collections: {
+  //   type: [{
+  //     type: SchemaTypes.ObjectId,
+  //     ref: 'collection',
+  //   }],
+  //   default: [],
+  // },
   hash: String,
   salt: String,
   resetPasswordToken: String,
@@ -130,14 +129,12 @@ export const UserSchema = new Schema<IUser>(
     versionKey: false,
     timestamps: true,
     toJSON: {
-      virtuals: true,
       transform: (doc, ret) => {
         delete ret._id;
         delete ret.ratings;
       },
     },
     toObject: {
-      virtuals: true,
       transform: (doc, ret) => {
         delete ret._id;
       }
@@ -145,6 +142,20 @@ export const UserSchema = new Schema<IUser>(
   });
 
 UserSchema.plugin(uniqueValidator, { message: 'is already taken.' });
+
+UserSchema.virtual('collections', {
+  ref: 'collection',
+  localField: '_id',
+  foreignField: 'createdBy',
+  options: { sort: { updatedAt: -1 } },
+});
+
+UserSchema.virtual('createdRecipes', {
+  ref: 'recipe',
+  localField: '_id',
+  foreignField: 'createdBy',
+  options: { sort: { updatedAt: -1 } },
+});
 
 UserSchema.methods.getLatest = function(this: IUser) {
   return UserModel.findById(this.id).exec();
@@ -208,19 +219,6 @@ UserSchema.methods.deleteRecipe = function(this: IUser, recipeId) {
   return this.updateOne({
     $push: { savedRecipes: recipeId }
   }).exec(() => this.getLatest());
-};
-
-UserSchema.methods.createCollection = function(this: IUser, collectionId) {
-  // this.collections.unshift(collectionId);
-  // return this;
-  return this.updateOne({
-    $push: {
-      collections: {
-        $each: [collectionId],
-        $position: [0],
-      }
-    }
-  }).then(() => this.getLatest());
 };
 
 UserSchema.methods.deleteCollection = function(this: IUser, collectionId) {
