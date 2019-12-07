@@ -20,7 +20,7 @@ export interface ICollection extends Document, ICollectionMethods {
   createdBy?: string | IUser;
   image_url?: string;
   recipes?: Array<string | IRecipe>;
-  didSaveRecipe?: boolean;
+  didContainRecipe?: boolean;
 }
 
 export interface ICollectionModel extends Model<ICollection> {
@@ -118,7 +118,7 @@ CollectionSchema.methods.addRecipe = function(this: ICollection, recipeId: strin
   // }
 
   // return this;
-  return this.update({
+  return this.updateOne({
     $addToSet: {
       recipes: recipeId,
     }
@@ -131,7 +131,7 @@ CollectionSchema.methods.removeRecipe = function(this: ICollection, recipeId: st
 
   // return this;
 
-  return this.update({
+  return this.updateOne({
     $pull: {
       recipes: recipeId,
     }
@@ -139,7 +139,7 @@ CollectionSchema.methods.removeRecipe = function(this: ICollection, recipeId: st
 };
 
 CollectionSchema.methods.didIncludeRecipe = function(this: ICollection, recipeId: string) {
-  return CollectionModel.find({_id: this.id, recipes: recipeId}).then((c) => !!c);
+  return CollectionModel.findOne({ _id: this.id, recipes: recipeId }, "id").then((c) => !!c);
 };
 
 CollectionSchema.methods.toSearchResult = async function(this: ICollection) {
@@ -167,17 +167,19 @@ CollectionSchema.methods.toSearchResult = async function(this: ICollection) {
 };
 
 CollectionSchema.methods.toDetailFor = async function(this: ICollection, user: IUser) {
-  await this.populate({
+  await this.populate([{
     path: 'recipes',
     // populate: { model: 'image', path: 'banners', options: { limit: 1 } },
     // options: { limit: 1 }
-  }).execPopulate();
+  }, {
+    path: 'createdBy',
+    select: 'username',
+  }]).execPopulate();
 
   console.log('called');
   return {
     ...this.toJSON(),
-    user: this.createdBy,
-    recipes: this.recipes.map((r: IRecipe) => r.toThumbnailFor(user)),
+    recipes: this.recipes.toThumbnailFor(user),
   };
 };
 

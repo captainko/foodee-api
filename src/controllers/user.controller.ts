@@ -187,8 +187,8 @@ export class UserController {
       const collections$ =  user.collections.map(async (c: ICollection) => {
         const didSaveRecipe$ = c.didIncludeRecipe(recipe.id);
         const result$ = c.toSearchResult();
-        const [didSaveRecipe, result] = await Promise.all([didSaveRecipe$, result$]);
-        result.didSaveRecipe = didSaveRecipe;
+        const [isContained, result] = await Promise.all([didSaveRecipe$, result$]);
+        result.didContainRecipe = isContained;
         return result;
       });
       

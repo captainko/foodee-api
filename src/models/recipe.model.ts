@@ -311,7 +311,7 @@ RecipeSchema.methods.populateBanners = async function(this: IRecipe) {
 
 RecipeSchema.methods.addRating = function(this: IRecipe, ratingId: string) {
 
-  return this.update({
+  return this.updateOne({
     $addToSet: {
       ratings: ratingId,
     }

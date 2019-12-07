@@ -155,7 +155,7 @@ UserSchema.methods.addRating = function(this: IUser, ratingId: string) {
   //   this.ratings.push(ratingId);
   // }
 
-  return this.update({
+  return this.updateOne({
     $addToSet: { ratings: ratingId }
   }).exec(() => this.getLatest());
 };
@@ -167,7 +167,7 @@ UserSchema.methods.saveRecipe = function(this: IUser, recipeId) {
   // }
   // return this;
 
-  return this.update({
+  return this.updateOne({
     $push: { savedRecipes: { $each: [recipeId], $position: 0 } }
   }).exec(() => this.getLatest());
 };
@@ -181,7 +181,7 @@ UserSchema.methods.unsaveRecipe = function(this: IUser, recipeId) {
   // }
   // return this;
 
-  return this.update({
+  return this.updateOne({
     $pull: {
       savedRecipes: recipeId
     }
@@ -205,7 +205,7 @@ UserSchema.methods.deleteRecipe = function(this: IUser, recipeId) {
   //   this.createdRecipes.splice(position, 1);
   // }
   // return this;
-  return this.update({
+  return this.updateOne({
     $push: { savedRecipes: recipeId }
   }).exec(() => this.getLatest());
 };
@@ -213,12 +213,9 @@ UserSchema.methods.deleteRecipe = function(this: IUser, recipeId) {
 UserSchema.methods.createCollection = function(this: IUser, collectionId) {
   // this.collections.unshift(collectionId);
   // return this;
-  return this.update({
+  return this.updateOne({
     $addToSet: {
-      collections: {
-        $each: [collectionId],
-        $position: 0
-      }
+      collections: collectionId
     }
   }).then(() => this.getLatest());
 };
@@ -232,7 +229,7 @@ UserSchema.methods.deleteCollection = function(this: IUser, collectionId) {
   // }
   // return this;
 
-  return this.update({
+  return this.updateOne({
     $pull: {
       collections: collectionId,
     }

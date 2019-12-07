@@ -83,7 +83,7 @@ export class RecipeController {
   public static updateRecipe(req: Request, res: Response, next: NextFunction) {
     req.body.createdBy = req.user.id;
     console.log(req.body);
-    req.recipe.update(req.body)
+    req.recipe.updateOne(req.body)
       .then((value) => res.sendAndWrap(value, 'recipe'))
       .catch(next);
   }
