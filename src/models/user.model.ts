@@ -214,8 +214,11 @@ UserSchema.methods.createCollection = function(this: IUser, collectionId) {
   // this.collections.unshift(collectionId);
   // return this;
   return this.updateOne({
-    $addToSet: {
-      collections: collectionId
+    $push: {
+      collections: {
+        $each: [collectionId],
+        $position: [0],
+      }
     }
   }).then(() => this.getLatest());
 };

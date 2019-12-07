@@ -4,13 +4,15 @@ import { Document, Model, model, Schema, SchemaTypes } from "mongoose";
 // app
 import { IUser, User } from "./user.model";
 import { IRecipe } from "./recipe.model";
-import { COLLECTION_DEFAULT_IMG } from "../environment";
+import { COLLECTION_DEFAULT_IMG as DEFAULT_COLLECTION_IMG } from "../environment";
 
 export interface ICollectionMethods {
   addRecipe(recipeId: string): Promise<ICollection>;
   removeRecipe(recipeId: string): Promise<ICollection>;
   toSearchResult(): Promise<ICollection>;
   toDetailFor(user: IUser): Promise<ICollection>;
+  getBannerSync(): string;
+  getBannerAsync(): Promise<string>;
   getLatest(): Promise<ICollection>;
   didIncludeRecipe(recipeId): Promise<boolean>;
 }
@@ -143,21 +145,13 @@ CollectionSchema.methods.didIncludeRecipe = function(this: ICollection, recipeId
 };
 
 CollectionSchema.methods.toSearchResult = async function(this: ICollection) {
-  await this.populate({
-    path: 'recipes',
-    populate: { model: 'image', path: 'banners', options: { limit: 1 } },
-    options: { limit: 1 }
-  }).execPopulate();
+ 
   const result = {
     ...this.toObject(),
     total: this.recipes.length,
+    image_url: await this.getBannerAsync(),
   };
-  if (this.recipes.length) {
-    // @ts-ignore
-    result.image_url = this.recipes[0].image_url;
-  } else {
-    result.image_url = COLLECTION_DEFAULT_IMG;
-  }
+  
   // console.log(this.toObject());
   delete result.createdBy;
   delete result.createdAt;
@@ -169,8 +163,6 @@ CollectionSchema.methods.toSearchResult = async function(this: ICollection) {
 CollectionSchema.methods.toDetailFor = async function(this: ICollection, user: IUser) {
   await this.populate([{
     path: 'recipes',
-    // populate: { model: 'image', path: 'banners', options: { limit: 1 } },
-    // options: { limit: 1 }
   }, {
     path: 'createdBy',
     select: 'username',
@@ -179,8 +171,24 @@ CollectionSchema.methods.toDetailFor = async function(this: ICollection, user: I
   console.log('called');
   return {
     ...this.toJSON(),
+    total: this.recipes.length,
     recipes: this.recipes.toThumbnailFor(user),
+    image_url: this.getBannerSync(),
   };
+};
+
+CollectionSchema.methods.getBannerSync = function(this: ICollection) {
+  // @ts-ignore
+  return this.recipes.length ? this.recipes[0].image_url : DEFAULT_COLLECTION_IMG;
+}; 
+
+CollectionSchema.methods.getBannerAsync = async function(this: ICollection) {
+  await this.populate({
+    path: 'recipes',
+    populate: { model: 'image', path: 'banners', options: { limit: 1 } },
+    options: { limit: 1 }
+  }).execPopulate();
+  return this.getBannerSync();
 };
 
 export const CollectionModel = model<ICollection, ICollectionModel>('collection', CollectionSchema);

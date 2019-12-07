@@ -20,17 +20,17 @@ export class CollectionController {
       .catch(next);
   }
 
-  public static preloadRecipe(req: Request, res: Response, next: NextFunction, recipeId: string) {
-    Recipe.findById(recipeId, {}, { autopopulate: false })
-      .then((recipe) => {
-        if (!recipe) {
-          throw new HTTP404Error('Recipe not found');
-        }
-        req.recipe = recipe;
-        next();
-      })
-      .catch(next);
-  }
+  // public static preloadRecipe(req: Request, res: Response, next: NextFunction, recipeId: string) {
+  //   Recipe.findById(recipeId, {}, { autopopulate: false })
+  //     .then((recipe) => {
+  //       if (!recipe) {
+  //         throw new HTTP404Error('Recipe not found');
+  //       }
+  //       req.recipe = recipe;
+  //       next();
+  //     })
+  //     .catch(next);
+  // }
 
   public static async createCollection({ body, user }: Request, res: Response, next: NextFunction) {
     try {
@@ -48,12 +48,11 @@ export class CollectionController {
     }
   }
 
-  public static async getCollection({ collection, user }: Request, res: Response, next: NextFunction) {
+  public static async getDetailCollection({ collection, user }: Request, res: Response, next: NextFunction) {
     // collection.populate('recipes').execPopulate()
     //   .then(c => res.sendAndWrap(c.toSearchResult(), 'collection'))
     //   .catch(next);
     try {
-      collection = await collection.populate('recipes').execPopulate();
       const result = await collection.toDetailFor(user);
       res.sendAndWrap(result, 'collection');
     } catch (err) {

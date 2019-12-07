@@ -17,7 +17,7 @@ export const {
   SSL_PASSPHRASE,
 } = process.env;
 
-export const COLLECTION_DEFAULT_IMG = 'https://res.cloudinary.com/dmbqtabzp/image/upload/v1575631311/default-collection-image.jpg';
+export const COLLECTION_DEFAULT_IMG = undefined;
 
 export const IS_PROD = NODE_ENV === 'production';
 export const WEB_URL = IS_PROD ? 'https://foodee.cf' : 'http://localhost'; 
