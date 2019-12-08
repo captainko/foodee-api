@@ -2,6 +2,6 @@ const express = require('express');
 
 export const resetPassword = express.Router();
 
-import mountResetPasswordRoutes = require('../features/reset-password/routes');
+import mountResetPasswordRoutes from '../features/reset-password/routes';
 
 mountResetPasswordRoutes(resetPassword);

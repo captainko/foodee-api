@@ -4,7 +4,7 @@ import https = require('https');
 // app
 import app from "./app";
 import admin from './admin';
-import { SERVER_PORT, SSL_PASSPHRASE, IS_PROD, WEB_PORT } from "./environment";
+import { SERVER_PORT, IS_PROD, WEB_PORT } from "./environment";
 
 // if (!IS_PROD) {
 //     process.on("uncaughtException", e => {
@@ -24,10 +24,11 @@ if (IS_PROD) {
         key: fs.readFileSync('./private.key'),
         cert: fs.readFileSync('./certificate.crt'),
     }, app).listen(SERVER_PORT);
+    console.log(WEB_PORT);
     https.createServer({
-        key: fs.readFileSync('./key.pem'),
-        cert: fs.readFileSync('./cert.pem'),
-        passphrase: SSL_PASSPHRASE,
+        ca: fs.readFileSync('./ca_bundle.crt'),
+        key: fs.readFileSync('./private.key'),
+        cert: fs.readFileSync('./certificate.crt'),
     }, admin).listen(WEB_PORT);
 } else {
     app.listen(SERVER_PORT, () => {

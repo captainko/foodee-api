@@ -4,9 +4,7 @@ WORKDIR /usr/src/app
 
 COPY package*.json ./
 
-RUN npm install pm2 -g
-
-RUN npm install && npm run build
+RUN npm install 
 
 #COPY dist dist
 #COPY .env .
@@ -15,4 +13,6 @@ RUN npm install && npm run build
 
 COPY . .
 
-CMD ["npm","start"]
+RUN npm run build
+
+CMD ["npm","run", "prod"]

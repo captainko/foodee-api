@@ -9,9 +9,11 @@
         "ts-node-dev": "ts-node-dev",
         "start": "npm run watch",
         "watch": "ts-node-dev --respawn --transpileOnly src/server.ts",
-        "prod": "node ./dist/server.js",
+        "prod": "pm2-runtime ./dist/server.js",
         "build": "tsc",
-        "seed": "ts-node ./src/seeds"
+        "seed": "ts-node ./src/seeds",
+        "pm2-runtime": "pm2-runtime",
+        "ts-node": "ts-node"
     },
     "dependencies": {
         "admin-bro": "^1.4.2",
@@ -47,7 +49,8 @@
         "passport": "^0.4.0",
         "passport-jwt": "^4.0.0",
         "passport-local": "^1.0.0",
-        "react": "^16.12.0"
+        "react": "^16.12.0",
+        "react-dom": "^16.12.0"
     },
     "devDependencies": {
         "@types/async": "^3.0.3",
@@ -94,6 +97,7 @@
         "gulp-uglify": "^3.0.2",
         "gulp-wait": "0.0.2",
         "nodemon": "^1.19.4",
+        "pm2": "^4.2.0",
         "postcss-flexbugs-fixes": "^4.1.0",
         "terser-webpack-plugin": "^2.2.1",
         "ts-loader": "^6.2.1",

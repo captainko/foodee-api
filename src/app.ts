@@ -14,6 +14,7 @@ import middleware from "./middleware";
 import { applyMiddleware } from "./util";
 import { errorHandlers } from "./middleware/errorHandlers";
 import admin from "./admin";
+import { SEED_DB } from "./seeds";
 
 class App {
   public app: express.Application;
@@ -36,7 +37,10 @@ class App {
   private _mongoSetup() {
     mongoose.set('useCreateIndex', true);
     mongoose.connect(this.mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true })
-      .then(() => console.log("Connected to db"))
+      .then(() => {
+        console.log("Connected to db");
+        return SEED_DB();
+      })
       .catch((err) => console.log("Can't connect to db, ", err));
 
     if (!IS_PROD) {

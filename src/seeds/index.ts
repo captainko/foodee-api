@@ -352,8 +352,8 @@ function fakeMethods(): string[] {
     .map(() => faker.lorem.sentence());
 }
 
-new Promise((res) => {
-  mongoose.connect(DB_URI, { useNewUrlParser: true, useUnifiedTopology: true, ssl: true })
+export const SEED_DB = () => new Promise((res) => {
+  mongoose.connect(DB_URI, { useNewUrlParser: true, useUnifiedTopology: true, ssl: false })
     .then(() => {
       async.parallel(users.map((user) => (done) => {
         async.waterfall([
@@ -419,5 +419,5 @@ new Promise((res) => {
 
 }).then((value) => {
   console.log(value);
-  return mongoose.disconnect();
+  // return mongoose.disconnect();
 }).catch(x => console.error(x));

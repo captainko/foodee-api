@@ -13,8 +13,8 @@ services:
   mongo:
     container_name: mongo
     image: mongo
-    volumes: 
-      - mongodata:/data/db
+    # volumes: 
+    #   - mongodata:/data/db
     networks:
       - foodee-net
 volumes:

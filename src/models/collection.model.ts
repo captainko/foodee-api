@@ -1,5 +1,5 @@
 // lib
-import { Document, Model, model, Schema, SchemaTypes } from "mongoose";
+import { Document, Model, model, Schema, SchemaTypes, SchemaType, SchemaTypeOpts, Types } from "mongoose";
 
 // app
 import { IUser, User } from "./user.model";
@@ -21,7 +21,7 @@ export interface ICollection extends Document, ICollectionMethods {
   name?: string;
   createdBy?: string | IUser;
   image_url?: string;
-  recipes?: Array<string | IRecipe>;
+  recipes?: Array<Types.ObjectId | IRecipe>;
   didContainRecipe?: boolean;
 }
 
@@ -132,13 +132,13 @@ CollectionSchema.methods.didIncludeRecipe = function(this: ICollection, recipeId
 };
 
 CollectionSchema.methods.toSearchResult = async function(this: ICollection) {
- 
+
   const result = {
     ...this.toObject(),
     total: this.recipes.length,
     image_url: await this.getBannerAsync(),
   };
-  
+
   // console.log(this.toObject());
   delete result.createdBy;
   delete result.createdAt;
@@ -159,6 +159,7 @@ CollectionSchema.methods.toDetailFor = async function(this: ICollection, user: I
   return {
     ...this.toJSON(),
     total: this.recipes.length,
+    // @ts-ignore
     recipes: this.recipes.toThumbnailFor(user),
     image_url: this.getBannerSync(),
   };
@@ -167,7 +168,7 @@ CollectionSchema.methods.toDetailFor = async function(this: ICollection, user: I
 CollectionSchema.methods.getBannerSync = function(this: ICollection) {
   // @ts-ignore
   return this.recipes.length ? this.recipes[0].image_url : DEFAULT_COLLECTION_IMG;
-}; 
+};
 
 CollectionSchema.methods.getBannerAsync = async function(this: ICollection) {
   await this.populate({

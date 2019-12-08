@@ -7,7 +7,8 @@ export const ImageResource = {
     properties: {
       url: {
         components: {
-          show: AdminBro.bundle('../components/ImageInShow')
+          show: AdminBro.bundle('../components/images/ImageInShow'),
+          // list: AdminBro.bundle('../components/images/ImageInList'),
         }
       }
     }

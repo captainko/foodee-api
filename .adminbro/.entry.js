@@ -1,3 +1,3 @@
 AdminBro.UserComponents = {}
-import Component1 from '../src/web/components/ImageInShow'
+import Component1 from '../dist/web/components/ImageInShow'
 AdminBro.UserComponents.Component1 = Component1
