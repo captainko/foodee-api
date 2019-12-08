@@ -1,6 +1,7 @@
 import crypto = require('crypto');
 
 import {User } from '../models';
+import AdminBro from 'admin-bro';
 
 export const UserResource = {
   resource: User,
@@ -31,6 +32,11 @@ export const UserResource = {
           edit: false,
           filter: false,
           show: false,
+        }
+      },
+      image_url: {
+        components: {
+          show: AdminBro.bundle('../components/user/UserImageInShow')
         }
       }
     },
