@@ -1,4 +1,4 @@
-import React from 'react';
+const React = require('react');
 // import { Label } from "admin-bro";
 
 function RecipeBannerInShow(props)  {
@@ -11,7 +11,7 @@ function RecipeBannerInShow(props)  {
       style={{ width: '100px', display: 'block', marginLeft: 'auto', marginRight: 'auto', }}
     />
   );
-};
+}
 
 // AdminBro.UserComponents['MyComponentName'] = MyComponent
 export default RecipeBannerInShow;
