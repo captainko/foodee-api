@@ -3,8 +3,7 @@ services:
   app: 
     container_name: docker-node-mongo
     restart: always
-    image: december09/foodee-api:0.0.1
-    # build: .
+    image: december09/foodee-api:latest
     ports:
       - '8443:8443'
       - '80:80'

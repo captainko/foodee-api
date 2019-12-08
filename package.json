@@ -13,7 +13,12 @@
         "build": "tsc",
         "seed": "ts-node ./src/seeds",
         "pm2-runtime": "pm2-runtime",
-        "ts-node": "ts-node"
+        "ts-node": "ts-node",
+        "docker-build" : "docker-compose -f docker-compose-build.yml build",
+        "docker-tag": "docker tag foodee-api_app december09/foodee-api:latest",
+        "docker-push" : "docker push december09/foodee-api:latest",
+        "docker-tasks": "npm run docker-build && npm run docker-tag && npm run docker-push",
+        "docker-up": "docker-compose up -d"
     },
     "dependencies": {
         "admin-bro": "^1.4.2",

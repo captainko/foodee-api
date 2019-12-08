@@ -1,0 +1,25 @@
+version: '3'
+services: 
+  app: 
+    container_name: docker-node-mongo
+    restart: always
+    # image: december09/foodee-api:0.0.1
+    build: .
+    ports:
+      - '8443:8443'
+      - '80:80'
+      - '443:443'
+    networks:
+      - foodee-net
+  # mongo:
+  #   container_name: mongo
+  #   image: mongo
+  #   volumes: 
+  #     - mongodata:/data/db
+  #   networks:
+  #     - foodee-net
+# volumes:
+#   mongodata:
+#     driver: local
+networks:
+  foodee-net:
