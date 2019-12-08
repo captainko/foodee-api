@@ -12,7 +12,7 @@ export class RecipeController {
       .findById(id, {}, { autopopulate: false })
       .then((recipe) => {
         if (!recipe) {
-          throw new HTTP404Error();
+          throw new HTTP404Error("recipe not found");
         }
         req.recipe = recipe;
         return next();
@@ -69,6 +69,7 @@ export class RecipeController {
         servings: body.servings,
         ingredients: body.ingredients,
         createdBy: req.user.id,
+        methods: body.methods,
       });
       await recipe.populate('banners').execPopulate();
       req.user.createRecipe(recipe.id);
@@ -82,7 +83,7 @@ export class RecipeController {
   public static updateRecipe(req: Request, res: Response, next: NextFunction) {
     req.body.createdBy = req.user.id;
     console.log(req.body);
-    req.recipe.update(req.body)
+    req.recipe.updateOne(req.body)
       .then((value) => res.sendAndWrap(value, 'recipe'))
       .catch(next);
   }
@@ -97,13 +98,10 @@ export class RecipeController {
     try {
       const rateObj = await Rating.rate(req.user.id, req.recipe.id, req.body.rateValue);
       const { user, recipe } = req;
-      console.log(recipe);
-      recipe.addRating(rateObj._id);
-      user.addRating(rateObj._id);
+      
+      await Promise.all([user.addRating(rateObj._id), recipe.addRating(rateObj._id)]);
 
       await recipe.updateRating();
-
-      await Promise.all([recipe.save(), user.save()]);
 
       return res.sendMessage('rated successfully');
 
@@ -114,8 +112,7 @@ export class RecipeController {
 
   public static async saveRecipe(req: Request, res: Response, next: NextFunction) {
     try {
-      req.user.saveRecipe(req.recipe);
-      await req.user.save();
+      await req.user.saveRecipe(req.recipe.id);
       res.sendMessage('saved successfully');
     } catch (err) {
       next(err);
@@ -124,15 +121,14 @@ export class RecipeController {
 
   public static async unsaveRecipe(req: Request, res: Response, next: NextFunction) {
     try {
-      req.user.unsaveRecipe(req.recipe);
-      await req.user.save();
+      await req.user.unsaveRecipe(req.recipe.id);
       res.sendMessage("unsaved successfully");
     } catch (err) {
       next(err);
     }
   }
 
-  public static async deleteRecipe({ user, recipe }: Request, res: Response, next: NextFunction) {
+  public static async deleteRecipe({ recipe }: Request, res: Response, next: NextFunction) {
     try {
       await recipe.remove();
       res.sendMessage('removed successfully');

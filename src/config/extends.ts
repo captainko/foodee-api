@@ -29,7 +29,7 @@ Array.prototype.toJSONFor = function(this: any[], something) {
   return this.to("toJSONFor", something);
 };
 
-Array.prototype.toSearchResult = async function(this: any[]) {
+Array.prototype.toSearchResult = function(this: any[]) {
   const $result = [];
   for (const v of this) { 
     $result[$result.length] =  v.toSearchResult();

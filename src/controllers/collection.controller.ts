@@ -20,17 +20,17 @@ export class CollectionController {
       .catch(next);
   }
 
-  public static preloadRecipe(req: Request, res: Response, next: NextFunction, recipeId: string) {
-    Recipe .findById(recipeId, {},  {autopopulate: false})
-      .then((recipe) => {
-        if (!recipe) {
-          throw new HTTP404Error('Recipe not found');
-        }
-        req.recipe = recipe;
-        next();
-      })
-      .catch(next);
-  }
+  // public static preloadRecipe(req: Request, res: Response, next: NextFunction, recipeId: string) {
+  //   Recipe.findById(recipeId, {}, { autopopulate: false })
+  //     .then((recipe) => {
+  //       if (!recipe) {
+  //         throw new HTTP404Error('Recipe not found');
+  //       }
+  //       req.recipe = recipe;
+  //       next();
+  //     })
+  //     .catch(next);
+  // }
 
   public static async createCollection({ body, user }: Request, res: Response, next: NextFunction) {
     try {
@@ -39,26 +39,22 @@ export class CollectionController {
         name: body.name,
         createdBy: user.id,
       });
-      
-      await user.createCollection(collection.id).save();
-
       res.sendAndWrap(collection, 'collection');
     } catch (err) {
       next(err);
     }
   }
 
-  public static async getCollection({ collection, user }: Request, res: Response, next: NextFunction) {
+  public static async getDetailCollection({ collection, user }: Request, res: Response, next: NextFunction) {
     // collection.populate('recipes').execPopulate()
     //   .then(c => res.sendAndWrap(c.toSearchResult(), 'collection'))
     //   .catch(next);
-try {
-  collection = await collection.populate('recipes').execPopulate();
-  const result = await collection.toDetailFor(user);
-  res.sendAndWrap(result, 'collection');
-} catch (err) {
-  next(err);
-}
+    try {
+      const result = await collection.toDetailFor(user);
+      res.sendAndWrap(result, 'collection');
+    } catch (err) {
+      next(err);
+    }
 
     // return res.sendAndWrap(collection, 'collection');
   }
@@ -76,20 +72,34 @@ try {
       .catch(next);
   }
 
-  public static addRecipe(req: Request, res: Response, next: NextFunction) {
-    const { collection , recipe} = req;
-    collection.addRecipe(recipe.id);
-    collection.save()
-      .then((c) => res.sendAndWrap(c, 'collection'))
-      .catch(next);
+  public static async deleteCollection(req: Request, res: Response, next: NextFunction) {
+    try {
+      await req.collection.remove();
+      res.sendMessage("Removed collection successfully");
+    } catch (err) {
+      next(err);
+    }
   }
 
-  public static removeRecipe(req: Request, res: Response, next: NextFunction) {
-    const {collection, recipe} = req;
-    collection.removeRecipe(recipe.id);
-    collection.save()
-    .then((c) => res.sendAndWrap(c, 'collection'))
-    .catch(next);
+  public static async addRecipe(req: Request, res: Response, next: NextFunction) {
+    const { collection, recipe } = req;
+    try {
+      const newCollection = await collection.addRecipe(recipe.id);
+      res.sendAndWrap(await newCollection.toDetailFor(req.user), 'collection');
+    } catch (err) {
+      next(err);
+    }
+
+  }
+
+  public static async removeRecipe(req: Request, res: Response, next: NextFunction) {
+    const { collection, recipe } = req;
+    try {
+      const newCollection = await collection.removeRecipe(recipe.id);
+      res.sendAndWrap(await newCollection.toDetailFor(req.user), 'collection');
+    } catch (err) {
+      next(err);
+    }
   }
 
   public static onlySameUserOrAdmin(req: Request, res: Response, next: NextFunction) {

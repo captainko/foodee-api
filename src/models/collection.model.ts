@@ -1,15 +1,20 @@
 // lib
-import { Document, Model, model, Schema, SchemaTypes, SchemaDefinition } from "mongoose";
+import { Document, Model, model, Schema, SchemaTypes } from "mongoose";
 
 // app
 import { IUser, User } from "./user.model";
 import { IRecipe } from "./recipe.model";
+import { COLLECTION_DEFAULT_IMG as DEFAULT_COLLECTION_IMG } from "../environment";
 
 export interface ICollectionMethods {
-  addRecipe(recipeId: string): ICollection;
-  removeRecipe(recipeId: string): ICollection;
+  addRecipe(recipeId: string): Promise<ICollection>;
+  removeRecipe(recipeId: string): Promise<ICollection>;
   toSearchResult(): Promise<ICollection>;
   toDetailFor(user: IUser): Promise<ICollection>;
+  getBannerSync(): string;
+  getBannerAsync(): Promise<string>;
+  getLatest(): Promise<ICollection>;
+  didIncludeRecipe(recipeId): Promise<boolean>;
 }
 
 export interface ICollection extends Document, ICollectionMethods {
@@ -17,10 +22,12 @@ export interface ICollection extends Document, ICollectionMethods {
   createdBy?: string | IUser;
   image_url?: string;
   recipes?: Array<string | IRecipe>;
+  didContainRecipe?: boolean;
 }
 
 export interface ICollectionModel extends Model<ICollection> {
-
+  removeRecipeFromAll(recipeId): Promise<any>;
+  removeRecipeFromUser(recipeId, userId): Promise<any>;
 }
 
 export const CollectionFields = {
@@ -67,7 +74,25 @@ export const CollectionSchema = new Schema(
 
       }
     },
-  });
+  }
+);
+
+CollectionSchema.statics.removeRecipeFromAll = function(recipeId) {
+  return CollectionModel.updateMany({
+    recipes: recipeId
+  }, {
+    $pull: { recipes: recipeId }
+  }).exec();
+};
+
+CollectionSchema.statics.removeRecipeFromUser = function(recipeId, userId) {
+  return CollectionModel.updateMany({
+    createdBy: userId,
+    recipes: recipeId,
+  }, {
+    $pull: { recipes: recipeId }
+  }).exec();
+};
 
 CollectionSchema.index({
   name: 'text',
@@ -77,45 +102,44 @@ CollectionSchema.index({
   }
 });
 
-CollectionSchema.post("remove", function(this: ICollection) {
-  User.updateMany({collection: {$in: [this._id]}}, {
-    $pull: {
-      collections: this._id,
-    }
-  }).then(console.log);  
-});
+CollectionSchema.methods.getLatest = function() {
+  return CollectionModel.findById(this.id).exec();
+};
 
 CollectionSchema.methods.addRecipe = function(this: ICollection, recipeId: string) {
-  if (-1 === this.recipes.findIndex((r: any) => r == recipeId || r.id == recipeId)) {
-  this.recipes.push(recipeId);
-  }
-
-  return this;
+  return this.updateOne({
+    $addToSet: {
+      recipes: recipeId,
+    }
+  }).exec().then(() => this.getLatest());
 };
 
 CollectionSchema.methods.removeRecipe = function(this: ICollection, recipeId: string) {
-  const index = this.recipes.findIndex((r: any) => r == recipeId || r.id == recipeId);
-  this.recipes.splice(index, 1);
+  // const index = this.recipes.findIndex((r: any) => r == recipeId || r.id == recipeId);
+  // this.recipes.splice(index, 1);
 
-  return this;
+  // return this;
+
+  return this.updateOne({
+    $pull: {
+      recipes: recipeId,
+    }
+  }).exec().then(() => this.getLatest);
+};
+
+CollectionSchema.methods.didIncludeRecipe = function(this: ICollection, recipeId: string) {
+  return CollectionModel.findOne({ _id: this.id, recipes: recipeId }, "id").then((c) => !!c);
 };
 
 CollectionSchema.methods.toSearchResult = async function(this: ICollection) {
-  await this.populate({
-    path: 'recipes',
-    populate: { model: 'image', path: 'banners', options: { limit: 1 } },
-    options: { limit: 1 }
-  }).execPopulate();
-  console.log(this);
+ 
   const result = {
     ...this.toObject(),
+    total: this.recipes.length,
+    image_url: await this.getBannerAsync(),
   };
-  if (this.recipes.length) {
-    // @ts-ignore
-    result.image_url = this.recipes[0].image_url;
-  }
+  
   // console.log(this.toObject());
-  console.log(result);
   delete result.createdBy;
   delete result.createdAt;
   delete result.recipes;
@@ -124,18 +148,34 @@ CollectionSchema.methods.toSearchResult = async function(this: ICollection) {
 };
 
 CollectionSchema.methods.toDetailFor = async function(this: ICollection, user: IUser) {
-  await this.populate({
+  await this.populate([{
     path: 'recipes',
-    // populate: { model: 'image', path: 'banners', options: { limit: 1 } },
-    // options: { limit: 1 }
-  }).execPopulate();
+  }, {
+    path: 'createdBy',
+    select: 'username',
+  }]).execPopulate();
 
   console.log('called');
   return {
     ...this.toJSON(),
-    user: this.createdBy,
-    recipes: this.recipes.map((r: IRecipe) => r.toThumbnailFor(user)),
+    total: this.recipes.length,
+    recipes: this.recipes.toThumbnailFor(user),
+    image_url: this.getBannerSync(),
   };
+};
+
+CollectionSchema.methods.getBannerSync = function(this: ICollection) {
+  // @ts-ignore
+  return this.recipes.length ? this.recipes[0].image_url : DEFAULT_COLLECTION_IMG;
+}; 
+
+CollectionSchema.methods.getBannerAsync = async function(this: ICollection) {
+  await this.populate({
+    path: 'recipes',
+    populate: { model: 'image', path: 'banners', options: { limit: 1 } },
+    options: { limit: 1 }
+  }).execPopulate();
+  return this.getBannerSync();
 };
 
 export const CollectionModel = model<ICollection, ICollectionModel>('collection', CollectionSchema);

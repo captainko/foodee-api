@@ -6,9 +6,12 @@ import {
   DocumentQuery,
   Model,
   PaginateModel,
+  Aggregate,
+  SchemaDefinition,
 } from "mongoose";
 import mongooseAutoPopulate = require('mongoose-autopopulate');
 import mongoosePaginate = require('mongoose-paginate');
+import mongooseRandom = require('mongoose-simple-random');
 import { Rating, IRating } from "./rating.model";
 import { IUser, User } from "./user.model";
 import { IImage, Image } from "./image.model";
@@ -38,7 +41,7 @@ export interface IRecipe extends Document {
   createdAt?: string;
   updatedAt?: string;
 
-  addRating(ratingId: string): IRating;
+  addRating(ratingId: string): Promise<IRating>;
   updateRating(): Promise<any>;
   isCreatedBy(user: string | IUser): boolean;
   toJSONFor(user: IUser): IRecipe;
@@ -47,6 +50,7 @@ export interface IRecipe extends Document {
   toSearchResultFor(user?: IUser): IRecipe;
   populateBanners(): Promise<IRecipe>;
   populateUser(): Promise<IRecipe>;
+  getLatest(): Promise<IRecipe>;
 }
 
 export interface IRecipeModel extends PaginateModel<IRecipe> {
@@ -54,9 +58,10 @@ export interface IRecipeModel extends PaginateModel<IRecipe> {
   getCategories(limit?: number): Promise<Array<ICategory>>;
   getNewRecipes(): DocumentQuery<IRecipe[], IRecipe, {}>;
   getHighRatedRecipes(): DocumentQuery<IRecipe[], IRecipe, {}>;
+  getRecommendRecipes(): Aggregate<IRecipe[]>;
 }
 
-export const RecipeFields = {
+export const RecipeFields: SchemaDefinition = {
   name: {
     type: String,
     required: [true, 'is required'],
@@ -132,13 +137,13 @@ export const RecipeFields = {
       total: 0,
     }
   },
-  ratings: {
-    type: [{
-      type: SchemaTypes.ObjectId,
-      ref: 'rating',
-    }],
-    default: [],
-  },
+  // ratings: {
+  //   type: [{
+  //     type: SchemaTypes.ObjectId,
+  //     ref: 'rating',
+  //   }],
+  //   default: [],
+  // },
   tags: {
     type: [String],
     trim: true,
@@ -174,6 +179,7 @@ export const RecipeSchema = new Schema<IRecipe>(
 
 RecipeSchema.plugin(mongoosePaginate);
 RecipeSchema.plugin(mongooseAutoPopulate);
+RecipeSchema.plugin(mongooseRandom);
 
 RecipeSchema.path('banners').validate({
   async validator(v) {
@@ -188,6 +194,12 @@ RecipeSchema.virtual('image_url').get(function(this: IRecipe) {
   }
   // @ts-ignore
   return this.banners[0].url;
+});
+
+RecipeSchema.virtual('ratings', {
+  ref: 'rating',
+  localField: '_id',
+  foreignField: 'recipeId'
 });
 
 RecipeSchema.index({
@@ -235,7 +247,6 @@ RecipeSchema.methods.toSearchResultFor = function(this: IRecipe, user?: IUser) {
   delete recipe.description;
   delete recipe.category;
   delete recipe.tags;
-  delete recipe.time;
   delete recipe.status;
   delete recipe.score;
   return recipe;
@@ -268,7 +279,7 @@ RecipeSchema.methods.toJSONFor = function(this: IRecipe, user: IUser) {
     result.savedByUser = user.didSaveRecipe(this);
     result.createdByUser = this.isCreatedBy(user);
   }
-  return result; 
+  return result;
 };
 
 RecipeSchema.methods.updateRating = async function(this: IRecipe) {
@@ -291,9 +302,13 @@ RecipeSchema.methods.updateRating = async function(this: IRecipe) {
   return await this.save();
 };
 
+RecipeSchema.methods.getLatest = function(this: IRecipe) {
+  return RecipeModel.findById(this.id).exec();
+};
+
 RecipeSchema.methods.populateUser = async function(this: IRecipe) {
-    await this.populate('createdBy', 'username').execPopulate();
-    return this;
+  await this.populate('createdBy', 'username').execPopulate();
+  return this;
 };
 
 RecipeSchema.methods.populateBanners = async function(this: IRecipe) {
@@ -302,34 +317,33 @@ RecipeSchema.methods.populateBanners = async function(this: IRecipe) {
 };
 
 RecipeSchema.methods.addRating = function(this: IRecipe, ratingId: string) {
-  if (!this.ratings.includes(ratingId)) {
-    this.ratings.push(ratingId);
-  }
 
-  return this;
+  return this.updateOne({
+    $addToSet: {
+      ratings: ratingId,
+    }
+  }).exec(() => this.getLatest());
 };
 
-RecipeSchema.statics.getCategories = async function(limit: number = null) {
+RecipeSchema.statics.getCategories = async function(limit: number = 10) {
   const categories = await Recipe.aggregate([
-    {
-      $match: {
-        status: true,
-        category: { $ne: null }
-      }
-    },
+    // {
+    //   $match: {
+    //     category: { $ne: null }
+    //   }
+    // },
     {
       $group: {
         // _id: { $ifNull: ["$category", "Unknown"] },
         _id: "$category",
         total: { $sum: 1 },
         // should change to first in product
-        image_url: { $last: { $arrayElemAt: ["$banners", 0] } },
+        image_url: { $first: { $arrayElemAt: ["$banners", 0] } },
       }, // ~$group
     },
-    // {
-    //   $limit: limit,
-    // }
+    { $sample: { size: limit } }
   ]);
+  await Image.populate(categories, { path: 'image_url' });
   return categories;
 };
 
@@ -345,26 +359,23 @@ RecipeSchema.statics.getRecipesByCategory = function(category: string) {
   return Recipe.find({ category });
 };
 
+RecipeSchema.statics.getRecommendRecipes = function(limit: number = 20) {
+  return new Promise((resolve, reject) => {
+    Recipe.findRandom({}, {}, { limit }, (err, result) => {
+      if (err) {
+        return reject(err);
+      }
+      return resolve(result);
+    });
+  });
+};
+
 RecipeSchema.post("remove", function(this: IRecipe) {
   console.log(typeof this._id);
-  User.updateMany({
-    $or: [
-      { createdRecipes: { $in: [this.id] } },
-      { savedRecipes: { $in: [this.id] } }
-    ]}, {
-    $pull: {
-      createdRecipes: this._id,
-      savedRecipes: this._id,
-    }
-  }).then(console.log);
 
-  Collection.updateMany({ recipes: { $in: [this.id] } }, {
-    $pull: {
-      recipes: this._id,
-    }
-  }).then(console.log);
+  Collection.removeRecipeFromAll(this.id).then(console.log);
 
-  Rating.deleteMany({ recipeId: { $in: [this.id] } }).then(console.log);
+  Rating.removeRecipe(this.id).then(console.log);
 });
 
 export const RecipeModel = model<IRecipe, IRecipeModel>('recipe', RecipeSchema);

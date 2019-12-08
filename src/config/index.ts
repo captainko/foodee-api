@@ -7,9 +7,10 @@ import "./extends";
 import { JWT_SECRET } from "../environment";
 
 // express
-express.response.sendAndWrap = function(obj, key = 'data') {
+express.response.sendAndWrap = function(obj, key = 'data', message = 'success') {
   return this.send({
     status: this.statusCode,
+    message,
     [key]: obj
   });
 };
@@ -18,7 +19,7 @@ express.response.sendMessage = function(message) {
   return this.sendAndWrap(message, 'message');
 };
 
-express.response.sendError = function(error: any) {
+express.response.sendError = function(this: Express.Response, error: any) {
   let res;
   if (error instanceof Object) {
     res = {};
@@ -35,7 +36,7 @@ express.response.sendError = function(error: any) {
   } else {
     res = error;
   }
-  return this.sendAndWrap(res, 'error');
+  return this.sendAndWrap(res, 'error', 'error');
 };
 
 // ~express

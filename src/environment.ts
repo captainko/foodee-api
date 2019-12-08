@@ -9,14 +9,15 @@ export const {
   JWT_SECRET = 'secret',
   SESSION_SECRET = 'foodee-api',
   EMAIL_SECRET = 'foodee-email',
-  PATH_IMAGE = '/public/uploads/',
   GMAIL_USER = 'foodeeapplication@gmail.com',
   GMAIL_PASS = 'foodee123',
   CLOUDINARY_CLOUD_NAME,
   CLOUDINARY_API_KEY,
   CLOUDINARY_API_SECRET,
-
   SSL_PASSPHRASE,
 } = process.env;
 
+export const COLLECTION_DEFAULT_IMG = undefined;
+
 export const IS_PROD = NODE_ENV === 'production';
+export const WEB_URL = IS_PROD ? 'https://foodee.cf' : 'http://localhost'; 
