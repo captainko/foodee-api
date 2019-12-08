@@ -14,7 +14,9 @@ UserFields.savedRecipes.type[0].ref = 'admin-recipe';
 UserFields.ratings.type[0].ref = 'admin-rating';
 // UserFields.createdRecipes.type[0].ref = 'admin-recipe';
 // UserFields.collections.type[0].ref = 'admin-collection';
+// @ts-ignore
 RecipeFields.banners.type[0].ref = 'admin-image';
+// @ts-ignore
 RecipeFields.createdBy.ref = 'admin-user';
 // RecipeFields.ratings.type[0].ref = 'admin-rating';
 

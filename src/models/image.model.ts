@@ -1,5 +1,4 @@
 import { Schema, model, Document, Model, SchemaDefinition } from 'mongoose';
-import { HTTP404Error } from '../util/httpErrors';
 
 type ImageType = 'profile' | 'recipe';
 

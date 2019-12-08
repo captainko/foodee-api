@@ -73,8 +73,14 @@ RatingSchema.statics.removeRecipe = function(recipeId) {
 export interface IRatingResult extends Document {
   _id: string;
   rating: {
-    avgRating: number;
-    totalRating: number;
+    avgRating: {
+      type: number,
+      default: 4.5,
+    };
+    totalRating: {
+      type: number,
+      default: 1,
+    };
   };
 }
 
