@@ -58,7 +58,7 @@ const users: IUserData[] = [
       created: [{
           name:'A classic sponge cake',
           banners:['https://ichef.bbci.co.uk/food/ic/food_16x9_832/recipes/aclassicspongecakewi_9406_16x9.jpg'],
-          createdBy:'Diana Cotech',
+          createdBy:'foodee',
           category:'Cake',
           description:'Diana shows you how to bake a perfect sponge cake with a creamy passion fruit filling',
           servings:8,
@@ -87,7 +87,7 @@ const users: IUserData[] = [
     {
         name:'Bunting cake',
         banners:['https://ichef.bbci.co.uk/food/ic/food_16x9_832/recipes/bunting_cake_35577_16x9.jpg'],
-        createdBy:'Diana Cotech',
+        createdBy:'foodee',
         category:'Cake',
         description:'This charming colourful sponge cake is decorated with beautiful bunting, easily made with straws and scraps of cute fabric.',
         servings:10,
@@ -122,7 +122,7 @@ const users: IUserData[] = [
       name:'Tonkatsu pork',
       banners:['https://ichef.bbci.co.uk/food/ic/food_16x9_832/recipes/springmisosoup_72270_16x9.jpg'],
       category:'Soup',
-      createdBy:'Diana Cotech',
+      createdBy:'foodee',
       description:'Miso soup is deliciously savoury and comforting. With a good quality stock, this dish takes only a few minutes.',
       servings:4,
       tags:['soup'],
@@ -148,7 +148,7 @@ const users: IUserData[] = [
       name:'Mango smoothie',
       banners:['https://ichef.bbci.co.uk/food/ic/food_16x9_832/recipes/mangosmoothie_86438_16x9.jpg'],
       category:'Smoothie',
-      createdBy:'Diana Cotech',
+      createdBy:'foodee',
       servings:2,
       tags:['Smoothie'],
       time:30,
@@ -170,7 +170,7 @@ const users: IUserData[] = [
       name:'Veggie stir-fried noodles (Yasai yaki soba)',
       banners:['https://ichef.bbci.co.uk/food/ic/food_16x9_832/recipes/japanesevegetablesti_92442_16x9.jpg'],
       category:'Noodles',
-      createdBy:'Diana Cotech',
+      createdBy:'foodee',
       description:'Teriyaki and yellow bean sauce add depth to this healthy - and super easy - noodle stir fry.',
       servings:2,
       time:30,
@@ -201,7 +201,203 @@ const users: IUserData[] = [
         'Heat the oil in a wok over a medium heat. Add the egg and vegetable mixture and the cooked, cold noodles, and stir-fry for 3-4 minutes, or until the noodles have warmed through and the eggs and vegetables are cooked through.',
         'To serve, divide the vegetables and noodles equally between two serving bowls. Drizzle over the yaki soba dressing. Sprinkle over the sesame seeds, if using.'
       ]
-    }
+    },
+    {
+      name:'Simple miso, tofu and mushroom ramen',
+      banners:['https://ichef.bbci.co.uk/food/ic/food_16x9_832/recipes/simple_miso_tofu_and_03158_16x9.jpg'],
+      category:'Noodles',
+      createdBy:'foodee',
+      description:'Serve the family something different for dinner: a rich miso and mushroom broth with golden tofu and soft-boiled eggs.',
+      servings:4,
+      time:30,
+      tags:['Noodles'],
+      ingredients:[
+        {quantity:'15g/½oz',ingredient:'dried wild mushrooms'},
+        {quantity:'1.4 litres/2½',ingredient:'pints just-boiled water'},
+        {quantity:'2 tbsp',ingredient:'dark soy sauce'},
+        {quantity:'1',ingredient:'vegetable stock cube'},
+        {quantity:'4 tbsp',ingredient:'brown miso paste'},
+        {quantity:'200g/7oz',ingredient:'medium dried egg noodles'},
+        {quantity:'396g',ingredient:'pack firm tofu, drained, dried, cut into 8 rectangular slices'},
+        {quantity:'2-3 tsp',ingredient:' sunflower oil'},
+        {quantity:'4',ingredient:'large free-range eggs'},
+        {quantity:'150g/5oz',ingredient:' chestnut mushrooms'},
+        {quantity:'2',ingredient:'pak choi'},
+        {quantity:'100g/3½oz',ingredient:'fresh beansprouts'},
+        {quantity:'6',ingredient:'spring onions'},
+        {quantity:'50g/2oz',ingredient:'roasted cashew nuts'},
+        {quantity:'some',ingredient:'dried flaked chillies,'}
+      ],
+      methods:[
+        'Put the dried mushrooms in a large, heavy-based saucepan and cover with the water. Add the soy sauce, stock cube and miso paste and stir until the stock cube has dissolved. Set aside for 30 minutes to rehydrate and infuse.',
+        'Meanwhile, half-fill a saucepan with water and bring to the boil. Add the noodles and cook for 3-4 minutes, or until just tender, stirring occasionally to break up the strands. Drain well, then rinse under running water until cold.',
+        'Half-fill the same pan with water and bring to the boil. Add the eggs to the boiling water and cook for 5 minutes.',
+        'Heat 2 teaspoons of the oil in a large, non-stick frying pan over a medium heat. Add the tofu pieces and fry carefully for 3-4 minutes on each side, or until pale golden-brown on both sides. Turn off the heat but keep the pan on the hob so that the tofu stays warm.',
+        'Stir the noodles into the mushroom broth and bring to the boil. Reduce the heat until the mixture is simmering, add the chestnut mushrooms and pak choi and continue to simmer for a further 2-3 minutes. Stir in the beansprouts and spring onions, remove from the heat.',
+        'Drain the eggs then rinse under cold water. Crack and peel off the shells, cut in half.',
+        'Divide the broth, noodles and vegetables between 4 serving bowls. Top with the tofu and eggs. Sprinkle over the cashew nuts and chilli flakes. Season with extra soy sauce.'
+      ]
+    },
+    {
+      name:'okonomiyaki',
+      banners:['https://ichef.bbci.co.uk/food/ic/food_16x9_832/recipes/easy_okonomiyaki_78828_16x9.jpg'],
+      category:'Pancakes',
+      createdBy:'foodee',
+      description:'These easy traditional Japanese fritter-like pancakes are great for using up a head of white cabbage. Serve with okonomiyaki sauce, Japanese mayonnaise or your favourite Asian hot sauce.',
+      servings:2,
+      tags:['Pancake'],
+      time:30,
+      ingredients:[
+        {quantity:'1½ tbsp ',ingredient:'tomato ketchup'},
+        {quantity:'½ tbsp',ingredient:'Worcestershire sauce'},
+        {quantity:'2 tsp',ingredient:'runny honey'},
+        {quantity:'1 tsp',ingredient:'dark soy sauce'},
+        {quantity:'3',ingredient:'large free-range eggs'},
+        {quantity:'3 tbsp',ingredient:'plain flour'},
+        {quantity:'½ tsp',ingredient:'sea salt'},
+        {quantity:'½ tsp',ingredient:'dark soy sauce'},
+        {quantity:'½ tsp',ingredient:'toasted sesame oil'},
+        {quantity:'q',ingredient:'large spring onions'},
+        {quantity:'275g/9¾oz',ingredient:'white cabbage'},
+        {quantity:'some',ingredient:'sunflower oil'},
+      ],
+      methods:[
+        'For the okonomiyaki sauce, whisk together the tomato ketchup, Worcestershire sauce, honey and dark soy sauce in a small bowl until combined. Set aside',
+        'To make the okonomiyaki batter, whisk together the eggs, flour, salt, soy sauce and toasted sesame oil until smooth.',
+        'Fold the spring onions and cabbage into the batter until everything is well coated.',
+        'Heat enough oil to just cover the bottom of a large frying pan over a medium–high heat until shimmering. Line a warmed plate with a couple of sheets of kitchen paper.',
+        'Spoon some of the cabbage mixture into the pan into pancake shapes that are about the size of your palm. Press down with the back of the spoon and fry until golden-brown on each side, flipping halfway. Transfer the pancakes to the kitchen paper to drain.',
+        'Fry in batches until you’ve run out of mixture – you should get about eight pancakes.',
+        'Serve the pancakes drizzled with the okonomiyaki sauce.'
+      ]
+    },
+    {
+      name:'Vietnamese beef pho',
+      banners:['https://ichef.bbci.co.uk/food/ic/food_16x9_832/recipes/vietnamese_beef_pho_22510_16x9.jpg'],
+      category:'Noodles',
+      createdBy:'foodee',
+      description:'Beef pho is a popular street food from Vietnam, with its delicious combination of fresh ingredients and a spicy, rich stock.',
+      servings:6,
+      time:120,
+      tags:['Noodles'],
+      ingredients:[
+        {quantity:'1.5kg/3lb 5oz',ingredient:'beef shin'},
+        {quantity:'2kg/4lb 8oz',ingredient:'beef bones'},
+        {quantity:'1',ingredient:'large onion'},
+        {quantity:'5cm/2in ',ingredient:'piece fresh root ginger'},
+        {quantity:'1 tsp',ingredient:' fennel seeds'},
+        {quantity:'1 tsp',ingredient:'black peppercorns'},
+        {quantity:'3',ingredient:'star anise'},
+        {quantity:'5cm/2in',ingredient:'piece cinnamon stick'},
+        {quantity:'4',ingredient:'cloves'},
+        {quantity:'2',ingredient:'bay leaves'},
+        {quantity:'200g/7oz',ingredient:'flat rice noodles (banh pho)'},
+        {quantity:'1',ingredient:'large carrot'},
+        {quantity:'bunch',ingredient:'spring onions'},
+        {quantity:'300g/10½oz',ingredient:'beansprouts'},
+        {quantity:'250g/9oz ',ingredient:'rump or sirloin steak'},
+        {quantity:'1–2 tbsp',ingredient:'fish sauce'},
+        {quantity:'small bunch',ingredient:'fresh coriander'},
+        {quantity:'small bunch',ingredient:'fresh mint'},
+        {quantity:'handful',ingredient:'fresh basil leaves'},
+        {quantity:'some',ingredient:'salt and freshly ground black pepper'},
+        {quantity:'some',ingredient:'fresh coriander, mint and basil leaves'},
+        {quantity:'2',ingredient:'limes'},
+        {quantity:'few',ingredient:'Thai chillies'},
+        {quantity:'some',ingredient:'chilli oil or sauce such as sriracha'},
+        {quantity:'some',ingredient:'hoisin sauce (optional)'},
+      ],
+      methods:[
+        'For the stock, preheat the oven to 220C/200C Fan/Gas 7. Put the beef shin, bones, onion and ginger in a large roasting tin. Roast in the oven for 1 hour, or until the onion looks quite charred and everything is well browned.',
+        'Put the shin and bones in a large saucepan. Slice the ginger and add that to the saucepan with the onion. Cover with around 4 litres/7 pints water. Bring to the boil, skimming off any grey coloured foam on top.',
+        'While you are waiting for the water to come to the boil, put the roasting tin over direct heat on a hob and deglaze with a little water. Scrape up any brown bits from the bottom of the pan. When you have finished skimming the top of the water of the saucepan, add the scraped bits and all of the spices to the pan.',
+        'Simmer very slowly, partially covered, for between 3–5 hours, until the meat is tender and the stock has a depth of colour. Strain the stock into a new pan. Strip the meat from the shin and add into the pan, discarding the rest of the solids. Season with salt and pepper, bring to the boil and leave to simmer.',
+        'Meanwhile, cook the noodles in a separate saucepan of salted boiling water, according to the packet instructions.',
+        'Add the carrot to the beef stock and simmer for 3 minutes. Add the spring onions, beansprouts, and fish sauce and simmer for a further minute. Check seasoning and add a dash more fish sauce if preferred. Add the herbs.',
+        'Divide the noodles between warmed bowls and ladle over some soup, top with the steak slices and ladle over more soup. The hot soup will lightly cook the steak. Serve with herbs, lime wedges, chilli, chilli oil and hoisin sauce, if using.',
+      ],
+    },
+    {
+      name:'Chashu pork ramen',
+      banners:['https://ichef.bbci.co.uk/food/ic/food_16x9_832/recipes/microwave_soy_salmon_07689_16x9.jpg'],
+      category:'Noodles',
+      createdBy:'foodee',
+      servings:1,
+      tags:['Noodles'],
+      time:40,
+      description:'A seriously quick and healthy salmon noodle dinner made in the microwave. Perfect for speedy suppers.',
+      ingredients:[
+        {quantity:'1',ingredient:'salmon fillet'},
+        {quantity:'2 tbsp',ingredient:'orange juice, fresh or from concentrate'},
+        {quantity:'1 tbsp',ingredient:'soy sauce'},
+        {quantity:'1 tsp',ingredient:'honey'},
+        {quantity:'1',ingredient:'nest of noodles'},
+        {quantity:'2 tbsp',ingredient:'frozen peas'},
+        {quantity:'1',ingredient:' spring onion, finely sliced'},
+        {quantity:'2 tbp',ingredient:'sesame seeds'},
+      ],
+      methods:[
+        'Put the salmon in a microwaveable bowl. Pour over the orange juice and soy sauce and drizzle over the honey. Microwave for 4 minutes, turning halfway through. Rest in the microwave for a minute before removing, taking care as it might spit',
+        'Put the noodles in a microwaveable bowl, cover with boiling water and microwave for 5 minutes, or until cooked to your liking. Add the peas and set aside for a few minutes until the peas have defrosted. Drain the water.',
+        'Place the salmon on top of the noodles and pour over the sauce. Sprinkle with spring onions and sesame seeds, if using.'
+      ]
+    },
+    {
+      name:'Chicken and sweetcorn noodles',
+      banners:['https://ichef.bbci.co.uk/food/ic/food_16x9_832/recipes/chicken_and_sweetcorn_44908_16x9.jpg'],
+      category:'Noodles',
+      createdBy:'foodee',
+      description:'Make your own easy and healthy pot noodles. Put them in a lidded jar and take to work to revolutionise lunch times.',
+      servings:1,
+      time:40,
+      tags:['Noodles'],
+      ingredients:[
+        {quantity:'40g/1½oz',ingredient:'nest fine egg noodles'},
+        {quantity:'¼',ingredient:'chicken stock pot'},
+        {quantity:'1 tsp',ingredient:'soy sauce'},
+        {quantity:'½',ingredient:'red chilli, finely chopped'},
+        {quantity:'25g/1oz',ingredient:'tinned sweetcorn, drained'},
+        {quantity:'25g/1oz',ingredient:'cooked roast chicken, shredded'},
+        {quantity:'25g/1oz',ingredient:'baby spinach leaves, roughly chopped'},
+        {quantity:'½',ingredient:'Lime,zest and juice'},
+        {quantity:'some',ingredient:'sea salt and freshly ground black pepper'},
+      ], 
+      methods:[
+        'Put the noodles into the bottom of a heatproof bowl or jar, then add all the remaining ingredients, except for the lime zest and juice.',
+        'Pour over enough boiling water to just cover the ingredients. Cover with a lid or cling film and set aside for 10 minutes.',
+        'Add the lime zest and juice, stir well and season with salt and pepper.',
+      ],
+    },
+    {
+      name:'Crispy fish fingers',
+      banners:['https://ichef.bbci.co.uk/food/ic/food_16x9_832/recipes/crispy_fish_fingers_34974_16x9.jpg'],
+      category:'fish food',
+      createdBy:'foodee',
+      description:'These quick and easy fish fingers are baked in the oven rather than fried for a healthier dish.',
+      servings:2,
+      time:30,
+      tags:['Fish'],
+      ingredients:[
+        {quantity:'1-2 tbsp',ingredient:'vegetable oil'},
+        {quantity:'1',ingredient:'slice day-old bread, grated'},
+        {quantity:'2 tbsp',ingredient:'quick-cook dried polenta'},
+        {quantity:'some',ingredient:'freshly ground black pepper'},
+        {quantity:'3 tbsp',ingredient:'plain flour'},
+        {quantity:'some',ingredient:'pinch paprika'},
+        {quantity:'1',ingredient:'free-range egg'},
+        {quantity:'½',ingredient:'lemon, juice only'},
+        {quantity:'1',ingredient:'white fish fillet'},
+      ],
+      methods:[
+        'Preheat the oven to 220C/450F/Gas 7. Line a baking tray with baking parchment and brush the parchment all over with a little vegetable oil.',
+        'In a bowl, mix together the breadcrumbs and polenta, and season well with freshly ground black pepper.',
+        'Put the plain flour into another bowl and season with the paprika. Beat the egg in a bowl.',
+        'Squeeze the lemon juice over the strips of fish.',
+        'Roll each strip of fish first in the flour mixture, then dip it into the beaten egg, then coat it in the polenta mixture. Place each fish finger onto the prepared baking tray.',
+        'Drizzle a little more vegetable oil onto each fish finger, then bake in the oven for 10-12 minutes, or until the fish is cooked through and the coating is crisp. Serve with salad or steamed vegetables.'
+      ]
+    },
+    
   ],
       saved: [{
       }]
@@ -328,7 +524,44 @@ const users: IUserData[] = [
           "Place large, heaped tablespoons of the mixture on to a baking tray lined with baking parchment. You should get twelve large biscuits. The mixture is fine to sit for a few minutes if you are cooking them in two batches. Don't be tempted to flatten the cookies, they will do so in the oven anyway.",
           "Bake the cookies for 10-12 minutes. The cookies will have spread and be very soft to the touch. Remove them from the oven and set aside to cool a little. As soon as they are cool enough to move without breaking, slide a palette knife underneath and carefully lift them onto a cooling rack. Serve with a handful of cherries and raspberries."
         ]
-      }
+      },
+      {
+        name:'Warm chocolate cakes with clementine sweet cheese',
+        banners:['https://ichef.bbci.co.uk/food/ic/food_16x9_1600/recipes/warm_chocolate_cakes_54459_16x9.jpg'],
+        category:'Cakes',
+        createdBy:'foodee',
+        description:'If you have time, make the mixture for the chocolate cakes the day before so that the mixture has time to rest in the fridge. Any excess clementine sweet cheese can be stored in the fridge for a few days to serve with other desserts or with fruit.',
+        servings:8,
+        tags:['Cakes'],
+        time:30,
+        ingredients:[
+          {quantity:'3',ingredient:'free-range egg yolks'},
+          {quantity:'3',ingredient:'free-range eggs'},
+          {quantity:'200g/7oz',ingredient:'sugar'},
+          {quantity:'150g/5½oz',ingredient:' chocolate (70% cocoa solids)'},
+          {quantity:'150g/5½oz',ingredient:'unsalted butter, plus extra for greasing'},
+          {quantity:'75g/2⅔oz',ingredient:'French T45 flour or Italian 00 flour'},
+          {quantity:'240g/8½oz',ingredient:'whipping cream'},
+          {quantity:'125g/4½oz',ingredient:'crème fraîche'},
+          {quantity:'225g/8oz',ingredient:'cream cheese'},
+          {quantity:'125g/4½oz',ingredient:'caster sugar'},
+          {quantity:'1',ingredient:'vanilla pod, seeds only'},
+          {quantity:'4',ingredient:'clementines, finely grated zest only'},
+          {quantity:'2 tsp',ingredient:'orange liqueur, such as Grand Marnier'}, 
+        ],
+        methods:[
+          'In a mixing bowl, add the egg yolks, whole eggs and sugar. Use the paddle attachment on your mixer and combine the ingredients at a slow speed setting. Alternatively, mix using the slow setting on a handheld mixer.',
+          'Place an inch of water in a large saucepan and sit a heatproof mixing bowl on top (the bowl should not touch the water). Place the pan on the heat. Once the water is simmering gently, add the chocolate and butter to the bowl and allow to melt gently. Mix to combine and set aside to allow to cool a little.',
+          'Once the melted chocolate is cool, stir it into the egg and sugar mixture gently (if the chocolate is too hot it will cook the eggs and cause them to scramble). Gently fold in the flour until fully combined and smooth. Ideally make this mixture the day before use and allow to rest in the fridge.',
+          'Meanwhile, make the clementine sweet cheese. Whip the cream in a bowl until soft peaks form when the whisk is removed. Put all the remaining ingredients, except the orange liqueur, into another mixing bowl. Mix until smooth and well combined. Fold this mixture into the whipped cream, and fold in the orange liqueur. Whip until firm enough to hold its shape. Chill until ready to serve.',
+          'When ready to bake the cakes, preheat the oven to 180C/160C Fan/Gas 4.',
+          'Take your moulds or rings and brush the insides with soft butter, place them in the fridge to set for a few minutes, then brush with more butter and chill again.',
+          'If using chef’s rings, place them on baking trays lined with baking paper. Fill the moulds or rings with the cake batter (approximately 80g/2¾oz each).',
+          'Bake for 10 minutes, or until the top is set – if it is not, return the cakes to the oven for a few minutes. Rest for 2 minutes, then use a small knife to release the cakes from their moulds or rings. Serve with a generous dollop of clementine sweet cheese.',
+        ],
+      },
+      
+      
     
     
     ],
@@ -416,7 +649,8 @@ function fakeMethods(): string[] {
 }
 
 new Promise((res) => {
-  mongoose.connect(DB_URI, { useNewUrlParser: true, useUnifiedTopology: true , ssl: true})
+  console.log(DB_URI)
+  mongoose.connect(DB_URI, { useNewUrlParser: true, useUnifiedTopology: true , ssl: false})
     .then(() => {
       async.parallel(users.map((user) => (done) => {
         async.waterfall([
