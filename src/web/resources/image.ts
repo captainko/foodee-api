@@ -6,9 +6,16 @@ export const ImageResource = {
     name: 'Images',
     properties: {
       url: {
+        position: 0,
+        isTitle: true,
         components: {
-          show: AdminBro.bundle('../components/ImageInShow')
+          show: AdminBro.bundle('../components/images/ImageInShow'),
+          list: AdminBro.bundle('../components/images/ImageInList')
         }
+      },
+      publicId: {
+        position: 1,
+        isTitle: true,
       }
     }
   }
