@@ -13,6 +13,7 @@ UserFields.image_url.ref = 'admin-image';
 
 UserFields.savedRecipes.type[0].ref = 'admin-recipe';
 UserFields.ratings.type[0].ref = 'admin-rating';
+
 // UserFields.createdRecipes.type[0].ref = 'admin-recipe';
 // UserFields.collections.type[0].ref = 'admin-collection';
 // @ts-ignore
@@ -27,7 +28,7 @@ CollectionFields.createdBy.ref = 'admin-user';
 CollectionFields.recipes.type[0].ref = 'admin-recipe';
 RatingResultFields._id.ref = 'admin-recipe';
 
-export const User = model('admin-user', AdminUserSchema, 'users');
+export const User = model('admin-user', UserFields as any, 'users');
 export const Image = model('admin-image', ImageFields as any, 'images');
 export const Recipe = model('admin-recipe', RecipeFields as any, 'recipes');
 export const Rating = model('admin-rating', RatingFields as any, 'recipes');

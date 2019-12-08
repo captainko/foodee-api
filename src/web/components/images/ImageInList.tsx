@@ -1,5 +1,5 @@
 
-const React = require('react');
+import * as React from 'react';
 import { Label } from "admin-bro";
 
 const ImageInList = (props) => {
