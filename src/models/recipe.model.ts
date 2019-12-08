@@ -7,6 +7,7 @@ import {
   Model,
   PaginateModel,
   Aggregate,
+  SchemaDefinition,
 } from "mongoose";
 import mongooseAutoPopulate = require('mongoose-autopopulate');
 import mongoosePaginate = require('mongoose-paginate');
@@ -60,7 +61,7 @@ export interface IRecipeModel extends PaginateModel<IRecipe> {
   getRecommendRecipes(): Aggregate<IRecipe[]>;
 }
 
-export const RecipeFields = {
+export const RecipeFields: SchemaDefinition = {
   name: {
     type: String,
     required: [true, 'is required'],
