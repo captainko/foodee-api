@@ -7,6 +7,7 @@ import {
   ImageFields,
   RatingResultFields
 } from "../../models";
+import { AdminUserSchema } from "./admin-user.model";
 UserFields.image_url.ref = 'admin-image';
 // export * from '../../src/models';
 
@@ -25,21 +26,6 @@ RatingFields.recipeId.ref = 'admin-recipe';
 CollectionFields.createdBy.ref = 'admin-user';
 CollectionFields.recipes.type[0].ref = 'admin-recipe';
 RatingResultFields._id.ref = 'admin-recipe';
-
-const AdminUserSchema = new Schema(UserFields);
-AdminUserSchema.virtual('collections', {
-  ref: 'admin-collection',
-  localField: '_id',
-  foreignField: 'createdBy',
-  options: { sort: { updatedAt: -1 } },
-});
-
-AdminUserSchema.virtual('createdRecipes', {
-  ref: 'admin-recipe',
-  localField: '_id',
-  foreignField: 'createdBy',
-  options: { sort: { updatedAt: -1 } },
-});
 
 export const User = model('admin-user', AdminUserSchema, 'users');
 export const Image = model('admin-image', ImageFields as any, 'images');

@@ -82,13 +82,13 @@ export const UserFields: SchemaDefinition = {
     ref: 'admin-image'
 
   },
-  createdRecipes: {
-    type: [{
-      type: SchemaTypes.ObjectId,
-      ref: 'admin-recipe'
-    }],
-    default: [],
-  },
+  // createdRecipes: {
+  //   type: [{
+  //     type: SchemaTypes.ObjectId,
+  //     ref: 'admin-recipe'
+  //   }],
+  //   default: [],
+  // },
   savedRecipes: {
     type: [{
       type: SchemaTypes.ObjectId,
@@ -113,7 +113,8 @@ export const UserFields: SchemaDefinition = {
   salt: String,
 };
 
-export const AdminUserSchema = new Schema<IAdminUser>(UserFields);
+export const AdminUserSchema = new Schema<IAdminUser>(UserFields,
+  { toJSON: { virtuals: true }, toObject: { virtuals: true } });
 
 AdminUserSchema.plugin(uniqueValidator, { message: 'is already taken.' });
 
