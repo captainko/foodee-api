@@ -46,7 +46,8 @@ export const RatingSchema = new Schema(
   });
 
 export interface IRatingModel extends Model<IRating> {
-  rate: (userId: string, recipeId: string, rateValue: number) => Promise<IRating>;
+  rate(userId: string, recipeId: string, rateValue: number): Promise<IRating>;
+  removeRecipe(userId): Promise<any>;
 }
 
 RatingSchema.statics.rate = async function(userId: string, recipeId: string, rateValue: number) {
@@ -65,11 +66,21 @@ RatingSchema.statics.rate = async function(userId: string, recipeId: string, rat
   return await ratingObj.save();
 };
 
+RatingSchema.statics.removeRecipe = function(recipeId) {
+  return Rating.deleteMany({ recipeId }).exec().then(console.log);
+};
+
 export interface IRatingResult extends Document {
   _id: string;
   rating: {
-    avgRating: number;
-    totalRating: number;
+    avgRating: {
+      type: number,
+      default: 4.5,
+    };
+    totalRating: {
+      type: number,
+      default: 1,
+    };
   };
 }
 

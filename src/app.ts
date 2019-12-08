@@ -13,6 +13,7 @@ import { Routes } from "./routes";
 import middleware from "./middleware";
 import { applyMiddleware } from "./util";
 import { errorHandlers } from "./middleware/errorHandlers";
+import admin from "./admin";
 
 class App {
   public app: express.Application;
@@ -27,6 +28,7 @@ class App {
   private _config() {
 
     applyMiddleware(middleware, this.app);
+    // this.routePrv.routes(admin);
     this.routePrv.routes(this.app);
     applyMiddleware(errorHandlers, this.app);
   }
