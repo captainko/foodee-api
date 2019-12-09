@@ -1,5 +1,6 @@
 // lib
-import { Document, Model, model, Schema, SchemaTypes } from "mongoose";
+import { Document, Model, model, Schema, SchemaTypes, PaginateModel } from "mongoose";
+import mongoosePaginate = require('mongoose-paginate');
 
 // app
 import { IUser, User } from "./user.model";
@@ -25,7 +26,7 @@ export interface ICollection extends Document, ICollectionMethods {
   didContainRecipe?: boolean;
 }
 
-export interface ICollectionModel extends Model<ICollection> {
+export interface ICollectionModel extends PaginateModel<ICollection> {
   removeRecipeFromAll(recipeId): Promise<any>;
   removeRecipeFromUser(recipeId, userId): Promise<any>;
 }
@@ -76,6 +77,8 @@ export const CollectionSchema = new Schema(
     },
   }
 );
+
+CollectionSchema.plugin(mongoosePaginate);
 
 CollectionSchema.statics.removeRecipeFromAll = function(recipeId) {
   return CollectionModel.updateMany({

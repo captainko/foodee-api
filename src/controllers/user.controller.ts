@@ -10,7 +10,7 @@ import { GMAIL_USER, GMAIL_PASS, EMAIL_SECRET } from "../environment";
 import { Image } from "../models/image.model";
 import { HTTP422Error } from "../util/httpErrors";
 import { renderResetPassword, renderVerifiedEmail, renderConfirmEmail } from "../util/emailTemplate";
-import { ICollection, Recipe } from "../models";
+import { ICollection, Recipe, Collection } from "../models";
 
 export class UserController {
   public static addUser(req: Request, res: Response, next: NextFunction) {
@@ -156,10 +156,21 @@ export class UserController {
   }
 
   public static getSavedRecipes(req: Request, res: Response, next: NextFunction) {
-    req.user.populate('savedRecipes').execPopulate()
-      .then((user) => {
-        res.sendAndWrap(user.savedRecipes.toThumbnailFor(user), 'recipes');
-      })
+    let {
+      page = 1,
+      limit = 10,
+      // tslint:disable-next-line: prefer-const
+      q = '',
+    } = req.query;
+    page = +page;
+    limit = +limit;
+    Recipe.paginate({
+      _id: { $in: req.user.savedRecipes },
+      name: { $regex: q, $options: 'i' },
+    }).then((page) => {
+      page.docs = page.docs.toThumbnailFor(req.user);
+      return page;
+    }).then((page) => res.send(page))
       .catch(next);
   }
 
@@ -175,15 +186,15 @@ export class UserController {
     console.log(q);
     Recipe.paginate({
       createdBy: req.user._id,
-      name: {$regex: q, $options: 'i'}
+      name: { $regex: q, $options: 'i' }
     }, {
-  page,
-    limit,
-    sort: { updatedAt: -1 },
-}).then((page) => {
-  page.docs = page.docs.toThumbnailFor(req.user);
-  return page;
-}).then((page) => res.send(page));
+      page,
+      limit,
+      sort: { updatedAt: -1 },
+    }).then((page) => {
+      page.docs = page.docs.toThumbnailFor(req.user);
+      return page;
+    }).then((page) => res.send(page));
   }
   // req.user.populate('createdRecipes').execPopulate()
   //   .then((user) => {
@@ -193,31 +204,49 @@ export class UserController {
   //   .catch(next);
 
   public static async getCreatedCollections(req: Request, res: Response, next: NextFunction) {
-  try {
-    await req.user.populate('collections').execPopulate();
-    res.sendAndWrap(await req.user.collections.toSearchResult(), 'collections');
-  } catch (err) {
-    next(err);
+    // try {
+    //   await req.user.populate('collections').execPopulate();
+    //   res.sendAndWrap(await req.user.collections.toSearchResult(), 'collections');
+    // } catch (err) {
+    //   next(err);
+    // }
+    let {
+      page = 1,
+      limit = 10,
+      // tslint:disable-next-line: prefer-const
+      q = '',
+    } = req.query;
+    page = +page;
+    limit = +limit;
+    try {
+      const page = await Collection.paginate({
+        createdBy: req.user._id,
+      }, { sort: { updatedAt: -1 } });
+      page.docs = await page.docs.toSearchResult();
+      res.send(page);
+    } catch (err) {
+      next(err);
+    }
+
   }
-}
 
   public static async getCreatedCollectionsWithRecipe(req: Request, res: Response, next: NextFunction) {
-  const { user, recipe } = req;
-  try {
-    await user.populate('collections').execPopulate();
-    const collections$ = user.collections.map(async (c: ICollection) => {
-      const didSaveRecipe$ = c.didIncludeRecipe(recipe.id);
-      const result$ = c.toSearchResult();
-      const [isContained, result] = await Promise.all([didSaveRecipe$, result$]);
-      result.didContainRecipe = isContained;
-      return result;
-    });
+    const { user, recipe } = req;
+    try {
+      await user.populate('collections').execPopulate();
+      const collections$ = user.collections.map(async (c: ICollection) => {
+        const didSaveRecipe$ = c.didIncludeRecipe(recipe.id);
+        const result$ = c.toSearchResult();
+        const [isContained, result] = await Promise.all([didSaveRecipe$, result$]);
+        result.didContainRecipe = isContained;
+        return result;
+      });
 
-    res.sendAndWrap(await Promise.all(collections$), 'collections');
-  } catch (err) {
-    next(err);
+      res.sendAndWrap(await Promise.all(collections$), 'collections');
+    } catch (err) {
+      next(err);
+    }
   }
-}
 }
 
 const transporter = createTransport({
