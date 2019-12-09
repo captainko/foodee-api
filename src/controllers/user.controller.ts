@@ -164,14 +164,26 @@ export class UserController {
   }
 
   public static getCreatedRecipes(req: Request, res: Response, next: NextFunction) {
-
-    Recipe.paginate({ createdBy: req.user._id }, {
-      sort: { updatedAt: -1 },
-      
-    }).then((page) => {
-      page.docs = page.docs.toThumbnailFor(req.user);
-      return page;
-    }).then((page) => res.send(page));
+    let {
+      page = 1,
+      limit = 10,
+      // tslint:disable-next-line: prefer-const
+      q = '',
+    } = req.query;
+    page = +page;
+    limit = +limit;
+    console.log(q);
+    Recipe.paginate({
+      createdBy: req.user._id,
+      name: {$regex: q, $options: 'i'}
+    }, {
+  page,
+    limit,
+    sort: { updatedAt: -1 },
+}).then((page) => {
+  page.docs = page.docs.toThumbnailFor(req.user);
+  return page;
+}).then((page) => res.send(page));
   }
   // req.user.populate('createdRecipes').execPopulate()
   //   .then((user) => {
