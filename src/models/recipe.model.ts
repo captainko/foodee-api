@@ -341,7 +341,14 @@ RecipeSchema.statics.getCategories = async function(limit: number = 10) {
         image_url: { $first: { $arrayElemAt: ["$banners", 0] } },
       }, // ~$group
     },
-    { $sample: { size: limit } }
+    { $sample: { size: limit }},
+    { $project: {
+      _id: 0,
+      id: "$_id",
+      name: "$_id",
+      image_url: 1,
+      total: 1,
+    }},
   ]);
   await Image.populate(categories, { path: 'image_url' });
   return categories;
