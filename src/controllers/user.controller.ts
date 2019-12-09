@@ -10,7 +10,7 @@ import { GMAIL_USER, GMAIL_PASS, EMAIL_SECRET } from "../environment";
 import { Image } from "../models/image.model";
 import { HTTP422Error } from "../util/httpErrors";
 import { renderResetPassword, renderVerifiedEmail, renderConfirmEmail } from "../util/emailTemplate";
-import { ICollection } from "../models";
+import { ICollection, Recipe } from "../models";
 
 export class UserController {
   public static addUser(req: Request, res: Response, next: NextFunction) {
@@ -30,7 +30,7 @@ export class UserController {
           expiresIn: '1d',
         },
         (err, emailToken) => {
-          
+
           transporter.sendMail({
             to: user.email,
             subject: 'Foodee - Confirm Email',
@@ -164,39 +164,48 @@ export class UserController {
   }
 
   public static getCreatedRecipes(req: Request, res: Response, next: NextFunction) {
-    req.user.populate('createdRecipes').execPopulate()
-      .then((user) => {
-        res.sendAndWrap(user.createdRecipes.toThumbnailFor(user), 'recipes');
-      })
-      .catch(next);
+
+    Recipe.paginate({ createdBy: req.user._id }, {
+      sort: { updatedAt: -1 },
+      
+    }).then((page) => {
+      page.docs = page.docs.toThumbnailFor(req.user);
+      return page;
+    }).then((page) => res.send(page));
   }
+  // req.user.populate('createdRecipes').execPopulate()
+  //   .then((user) => {
+
+  //     res.sendAndWrap(user.createdRecipes.toThumbnailFor(user), 'recipes');
+  //   })
+  //   .catch(next);
 
   public static async getCreatedCollections(req: Request, res: Response, next: NextFunction) {
-    try {
-      await req.user.populate('collections').execPopulate();
-      res.sendAndWrap(await req.user.collections.toSearchResult(), 'collections');
-    } catch (err) {
-      next(err);
-    }
+  try {
+    await req.user.populate('collections').execPopulate();
+    res.sendAndWrap(await req.user.collections.toSearchResult(), 'collections');
+  } catch (err) {
+    next(err);
   }
+}
 
   public static async getCreatedCollectionsWithRecipe(req: Request, res: Response, next: NextFunction) {
-    const {user, recipe} = req;
-    try {
-      await user.populate('collections').execPopulate();
-      const collections$ =  user.collections.map(async (c: ICollection) => {
-        const didSaveRecipe$ = c.didIncludeRecipe(recipe.id);
-        const result$ = c.toSearchResult();
-        const [isContained, result] = await Promise.all([didSaveRecipe$, result$]);
-        result.didContainRecipe = isContained;
-        return result;
-      });
-      
-      res.sendAndWrap(await Promise.all(collections$) , 'collections');
-    } catch (err) {
-      next(err);
-    }
+  const { user, recipe } = req;
+  try {
+    await user.populate('collections').execPopulate();
+    const collections$ = user.collections.map(async (c: ICollection) => {
+      const didSaveRecipe$ = c.didIncludeRecipe(recipe.id);
+      const result$ = c.toSearchResult();
+      const [isContained, result] = await Promise.all([didSaveRecipe$, result$]);
+      result.didContainRecipe = isContained;
+      return result;
+    });
+
+    res.sendAndWrap(await Promise.all(collections$), 'collections');
+  } catch (err) {
+    next(err);
   }
+}
 }
 
 const transporter = createTransport({
