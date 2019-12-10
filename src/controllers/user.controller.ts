@@ -76,7 +76,7 @@ export class UserController {
       if (user) {
         user.token = user.generateJWT();
         if (!user.isVerified) {
-          return res.status(401).sendError(new Error("Account is not verified!"));
+          return res.status(401).sendError(new Error("account is not verified!"));
         }
         req.logIn(user, (err) => {
           if (err) { return next(err); }
@@ -155,78 +155,216 @@ export class UserController {
 
   }
 
-  public static getSavedRecipes(req: Request, res: Response, next: NextFunction) {
-    let {
-      page = 1,
-      limit = 10,
+  public static async getSavedRecipes(req: Request, res: Response, next: NextFunction) {
+    try {
+      const {
+        q = ''
+      } = req.query;
+
+      let {
+        page = 0,
+        limit = 10,
+      } = req.query;
+      page = +page;
+      limit = +limit;
+    
+      const queries: any = {
+        $and: [
+          {
+            _id : {$in: req.user.savedRecipes}
+          },
+          // { createdBy: req.user._id },
+        ]
+
+      };
+
+      if (q) {
+        queries.$and.push({
+          $text: {
+            $search: q,
+            $caseSensitive: false,
+          }
+        });
+      }
+      console.log(queries);
+      const project = {
+        score: { $meta: 'textScore' }
+      };
+
+      const counted$ = Recipe.find(queries).countDocuments();
+      const paginated$ = Recipe.find(queries, project)
+        .sort({ score: { $meta: 'textScore' } })
+        .skip(page * limit)
+        .limit(limit);
+
       // tslint:disable-next-line: prefer-const
-      q = '',
-    } = req.query;
-    page = +page;
-    limit = +limit;
-    Recipe.paginate({
-      _id: { $in: req.user.savedRecipes },
-      name: { $regex: q, $options: 'i' },
-    }).then((page) => {
-      page.docs = page.docs.toThumbnailFor(req.user);
-      return page;
-    }).then((page) => res.send(page))
-      .catch(next);
+      let [total, recipes] = await Promise.all([counted$, paginated$]);
+      const pages = Math.ceil(total / limit);
+      let nextPage = page + 1;
+      if (nextPage >= pages) {
+        nextPage = null;
+      }
+      recipes = recipes.map(c => c.toSearchResultFor());
+      res.send({ nextPage, pages, total, docs: recipes });
+    } catch (err) {
+      next(err);
+    }
   }
 
-  public static getCreatedRecipes(req: Request, res: Response, next: NextFunction) {
-    let {
-      page = 1,
-      limit = 10,
+  public static async getCreatedRecipes(req: Request, res: Response, next: NextFunction) {
+    try {
+      const {
+        q = ''
+      } = req.query;
+
+      let {
+        page = 0,
+        limit = 10,
+      } = req.query;
+      page = +page;
+      limit = +limit;
+    
+      const queries: any = {
+        $and: [
+          {
+            createdBy: req.user._id,
+          },
+          // { createdBy: req.user._id },
+        ]
+
+      };
+
+      if (q) {
+        queries.$and.push({
+          $text: {
+            $search: q,
+            $caseSensitive: false,
+          }
+        });
+      }
+
+      const project = {
+        score: { $meta: 'textScore' }
+      };
+
+      const counted$ = Recipe.find(queries).countDocuments();
+      const paginated$ = Recipe.find(queries, project)
+        .sort({ score: { $meta: 'textScore' } })
+        .skip(page * limit)
+        .limit(limit);
+
       // tslint:disable-next-line: prefer-const
-      q = '',
-    } = req.query;
-    page = +page;
-    limit = +limit;
-    console.log(q);
-    Recipe.paginate({
-      createdBy: req.user._id,
-      name: { $regex: q, $options: 'i' }
-    }, {
-      page,
-      limit,
-      sort: { updatedAt: -1 },
-    }).then((page) => {
-      page.docs = page.docs.toThumbnailFor(req.user);
-      return page;
-    }).then((page) => res.send(page));
-  }
+      let [total, recipes] = await Promise.all([counted$, paginated$]);
+      const pages = Math.ceil(total / limit);
+      let nextPage = page + 1;
+      if (nextPage >= pages) {
+        nextPage = null;
+      }
+      recipes = recipes.map(c => c.toSearchResultFor());
+      res.send({ nextPage, pages, total, docs: recipes });
+    } catch (err) {
+      next(err);
+    }
+  //   let {
+  //     page = 1,
+  //     limit = 10,
+  //     // tslint:disable-next-line: prefer-const
+  //     q = '',
+  //   } = req.query;
+  //   page = +page;
+  //   limit = +limit;
+  //   console.log(q);
+  //   Recipe.paginate({
+  //     createdBy: req.user._id,
+  //     name: { $regex: q, $options: 'i' }
+  //   }, {
+  //     page,
+  //     limit,
+  //     sort: { updatedAt: -1 },
+  //   }).then((page) => {
+  //     page.docs = page.docs.toThumbnailFor(req.user);
+  //     return page;
+  //   }).then((page) => res.send(page));
+  // }
   // req.user.populate('createdRecipes').execPopulate()
   //   .then((user) => {
 
   //     res.sendAndWrap(user.createdRecipes.toThumbnailFor(user), 'recipes');
   //   })
   //   .catch(next);
+  }
 
   public static async getCreatedCollections(req: Request, res: Response, next: NextFunction) {
-    // try {
-    //   await req.user.populate('collections').execPopulate();
-    //   res.sendAndWrap(await req.user.collections.toSearchResult(), 'collections');
-    // } catch (err) {
-    //   next(err);
-    // }
-    let {
-      page = 1,
-      limit = 10,
-      // tslint:disable-next-line: prefer-const
-      q = '',
-    } = req.query;
-    page = +page;
-    limit = +limit;
     try {
-      const page = await Collection.paginate({
-        createdBy: req.user._id,
-      }, { sort: { updatedAt: -1 } });
-      page.docs = await page.docs.toSearchResult();
-      res.send(page);
+      const {
+        q = ''
+      } = req.query;
+
+      let {
+        page = 0,
+        limit = 10,
+      } = req.query;
+      page = +page;
+      limit = +limit;
+    
+      const queries: any = {
+        $and: [
+          {
+            createdBy: req.user._id,
+          },
+          // { createdBy: req.user._id },
+        ]
+
+      };
+
+      if (q) {
+        queries.$and.push({
+          $text: {
+            $search: q,
+            $caseSensitive: false,
+          }
+        });
+      }
+
+      const project = {
+        score: { $meta: 'textScore' }
+      };
+
+      const counted$ = Collection.find(queries).countDocuments();
+      const paginated$ = Collection.find(queries, project)
+        .sort({ score: { $meta: 'textScore' } })
+        .skip(page * limit)
+        .limit(limit);
+
+      // tslint:disable-next-line: prefer-const
+      let [total, collections] = await Promise.all([counted$, paginated$]);
+      const pages = Math.ceil(total / limit);
+      let nextPage = page + 1;
+      if (nextPage >= pages) {
+        nextPage = null;
+      }
+      collections = await Promise.all(collections.map(c => c.toSearchResult()));
+      res.send({ nextPage, pages, total, docs: collections });
     } catch (err) {
       next(err);
     }
+    // let {
+    //   page = 1,
+    //   limit = 10,
+    //   // tslint:disable-next-line: prefer-const
+    //   q = '',
+    // } = req.query;
+    // page = +page;
+    // limit = +limit;
+    // try {
+    //   const page = await Collection.paginate({
+    //     createdBy: req.user._id,
+    //   }, { sort: { updatedAt: -1 } });
+    //   page.docs = await page.docs.toSearchResult();
+    //   res.send(page);
+    // } catch (err) {
+    //   next(err);
+    // }
 
   }
 
