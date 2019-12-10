@@ -204,7 +204,7 @@ export class UserController {
       if (nextPage >= pages) {
         nextPage = null;
       }
-      recipes = recipes.map(c => c.toSearchResultFor());
+      recipes = recipes.map(c => c.toSearchResultFor(req.user));
       res.send({ nextPage, pages, total, docs: recipes });
     } catch (err) {
       next(err);
@@ -265,33 +265,6 @@ export class UserController {
     } catch (err) {
       next(err);
     }
-  //   let {
-  //     page = 1,
-  //     limit = 10,
-  //     // tslint:disable-next-line: prefer-const
-  //     q = '',
-  //   } = req.query;
-  //   page = +page;
-  //   limit = +limit;
-  //   console.log(q);
-  //   Recipe.paginate({
-  //     createdBy: req.user._id,
-  //     name: { $regex: q, $options: 'i' }
-  //   }, {
-  //     page,
-  //     limit,
-  //     sort: { updatedAt: -1 },
-  //   }).then((page) => {
-  //     page.docs = page.docs.toThumbnailFor(req.user);
-  //     return page;
-  //   }).then((page) => res.send(page));
-  // }
-  // req.user.populate('createdRecipes').execPopulate()
-  //   .then((user) => {
-
-  //     res.sendAndWrap(user.createdRecipes.toThumbnailFor(user), 'recipes');
-  //   })
-  //   .catch(next);
   }
 
   public static async getCreatedCollections(req: Request, res: Response, next: NextFunction) {
@@ -348,23 +321,6 @@ export class UserController {
     } catch (err) {
       next(err);
     }
-    // let {
-    //   page = 1,
-    //   limit = 10,
-    //   // tslint:disable-next-line: prefer-const
-    //   q = '',
-    // } = req.query;
-    // page = +page;
-    // limit = +limit;
-    // try {
-    //   const page = await Collection.paginate({
-    //     createdBy: req.user._id,
-    //   }, { sort: { updatedAt: -1 } });
-    //   page.docs = await page.docs.toSearchResult();
-    //   res.send(page);
-    // } catch (err) {
-    //   next(err);
-    // }
 
   }
 
