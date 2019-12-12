@@ -70,10 +70,10 @@ export class SearchController {
       }
       let {
         page = 0,
-        perPage = 10,
+        limit = 10,
       } = req.query;
       page = +page;
-      perPage = +perPage;
+      limit = +limit;
 
       const queries: any = {
         $text: {
@@ -89,12 +89,12 @@ export class SearchController {
       const counted$ = Collection.find(queries).countDocuments();
       const paginated$ = Collection.find(queries, project)
         .sort({ score: { $meta: 'textScore' } })
-        .skip(page * perPage)
-        .limit(perPage);
+        .skip(page * limit)
+        .limit(limit);
 
       // tslint:disable-next-line: prefer-const
       let [total, collections] = await Promise.all([counted$, paginated$]);
-      const pages = Math.ceil(total / perPage);
+      const pages = Math.ceil(total / limit);
       let nextPage = page + 1;
       if (nextPage >= pages) {
         nextPage = null;

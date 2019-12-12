@@ -10,7 +10,7 @@ import { GMAIL_USER, GMAIL_PASS, EMAIL_SECRET, SERVER_PORT, DOMAIN_NAME } from "
 import { Image } from "../models/image.model";
 import { HTTP422Error } from "../util/httpErrors";
 import { renderResetPassword, renderVerifiedEmail, renderConfirmEmail } from "../util/emailTemplate";
-import { ICollection } from "../models";
+import { ICollection, Recipe, Collection } from "../models";
 
 export class UserController {
   public static addUser(req: Request, res: Response, next: NextFunction) {
@@ -30,7 +30,7 @@ export class UserController {
           expiresIn: '1d',
         },
         (err, emailToken) => {
-          
+
           transporter.sendMail({
             to: user.email,
             subject: 'Foodee - Confirm Email',
@@ -76,7 +76,7 @@ export class UserController {
       if (user) {
         user.token = user.generateJWT();
         if (!user.isVerified) {
-          return res.status(401).sendError(new Error("Account is not verified!"));
+          return res.status(401).sendError(new Error("account is not verified!"));
         }
         req.logIn(user, (err) => {
           if (err) { return next(err); }
@@ -138,7 +138,7 @@ export class UserController {
         throw new HTTP422Error("email not exists");
       }
 
-      user.forgetsPassword();
+      await user.forgetsPassword();
       transporter.sendMail({
         from: 'Foodee',
         to: email,
@@ -151,48 +151,188 @@ export class UserController {
     }
   }
 
-  public static resetPassword(req: Request, res: Response, next: NextFunction) {
-
-  }
-
-  public static getSavedRecipes(req: Request, res: Response, next: NextFunction) {
-    req.user.populate('savedRecipes').execPopulate()
-      .then((user) => {
-        res.sendAndWrap(user.savedRecipes.toThumbnailFor(user), 'recipes');
-      })
-      .catch(next);
-  }
-
-  public static getCreatedRecipes(req: Request, res: Response, next: NextFunction) {
-    req.user.populate('createdRecipes').execPopulate()
-      .then((user) => {
-        res.sendAndWrap(user.createdRecipes.toThumbnailFor(user), 'recipes');
-      })
-      .catch(next);
-  }
-
-  public static async getCreatedCollections(req: Request, res: Response, next: NextFunction) {
+  public static async getSavedRecipes(req: Request, res: Response, next: NextFunction) {
     try {
-      await req.user.populate('collections').execPopulate();
-      res.sendAndWrap(await req.user.collections.toSearchResult(), 'collections');
+      const {
+        q = ''
+      } = req.query;
+
+      let {
+        page = 0,
+        limit = 10,
+      } = req.query;
+      page = +page;
+      limit = +limit;
+
+      const queries: any = {
+        $and: [
+          {
+            _id: { $in: req.user.savedRecipes }
+          },
+          // { createdBy: req.user._id },
+        ]
+
+      };
+
+      if (q) {
+        queries.$and.push({
+          $text: {
+            $search: q,
+            $caseSensitive: false,
+          }
+        });
+      }
+      console.log(queries);
+      const project = {
+        score: { $meta: 'textScore' }
+      };
+
+      const counted$ = Recipe.find(queries).countDocuments();
+      const paginated$ = Recipe.find(queries, project)
+        .sort({ score: { $meta: 'textScore' } })
+        .skip(page * limit)
+        .limit(limit);
+
+      // tslint:disable-next-line: prefer-const
+      let [total, recipes] = await Promise.all([counted$, paginated$]);
+      const pages = Math.ceil(total / limit);
+      let nextPage = page + 1;
+      if (nextPage >= pages) {
+        nextPage = null;
+      }
+      recipes = recipes.map(c => c.toSearchResultFor(req.user));
+      res.send({ nextPage, pages, total, docs: recipes });
     } catch (err) {
       next(err);
     }
   }
 
+  public static async getCreatedRecipes(req: Request, res: Response, next: NextFunction) {
+    try {
+      const {
+        q = ''
+      } = req.query;
+
+      let {
+        page = 0,
+        limit = 10,
+      } = req.query;
+      page = +page;
+      limit = +limit;
+
+      const queries: any = {
+        $and: [
+          {
+            createdBy: req.user._id,
+          },
+          // { createdBy: req.user._id },
+        ]
+
+      };
+
+      if (q) {
+        queries.$and.push({
+          $text: {
+            $search: q,
+            $caseSensitive: false,
+          }
+        });
+      }
+
+      const project = {
+        score: { $meta: 'textScore' }
+      };
+
+      const counted$ = Recipe.find(queries).countDocuments();
+      const paginated$ = Recipe.find(queries, project)
+        .sort({ score: { $meta: 'textScore' } })
+        .skip(page * limit)
+        .limit(limit);
+
+      // tslint:disable-next-line: prefer-const
+      let [total, recipes] = await Promise.all([counted$, paginated$]);
+      const pages = Math.ceil(total / limit);
+      let nextPage = page + 1;
+      if (nextPage >= pages) {
+        nextPage = null;
+      }
+      recipes = recipes.map(c => c.toSearchResultFor());
+      res.send({ nextPage, pages, total, docs: recipes });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  public static async getCreatedCollections(req: Request, res: Response, next: NextFunction) {
+    try {
+      const {
+        q = ''
+      } = req.query;
+
+      let {
+        page = 0,
+        limit = 10,
+      } = req.query;
+      page = +page;
+      limit = +limit;
+
+      const queries: any = {
+        $and: [
+          {
+            createdBy: req.user._id,
+          },
+          // { createdBy: req.user._id },
+        ]
+
+      };
+
+      if (q) {
+        queries.$and.push({
+          $text: {
+            $search: q,
+            $caseSensitive: false,
+          }
+        });
+      }
+
+      const project = {
+        score: { $meta: 'textScore' }
+      };
+
+      const counted$ = Collection.find(queries).countDocuments();
+      const paginated$ = Collection.find(queries, project)
+        .sort({ score: { $meta: 'textScore' } })
+        .skip(page * limit)
+        .limit(limit);
+
+      // tslint:disable-next-line: prefer-const
+      let [total, collections] = await Promise.all([counted$, paginated$]);
+      const pages = Math.ceil(total / limit);
+      let nextPage = page + 1;
+      if (nextPage >= pages) {
+        nextPage = null;
+      }
+      collections = await Promise.all(collections.map(c => c.toSearchResult()));
+      res.send({ nextPage, pages, total, docs: collections });
+    } catch (err) {
+      next(err);
+    }
+
+  }
+
   public static async getCreatedCollectionsWithRecipe(req: Request, res: Response, next: NextFunction) {
-    const {user, recipe} = req;
+    const { user, recipe } = req;
     try {
       await user.populate('collections').execPopulate();
-      const collections$ =  user.collections.map(async (c: ICollection) => {
+      const collections$ = user.collections.map(async (c: ICollection) => {
         const didSaveRecipe$ = c.didIncludeRecipe(recipe.id);
         const result$ = c.toSearchResult();
         const [isContained, result] = await Promise.all([didSaveRecipe$, result$]);
         result.didContainRecipe = isContained;
         return result;
       });
-      
-      res.sendAndWrap(await Promise.all(collections$) , 'collections');
+
+      res.sendAndWrap(await Promise.all(collections$), 'collections');
     } catch (err) {
       next(err);
     }

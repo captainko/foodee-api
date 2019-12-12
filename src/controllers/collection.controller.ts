@@ -4,7 +4,6 @@ import { Request, Response, NextFunction } from "express";
 // app
 import { Collection } from "../models/collection.model";
 import { HTTP404Error, HTTP403Error } from "../util/httpErrors";
-import { Recipe } from "../models/recipe.model";
 
 export class CollectionController {
   public static preloadCollection(req: Request, res: Response, next: NextFunction, collectionId: string) {
@@ -12,25 +11,13 @@ export class CollectionController {
       .findById(collectionId)
       .then((collection) => {
         if (!collection) {
-          throw new HTTP404Error('Collection not found');
+          throw new HTTP404Error('collection not found');
         }
         req.collection = collection;
         return next();
       })
       .catch(next);
   }
-
-  // public static preloadRecipe(req: Request, res: Response, next: NextFunction, recipeId: string) {
-  //   Recipe.findById(recipeId, {}, { autopopulate: false })
-  //     .then((recipe) => {
-  //       if (!recipe) {
-  //         throw new HTTP404Error('Recipe not found');
-  //       }
-  //       req.recipe = recipe;
-  //       next();
-  //     })
-  //     .catch(next);
-  // }
 
   public static async createCollection({ body, user }: Request, res: Response, next: NextFunction) {
     try {
@@ -46,9 +33,6 @@ export class CollectionController {
   }
 
   public static async getDetailCollection({ collection, user }: Request, res: Response, next: NextFunction) {
-    // collection.populate('recipes').execPopulate()
-    //   .then(c => res.sendAndWrap(c.toSearchResult(), 'collection'))
-    //   .catch(next);
     try {
       const result = await collection.toDetailFor(user);
       res.sendAndWrap(result, 'collection');
@@ -75,7 +59,7 @@ export class CollectionController {
   public static async deleteCollection(req: Request, res: Response, next: NextFunction) {
     try {
       await req.collection.remove();
-      res.sendMessage("Removed collection successfully");
+      res.sendMessage("removed collection successfully");
     } catch (err) {
       next(err);
     }

@@ -1,8 +1,14 @@
 
-import loadPage from './commands/load-page';
+import { loadPage } from "./commands/load-page";
+import { Router } from 'express';
+import { verifiedUser } from "./commands/verified-user";
+import { submitPassword } from "./commands/submit-password";
 
-export default function(router) {
-  router.get('/reset-password', loadPage);
+export default (router: Router) => {
+  router.all("*").param('token', verifiedUser);
+
+  router.get('/reset-password/:token', loadPage);
+  router.post('/reset-password/:token', submitPassword);
 
   return router;
-}
+};
