@@ -151,10 +151,6 @@ export class UserController {
     }
   }
 
-  public static resetPassword(req: Request, res: Response, next: NextFunction) {
-
-  }
-
   public static async getSavedRecipes(req: Request, res: Response, next: NextFunction) {
     try {
       const {

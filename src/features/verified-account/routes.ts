@@ -3,7 +3,7 @@
 import { loadPage } from "./commands/load-page";
 import { Router } from "express";
 
-module.exports = (router: Router) => {
+export default (router: Router) => {
   router.get('/verified-account/', loadPage);
 
   return router;

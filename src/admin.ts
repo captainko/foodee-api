@@ -16,6 +16,7 @@ import { UserResource, ImageResource, RecipeResource, RatingResource, RatingResu
 import { UserModel, RatingResultModel } from "./models";
 import { resetPassword } from "./routes/reset-password.router";
 import { verifiedAccount } from "./routes/verified-account";
+import { resetPasswordSuccess } from "./routes/reset-password-success";
 AdminBro.registerAdapter(require('admin-bro-mongoose'));
 
 class Admin {
@@ -68,6 +69,7 @@ class Admin {
     this.app.use(express.urlencoded());
     this.app.use(adminBro.options.rootPath, adminRouter);
     this.app.use(resetPassword);
+    this.app.use(resetPasswordSuccess);
     this.app.use(verifiedAccount);
     this.app.use((req, res) => {
       res.status(404).render('pages/404');

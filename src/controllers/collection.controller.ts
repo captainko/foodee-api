@@ -33,9 +33,6 @@ export class CollectionController {
   }
 
   public static async getDetailCollection({ collection, user }: Request, res: Response, next: NextFunction) {
-    // collection.populate('recipes').execPopulate()
-    //   .then(c => res.sendAndWrap(c.toSearchResult(), 'collection'))
-    //   .catch(next);
     try {
       const result = await collection.toDetailFor(user);
       res.sendAndWrap(result, 'collection');

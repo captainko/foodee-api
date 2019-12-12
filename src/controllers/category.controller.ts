@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { Recipe } from "../models/recipe.model";
 import { HTTP404Error } from "../util/httpErrors";
-import { ICategory } from "../util/interfaces";
 
 export class CategoryController {
   public static async preloadCategory(req: Request, res: Response, next: NextFunction, category) {
