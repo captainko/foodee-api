@@ -65,6 +65,7 @@ class Admin {
     this.app.set('view engine', 'ejs');
     this.app.use(express.static(path.join(__dirname, staticFolder)));
     this.app.use(expressLayouts);
+    this.app.use(express.urlencoded());
     this.app.use(adminBro.options.rootPath, adminRouter);
     this.app.use(resetPassword);
     this.app.use(verifiedAccount);

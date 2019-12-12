@@ -138,7 +138,7 @@ export class UserController {
         throw new HTTP422Error("email not exists");
       }
 
-      user.forgetsPassword();
+      await user.forgetsPassword();
       transporter.sendMail({
         from: 'Foodee',
         to: email,
@@ -167,11 +167,11 @@ export class UserController {
       } = req.query;
       page = +page;
       limit = +limit;
-    
+
       const queries: any = {
         $and: [
           {
-            _id : {$in: req.user.savedRecipes}
+            _id: { $in: req.user.savedRecipes }
           },
           // { createdBy: req.user._id },
         ]
@@ -223,7 +223,7 @@ export class UserController {
       } = req.query;
       page = +page;
       limit = +limit;
-    
+
       const queries: any = {
         $and: [
           {
@@ -279,7 +279,7 @@ export class UserController {
       } = req.query;
       page = +page;
       limit = +limit;
-    
+
       const queries: any = {
         $and: [
           {

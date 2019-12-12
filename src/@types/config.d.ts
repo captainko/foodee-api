@@ -3,7 +3,8 @@ declare namespace Express {
   export interface Request {
     payload?: any;
     recipe?: import('../models/recipe.model').IRecipe;
-    collection?: import('../models/collection.model').ICollection,
+    collection?: import('../models/collection.model').ICollection;
+    category?: import('../util/interfaces').ICategory;
   }
 
   

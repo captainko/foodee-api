@@ -8,3 +8,10 @@ export interface PreloadedRequest extends Request {
   payload?: any;
   user: IUser;
 }
+
+export interface ICategory {
+  name: string;
+  image_url: string;
+  total: number;
+  recipes: IRecipe[];
+}

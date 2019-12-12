@@ -16,12 +16,7 @@ import { Rating, IRating } from "./rating.model";
 import { IUser, User } from "./user.model";
 import { IImage, Image } from "./image.model";
 import { Collection } from './collection.model';
-
-export interface ICategory {
-  name: string;
-  total: number;
-  image_url: string;
-}
+import { ICategory } from "../util/interfaces";
 
 export interface IRecipe extends Document {
   name?: string;
