@@ -9,7 +9,7 @@ import {
 } from "./environment";
 
 import "./config";
-import { Routes } from "./routes";
+import { Routes } from "./routes/api";
 import middleware from "./middleware";
 import { applyMiddleware } from "./util";
 import { errorHandlers } from "./middleware/errorHandlers";

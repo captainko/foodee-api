@@ -14,9 +14,9 @@ import {
 
 import { UserResource, ImageResource, RecipeResource, RatingResource, RatingResultResource, CollectionResource } from './web/resources';
 import { UserModel, RatingResultModel } from "./models";
-import { resetPassword } from "./routes/reset-password.router";
-import { verifiedAccount } from "./routes/verified-account";
-import { resetPasswordSuccess } from "./routes/reset-password-success";
+import { resetPassword } from "./routes/web/reset-password.router";
+import { verifiedAccount } from "./routes/web/verified-account";
+import { resetPasswordSuccess } from "./routes/web/reset-password-success";
 AdminBro.registerAdapter(require('admin-bro-mongoose'));
 
 class Admin {
