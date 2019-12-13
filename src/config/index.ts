@@ -5,13 +5,22 @@ import express = require("express");
 import { User } from "../models/user.model";
 import "./extends";
 import { JWT_SECRET } from "../environment";
+import { IPaginateObj } from "../util/interfaces";
 
 // express
-express.response.sendAndWrap = function(obj, key = 'data', message = 'success') {
+express.response.sendAndWrap = function(this: express.Response, obj, key = 'data', message = 'success') {
   return this.send({
     status: this.statusCode,
     message,
     [key]: obj
+  });
+};
+
+express.response.sendPaginate = function(this: express.Response, obj: IPaginateObj) {
+  return this.send({
+    message: 'success',
+    status: this.statusCode,
+    ...obj
   });
 };
 
@@ -52,7 +61,7 @@ passport.deserializeUser((id, done) => {
   });
 });
 
-const jwtOptions = {  
+const jwtOptions = {
   // Telling Passport to check authorization headers for JWT
   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
   // Telling Passport where to find the secret

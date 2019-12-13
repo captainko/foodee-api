@@ -15,3 +15,10 @@ export interface ICategory {
   total: number;
   recipes: IRecipe[];
 }
+
+export interface IPaginateObj<T= any> {
+  total: number;
+  nextPage?: number | null;
+  pages: number;
+  docs: T[];
+}
