@@ -41,12 +41,9 @@ export class SearchController {
     }
 
     console.log(queries);
-    const project = {
-      score: { $meta: 'textScore' }
-    };
-
+  
     const counted$ = Recipe.find(queries).countDocuments();
-    const paginated$ = Recipe.find(queries, project)
+    const paginated$ = Recipe.find(queries)
       // .sort({ [sortBy]: { $meta: "textScore" } })
       .skip(page * limit)
       .sort(sorts[sortBy])
@@ -87,13 +84,8 @@ export class SearchController {
           $caseSensitive: false,
         },
       };
-
-      const project = {
-        score: { $meta: 'textScore' }
-      };
-
       const counted$ = Collection.find(queries).countDocuments();
-      const paginated$ = Collection.find(queries, project)
+      const paginated$ = Collection.find(queries)
         .sort({ score: { $meta: 'textScore' } })
         .skip(page * limit)
         .limit(limit);
