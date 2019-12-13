@@ -6,7 +6,7 @@ export class SearchController {
 
   public static searchRecipes(req: Request, res: Response, next: NextFunction) {
     if (req.query.q.length < 3) {
-      return res.send({ docs: [], pages: 0, total: 0, nextPage: null, message: 'success', status: res.statusCode });
+      return res.sendPaginate({ docs: [], pages: 0, total: 0, nextPage: null });
     }
 
     const sorts = SearchController._sorts;
@@ -55,7 +55,7 @@ export class SearchController {
         }
 
         recipes = recipes.map(r => r.toSearchResultFor(req.user));
-        res.send({ nextPage, pages, total, docs: recipes, message: 'success', status: res.statusCode});
+        res.sendPaginate({ nextPage, pages, total, docs: recipes});
       });
   }
 
@@ -66,7 +66,7 @@ export class SearchController {
       } = req.query;
 
       if (req.query.q.length <= 3) {
-        return res.send({ docs: [], pages: 0, total: 0, nextPage: null, message: 'success', status: res.statusCode, });
+        return res.sendPaginate({ docs: [], pages: 0, total: 0, nextPage: null, });
       }
       let {
         page = 0,
@@ -100,7 +100,7 @@ export class SearchController {
         nextPage = null;
       }
       collections = await collections.toSearchResult();
-      res.send({ nextPage, pages, total, docs: collections, message: 'success', status: res.statusCode });
+      res.sendPaginate({ nextPage, pages, total, docs: collections });
     } catch (err) {
       next(err);
     }
