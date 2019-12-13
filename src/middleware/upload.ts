@@ -22,6 +22,7 @@ const storage = cloudinaryStorage({
   folder: "foodee",
   format: "jpg",
   allowedFormats: ["jpg", "png"],
+
 });
 // cloudinary.v2.api.resource()
 // const fileFilter = (req: Request, file: Express.Multer.File, cb) => {

@@ -25,16 +25,22 @@ export class SearchController {
     page = +page;
     limit = +limit;
     const queries: any = {
-      $text: {
-        $search: q,
-        $caseSensitive: false,
-      },
-      time: { $gt: minTime, $lte: maxTime },
+      $and: [
+        {
+          $text: {
+            $search: q,
+            $caseSensitive: false,
+          }
+        },
+        { time: { $gt: minTime, $lte: maxTime } },
+      ]
     };
 
-    if (!categories.length) {
+    if (categories.length) {
       queries.categories = { $in: categories };
     }
+
+    console.log(queries);
     const project = {
       score: { $meta: 'textScore' }
     };
@@ -55,7 +61,7 @@ export class SearchController {
         }
 
         docs = docs.toThumbnailFor(req.user);
-        res.sendPaginate({ nextPage, pages, total, docs});
+        res.sendPaginate({ nextPage, pages, total, docs });
       });
   }
 

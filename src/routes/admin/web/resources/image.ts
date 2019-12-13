@@ -11,17 +11,23 @@ export const ImageResource = {
           new: AdminBro.bundle('../components/images/ImageInEdit'),
           edit: AdminBro.bundle('../components/images/ImageInEdit'),
         },
-        actions: {
-          new: uploadFile,
-          edit: uploadFile,
-        }
       },
       // image: {
       //   components: {
-         
+
       //   }
       // },
 
+    },
+    actions: {
+      // new: {
+      //   after: uploadFile,
+      //   hand
+      // },
+      edit: {
+        after: uploadFile,
+        handler: (res, req, data) => ({record: data.record.toJSON()})
+      },
     }
   }
 };
@@ -29,17 +35,25 @@ export const ImageResource = {
 async function uploadFile(res, req, ctx, ) {
   const { record } = ctx;
   const { payload } = req;
-  if (record.isValid() && payload.file) {
-    const { file } = payload;
+  const result = {};
+  if (req.method === 'post') {
 
-    // here is the logic for uploading to S3 (in our case) - but you also can write this to
-    // hdd or whatever else... file is a formidable object
-    const photo = await service.findAndUpdateFileInfo(+record.id(), file);
+    if (record.isValid() && payload.file) {
+      const { file } = payload;
+      console.warn('lol');
+      console.log(file);
 
-    return {
-      ...res,
-      record: new BaseRecord(photo, ctx.resource).toJSON(ctx.currentAdmin),
-    };
+      
+      // here is the logic for uploading to S3 (in our case) - but you also can write this to
+      // hdd or whatever else... file is a formidable object
+      // const photo = await service.findAndUpdateFileInfo(+record.id(), file);
+
+      return { ...res, record: record.toJSON() };
+    }
   }
-  return res;
+  if (req.method === 'get') {
+    return {  record: record.toJSON() };
+
+  }
+  return '';
 }
