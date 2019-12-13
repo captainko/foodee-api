@@ -6,7 +6,7 @@ export class SearchController {
 
   public static searchRecipes(req: Request, res: Response, next: NextFunction) {
     if (req.query.q.length < 3) {
-      return res.sendAndWrap({ recipes: [], pages: 0, total: 0, nextPage: null }, 'paginate');
+      return res.send({ docs: [], pages: 0, total: 0, nextPage: null, message: 'success', status: res.statusCode });
     }
 
     const sorts = SearchController._sorts;
@@ -55,7 +55,7 @@ export class SearchController {
         }
 
         recipes = recipes.map(r => r.toSearchResultFor(req.user));
-        res.sendAndWrap({ nextPage, totalPages, totalResults, recipes }, 'paginate');
+        res.send({ nextPage, totalPages, totalResults, docs: recipes, message: 'success', status: res.statusCode});
       });
   }
 
@@ -66,7 +66,7 @@ export class SearchController {
       } = req.query;
 
       if (req.query.q.length <= 3) {
-        return res.sendAndWrap({ recipes: [], pages: 0, total: 0, nextPage: null }, 'paginate');
+        return res.send({ docs: [], pages: 0, total: 0, nextPage: null, message: 'success', status: res.statusCode, });
       }
       let {
         page = 0,
@@ -99,8 +99,8 @@ export class SearchController {
       if (nextPage >= pages) {
         nextPage = null;
       }
-      collections = await Promise.all(collections.map(c => c.toSearchResult()));
-      res.sendAndWrap({ nextPage, pages, total, collections }, 'paginate');
+      collections = await collections.toSearchResult();
+      res.send({ nextPage, pages, total, docs: collections, message: 'success', status: res.statusCode });
     } catch (err) {
       next(err);
     }
