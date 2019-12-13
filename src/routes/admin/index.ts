@@ -62,9 +62,9 @@ class Admin {
     console.log(adminBro.options.rootPath);
     
     const staticFolder = IS_PROD ? 'dist' : 'public';
-    this.app.set('views', path.join(__dirname, 'views'));
+    this.app.set('views', path.join(__dirname, '..', '..', 'views'));
     this.app.set('view engine', 'ejs');
-    this.app.use(express.static(path.join(__dirname, staticFolder)));
+    this.app.use(express.static(path.join(__dirname, '..', '..', staticFolder)));
     this.app.use(expressLayouts);
     this.app.use(express.urlencoded());
     this.app.use(adminBro.options.rootPath, adminRouter);
