@@ -47,15 +47,15 @@ export class SearchController {
       .limit(limit);
 
     Promise.all([counted$, paginated$])
-      .then(([total, recipes]) => {
+      .then(([total, docs]) => {
         const pages = Math.ceil(total / limit);
         let nextPage = page + 1;
         if (nextPage >= pages) {
           nextPage = null;
         }
 
-        recipes = recipes.map(r => r.toSearchResultFor(req.user));
-        res.sendPaginate({ nextPage, pages, total, docs: recipes});
+        docs = docs.toThumbnailFor(req.user);
+        res.sendPaginate({ nextPage, pages, total, docs});
       });
   }
 
@@ -93,14 +93,14 @@ export class SearchController {
         .limit(limit);
 
       // tslint:disable-next-line: prefer-const
-      let [total, collections] = await Promise.all([counted$, paginated$]);
+      let [total, docs] = await Promise.all([counted$, paginated$]);
       const pages = Math.ceil(total / limit);
       let nextPage = page + 1;
       if (nextPage >= pages) {
         nextPage = null;
       }
-      collections = await collections.toSearchResult();
-      res.sendPaginate({ nextPage, pages, total, docs: collections });
+      docs = await docs.toSearchResult();
+      res.sendPaginate({ nextPage, pages, total, docs });
     } catch (err) {
       next(err);
     }
