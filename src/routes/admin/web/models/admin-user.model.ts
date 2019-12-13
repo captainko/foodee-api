@@ -4,7 +4,7 @@ import * as uniqueValidator from 'mongoose-unique-validator';
 import * as crypto from 'crypto';
 import * as jwt from 'jsonwebtoken';
 // app
-import { JWT_SECRET } from "../../environment";
+import { JWT_SECRET } from "../../../../environment";
 
 // const validator;
 

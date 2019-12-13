@@ -3,7 +3,7 @@ import fs = require('fs');
 import https = require('https');
 // app
 import app from "./app";
-import admin from './admin';
+import admin from './routes/admin';
 import { SERVER_PORT, SSL_PASSPHRASE, IS_PROD, WEB_PORT } from "./environment";
 
 // if (!IS_PROD) {

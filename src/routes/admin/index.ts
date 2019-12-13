@@ -10,13 +10,13 @@ import path = require('path');
 import {
   DB_URI,
   IS_PROD,
-} from "./environment";
+} from "../../environment";
 
 import { UserResource, ImageResource, RecipeResource, RatingResource, RatingResultResource, CollectionResource } from './web/resources';
-import { UserModel, RatingResultModel } from "./models";
-import { resetPassword } from "./routes/web/reset-password.router";
-import { verifiedAccount } from "./routes/web/verified-account";
-import { resetPasswordSuccess } from "./routes/web/reset-password-success";
+import { UserModel, RatingResultModel } from "../../models";
+import { resetPassword } from "../web/reset-password.router";
+import { verifiedAccount } from "../web/verified-account";
+import { resetPasswordSuccess } from "../web/reset-password-success";
 AdminBro.registerAdapter(require('admin-bro-mongoose'));
 
 class Admin {
