@@ -20,10 +20,10 @@ export class SearchController {
 
     let {
       page = 0,
-      perPage = 10,
+      limit = 10,
     } = req.query;
     page = +page;
-    perPage = +perPage;
+    limit = +limit;
     const queries: any = {
       $text: {
         $search: q,
@@ -42,20 +42,20 @@ export class SearchController {
     const counted$ = Recipe.find(queries).countDocuments();
     const paginated$ = Recipe.find(queries, project)
       // .sort({ [sortBy]: { $meta: "textScore" } })
-      .skip(page * perPage)
+      .skip(page * limit)
       .sort(sorts[sortBy])
-      .limit(perPage);
+      .limit(limit);
 
     Promise.all([counted$, paginated$])
-      .then(([totalResults, recipes]) => {
-        const totalPages = Math.ceil(totalResults / perPage);
+      .then(([total, recipes]) => {
+        const pages = Math.ceil(total / limit);
         let nextPage = page + 1;
-        if (nextPage >= totalPages) {
+        if (nextPage >= pages) {
           nextPage = null;
         }
 
         recipes = recipes.map(r => r.toSearchResultFor(req.user));
-        res.send({ nextPage, totalPages, totalResults, docs: recipes, message: 'success', status: res.statusCode});
+        res.send({ nextPage, pages, total, docs: recipes, message: 'success', status: res.statusCode});
       });
   }
 
