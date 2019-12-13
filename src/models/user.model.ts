@@ -172,25 +172,12 @@ UserSchema.methods.addRating = function(this: IUser, ratingId: string) {
 };
 
 UserSchema.methods.saveRecipe = function(this: IUser, recipeId) {
-  // console.log(this);
-  // if (!this.didSaveRecipe(recipe)) {
-  //   this.savedRecipes.unshift(recipe.id);
-  // }
-  // return this;
-
   return this.updateOne({
     $push: { savedRecipes: { $each: [recipeId], $position: 0 } }
   }).exec(() => this.getLatest());
 };
 
 UserSchema.methods.unsaveRecipe = function(this: IUser, recipeId) {
-  // @ts-ignore
-  // const position = this.savedRecipes.findIndex((r: IRecipe) => r == recipe.id || recipe.id == r.id);
-  // if (position !== -1) {
-  //   this.savedRecipes.splice(position, 1);
-  //   Collection.removeRecipeFromUser(recipe.id, this.id);
-  // }
-  // return this;
 
   return this.updateOne({
     $pull: {

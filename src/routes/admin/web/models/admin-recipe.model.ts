@@ -328,7 +328,6 @@ RecipeSchema.index({
 // };
 
 RecipeSchema.post("remove", function(this: IAdminRecipe) {
-  console.log(typeof this._id);
   AdminUser.updateMany({
     $or: [
       { createdRecipes: { $in: [this.id] } },
@@ -338,15 +337,15 @@ RecipeSchema.post("remove", function(this: IAdminRecipe) {
       createdRecipes: this._id,
       savedRecipes: this._id,
     }
-  }).then(console.log);
+  });
 
   AdminCollection.updateMany({ recipes: { $in: [this.id] } }, {
     $pull: {
       recipes: this._id,
     }
-  }).then(console.log);
+  });
 
-  AdminRating.deleteMany({ recipeId: { $in: [this.id] } }).then(console.log);
+  AdminRating.deleteMany({ recipeId: { $in: [this.id] } });
   AdminImage.deleteMany({_id: {$in: [this.banners]}});
 });
 

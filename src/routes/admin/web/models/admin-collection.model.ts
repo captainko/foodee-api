@@ -92,44 +92,6 @@ AdminCollectionSchema.methods.removeRecipe = function(this: IAdminCollection, re
   return this;
 };
 
-// CollectionSchema.methods.toSearchResult = async function(this: ICollection) {
-//   await this.populate({
-//     path: 'recipes',
-//     populate: { model: 'image', path: 'banners', options: { limit: 1 } },
-//     options: { limit: 1 }
-//   }).execPopulate();
-//   console.log(this);
-//   const result = {
-//     ...this.toObject(),
-//   };
-//   if (this.recipes.length) {
-//     // @ts-ignore
-//     result.image_url = this.recipes[0].image_url;
-//   }
-//   // console.log(this.toObject());
-//   console.log(result);
-//   delete result.createdBy;
-//   delete result.createdAt;
-//   delete result.recipes;
-//   delete result.score;
-//   return result;
-// };
-
-// CollectionSchema.methods.toDetailFor = async function(this: ICollection, user: IUser) {
-//   await this.populate({
-//     path: 'recipes',
-//     // populate: { model: 'image', path: 'banners', options: { limit: 1 } },
-//     // options: { limit: 1 }
-//   }).execPopulate();
-
-//   console.log('called');
-//   return {
-//     ...this.toJSON(),
-//     user: this.createdBy,
-//     recipes: this.recipes.map((r: IRecipe) => r.toThumbnailFor(user)),
-//   };
-// };
-
 // tslint:disable:max-line-length
 export const AdminCollectionModel = model<IAdminCollection, IAdminCollectionModel>('admin-collection', AdminCollectionSchema, 'collections');
 

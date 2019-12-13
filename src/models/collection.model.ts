@@ -142,7 +142,6 @@ CollectionSchema.methods.toSearchResult = async function(this: ICollection) {
     image_url: await this.getBannerAsync(),
   };
   
-  // console.log(this.toObject());
   delete result.createdBy;
   delete result.createdAt;
   delete result.recipes;
@@ -158,7 +157,6 @@ CollectionSchema.methods.toDetailFor = async function(this: ICollection, user: I
     select: 'username',
   }]).execPopulate();
 
-  console.log('called');
   return {
     ...this.toJSON(),
     total: this.recipes.length,

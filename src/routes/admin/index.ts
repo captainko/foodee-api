@@ -59,7 +59,6 @@ class Admin {
       }
     );
     // const AdminRouter = AdminBroExpress.buildRouter(adminBro);
-    console.log(adminBro.options.rootPath);
     
     const staticFolder = IS_PROD ? 'dist' : 'public';
     this.app.set('views', path.join(__dirname, '..', '..', 'views'));

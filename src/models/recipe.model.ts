@@ -375,9 +375,9 @@ RecipeSchema.statics.getRecommendRecipes = function(limit: number = 20) {
 RecipeSchema.post("remove", function(this: IRecipe) {
   console.log(typeof this._id);
 
-  Collection.removeRecipeFromAll(this.id).then(console.log);
+  Collection.removeRecipeFromAll(this.id);
 
-  Rating.removeRecipe(this.id).then(console.log);
+  Rating.removeRecipe(this.id);
 });
 
 export const RecipeModel = model<IRecipe, IRecipeModel>('recipe', RecipeSchema);

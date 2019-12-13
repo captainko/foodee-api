@@ -67,7 +67,7 @@ RatingSchema.statics.rate = async function(userId: string, recipeId: string, rat
 };
 
 RatingSchema.statics.removeRecipe = function(recipeId) {
-  return Rating.deleteMany({ recipeId }).exec().then(console.log);
+  return Rating.deleteMany({ recipeId }).exec();
 };
 
 export interface IRatingResult extends Document {
