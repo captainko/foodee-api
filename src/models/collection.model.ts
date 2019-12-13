@@ -160,6 +160,7 @@ CollectionSchema.methods.toDetailFor = async function(this: ICollection, user: I
   return {
     ...this.toJSON(),
     total: this.recipes.length,
+    // @ts-ignore
     recipes: this.recipes.toThumbnailFor(user),
     image_url: this.getBannerSync(),
   };
