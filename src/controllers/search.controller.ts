@@ -5,10 +5,7 @@ import { Collection } from '../models/collection.model';
 export class SearchController {
 
   public static searchRecipes(req: Request, res: Response, next: NextFunction) {
-    if (!req.query.q || req.query.q.length < 3) {
-      return res.sendPaginate({ docs: [], pages: 0, total: 0, nextPage: null });
-    }
-
+    
     const sorts = SearchController._sorts;
     const {
       sortBy = 'score',
@@ -18,6 +15,9 @@ export class SearchController {
       q = '',
     } = req.query;
 
+    if (q.length < 3) {
+      return res.sendPaginate({ docs: [], pages: 0, total: 0, nextPage: null });
+    }
     let {
       page = 0,
       limit = 10,
@@ -71,7 +71,7 @@ export class SearchController {
         q = ''
       } = req.query;
 
-      if (req.query.q.length <= 3) {
+      if (q.length <= 3) {
         return res.sendPaginate({ docs: [], pages: 0, total: 0, nextPage: null, });
       }
       let {
