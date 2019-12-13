@@ -57,7 +57,7 @@ export class SearchController {
           nextPage = null;
         }
 
-        docs = docs.toThumbnailFor(req.user);
+        docs = docs.map(r => r.toSearchResultFor(req.user));
         res.sendPaginate({ nextPage, pages, total, docs });
       });
   }
