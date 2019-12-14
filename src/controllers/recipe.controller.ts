@@ -72,7 +72,6 @@ export class RecipeController {
         methods: body.methods,
       });
       await recipe.populate('banners').execPopulate();
-      req.user.createRecipe(recipe.id);
       await req.user.save();
       res.sendAndWrap(recipe.toJSONFor(req.user), 'recipe');
     } catch (err) {
