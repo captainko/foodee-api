@@ -3,5 +3,6 @@ export const RecipeResource = {
   resource: Recipe,
   options: {
     name: 'Recipes',
+    
   }
 };
