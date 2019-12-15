@@ -262,7 +262,7 @@ RecipeSchema.methods.toEditObj = function(this: IRecipe) {
 RecipeSchema.methods.isCreatedBy = function(this: IRecipe, user: IUser) {
   if (!user) { return false; }
 
-  return this.createdBy == user._id || this.createdBy.username === user.username;
+  return this.createdBy == user.id || this.createdBy.username === user.username;
 };
 
 RecipeSchema.methods.toJSONFor = function(this: IRecipe, user: IUser) {
