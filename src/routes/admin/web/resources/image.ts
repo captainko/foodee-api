@@ -10,6 +10,7 @@ export const ImageResource = {
           show: AdminBro.bundle('../components/images/ImageInShow'),
           new: AdminBro.bundle('../components/images/ImageInEdit'),
           edit: AdminBro.bundle('../components/images/ImageInEdit'),
+          list: AdminBro.bundle('../components/images/ImageInList'),
         },
       },
       // image: {
@@ -43,7 +44,6 @@ async function uploadFile(res, req, ctx, ) {
       console.warn('lol');
       console.log(file);
 
-      
       // here is the logic for uploading to S3 (in our case) - but you also can write this to
       // hdd or whatever else... file is a formidable object
       // const photo = await service.findAndUpdateFileInfo(+record.id(), file);
