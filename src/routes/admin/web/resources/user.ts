@@ -1,6 +1,6 @@
 import crypto = require('crypto');
 
-import {User } from '../models';
+import { User } from '../models';
 
 export const UserResource = {
   resource: User,
@@ -37,37 +37,59 @@ export const UserResource = {
     actions: {
       new: {
         before: async (req) => {
-          console.log(req);
+          // console.log(req);
           if (req.method === 'post') {
             if (req.payload.record.password) {
               const salt = crypto.randomBytes(16).toString('hex');
               // tslint:disable:max-line-length
               const hash = crypto.pbkdf2Sync(req.payload.record.password, salt, 10000, 512, 'sha512').toString('hex');
+              let { savedRecipes, ratings } = req.payload.record;
+              if (!savedRecipes.length) {
+                savedRecipes = null;
+              }
+              if (!ratings.length) {
+                ratings = null;
+              }
               req.payload.record = {
                 ...req.payload.record,
+                savedRecipes,
+                ratings,
                 salt,
                 hash,
                 password: undefined,
               };
             }
           }
+          console.log('called');
           return req;
         }
       },
       edit: {
-        before: async (req, res, data) => {
+        before: async (req) => {
           if (req.method === 'post') {
-            console.log(req, res, data);
-            if (req.payload.record.password) {
+            if (req.payload.password) {
               const salt = crypto.randomBytes(16).toString('hex');
               // tslint:disable:max-line-length
-              const hash = crypto.pbkdf2Sync(req.payload.record.password, salt, 10000, 512, 'sha512').toString('hex');
-              req.payload.record = {
-                ...req.payload.record,
+              const hash = crypto.pbkdf2Sync(req.payload.password, salt, 10000, 512, 'sha512').toString('hex');
+              req.payload = {
+                ...req.payload,
                 salt,
                 hash,
                 password: undefined,
               };
+            }
+
+            let { savedRecipes, ratings } = req.fields;
+            if (typeof savedRecipes != 'undefined' && !savedRecipes.length) {
+              // savedRecipes = null;
+              delete req.fields.savedRecipes;
+              delete req.payload.savedRecipes;
+            }
+            if (typeof ratings != 'undefined' && !ratings.length) {
+              ratings = null;
+              console.log('called');
+              delete req.fields.ratings;
+              delete req.payload.ratings;
             }
           }
           return req;

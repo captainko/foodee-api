@@ -115,6 +115,6 @@ export class SearchController {
   private static _sorts = {
     name: { name: 1 },
     score: { score: { $meta: "textScore" } }, // relevant
-    rating: { "rating.total": -1, "rating.avg": -1 },
+    rating: { "rating.total": -1, "rating.avgRating": -1 },
   };
 }

@@ -189,11 +189,6 @@ UserSchema.methods.unsaveRecipe = function(this: IUser, recipeId) {
     .then(() => this.getLatest());
 };
 
-UserSchema.methods.createRecipe = function(this: IUser, recipeId) {
-  this.createdRecipes.unshift(recipeId);
-  return this;
-};
-
 UserSchema.methods.deleteRecipe = function(this: IUser, recipeId) {
   // delete recipe from all collections
 

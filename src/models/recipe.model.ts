@@ -31,7 +31,7 @@ export interface IRecipe extends Document {
   image_url?: string;
   ingredients?: [{ quantity: string, ingredient: string }];
   methods?: string[];
-  rating: { total: number, avg: number };
+  rating: { total: number, avgRating: number };
   ratings?: string[];
   createdAt?: string;
   updatedAt?: string;
@@ -124,12 +124,12 @@ export const RecipeFields: SchemaDefinition = {
   },
   rating: {
     type: {
-      avg: Number,
+      avgRating: Number,
       total: Number,
     },
     default: {
-      avgRating: 0,
-      total: 0,
+      avgRating: 4.5,
+      total: 1,
     }
   },
   // ratings: {
@@ -287,7 +287,7 @@ RecipeSchema.methods.updateRating = async function(this: IRecipe) {
     {
       $group: {
         _id: '$recipeId',
-        avg: { $avg: '$rateValue' },
+        avgRating: { $avg: '$rateValue' },
         total: { $sum: 1 },
       }
     },
@@ -354,7 +354,7 @@ RecipeSchema.statics.getNewRecipes = function() {
 };
 
 RecipeSchema.statics.getHighRatedRecipes = function() {
-  return Recipe.find().sort({ "rating.total": -1, "rating.avg": -1 });
+  return Recipe.find().sort({ "rating.total": -1, "rating.avgRating": -1 });
 };
 
 RecipeSchema.statics.getRecipesByCategory = function(category: string) {

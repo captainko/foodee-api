@@ -73,14 +73,11 @@ export const UserFields: SchemaDefinition = {
   isVerified: { type: Boolean, default: false },
   admin: {
     type: Boolean,
-    required: true,
     default: false,
   },
   image_url: {
-
     type: SchemaTypes.ObjectId,
-    ref: 'admin-image'
-
+    ref: 'admin-image',
   },
   createdRecipes: {
     type: [{
@@ -94,7 +91,6 @@ export const UserFields: SchemaDefinition = {
       type: SchemaTypes.ObjectId,
       ref: 'admin-recipe',
     }],
-    default: [],
   },
   ratings: {
     type: [{

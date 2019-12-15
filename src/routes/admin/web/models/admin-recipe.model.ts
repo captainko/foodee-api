@@ -121,7 +121,7 @@ export const RecipeFields = {
   },
   rating: {
     type: {
-      avg: Number,
+      avgRating: Number,
       total: Number,
     },
     default: {
