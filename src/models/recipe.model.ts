@@ -261,7 +261,7 @@ RecipeSchema.methods.toEditObj = function(this: IRecipe) {
 
 RecipeSchema.methods.isCreatedBy = function(this: IRecipe, user: IUser) {
   if (!user) { return false; }
-  return this.createdBy == user.id;
+  return this.createdBy == user._id;
 };
 
 RecipeSchema.methods.toJSONFor = function(this: IRecipe, user: IUser) {
@@ -336,14 +336,16 @@ RecipeSchema.statics.getCategories = async function(limit: number = 10) {
         image_url: { $first: { $arrayElemAt: ["$banners", 0] } },
       }, // ~$group
     },
-    { $sample: { size: limit }},
-    { $project: {
-      _id: 0,
-      id: "$_id",
-      name: "$_id",
-      image_url: 1,
-      total: 1,
-    }},
+    { $sample: { size: limit } },
+    {
+      $project: {
+        _id: 0,
+        id: "$_id",
+        name: "$_id",
+        image_url: 1,
+        total: 1,
+      }
+    },
   ]);
   await Image.populate(categories, { path: 'image_url' });
   return categories;
