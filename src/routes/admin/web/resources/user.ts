@@ -37,27 +37,32 @@ export const UserResource = {
     actions: {
       new: {
         before: async (req) => {
-          // console.log(req);
+          console.log(req);
           if (req.method === 'post') {
             if (req.payload.record.password) {
               const salt = crypto.randomBytes(16).toString('hex');
               // tslint:disable:max-line-length
               const hash = crypto.pbkdf2Sync(req.payload.record.password, salt, 10000, 512, 'sha512').toString('hex');
-              let { savedRecipes, ratings } = req.payload.record;
-              if (!savedRecipes.length) {
-                savedRecipes = null;
-              }
-              if (!ratings.length) {
-                ratings = null;
-              }
+            
               req.payload.record = {
                 ...req.payload.record,
-                savedRecipes,
-                ratings,
                 salt,
                 hash,
                 password: undefined,
               };
+            }
+            let { savedRecipes, ratings } = req.payload.record;
+            if (!savedRecipes.length) {
+              savedRecipes = null;
+            }
+            if (typeof savedRecipes != 'undefined' && !savedRecipes.length) {
+              // savedRecipes = null;
+           
+              req.payload.record.savedRecipes = [];
+            }
+            if (typeof ratings != 'undefined' && !ratings.length) {
+
+              req.payload.record.ratings = [];
             }
           }
           console.log('called');
@@ -82,14 +87,15 @@ export const UserResource = {
             let { savedRecipes, ratings } = req.fields;
             if (typeof savedRecipes != 'undefined' && !savedRecipes.length) {
               // savedRecipes = null;
-              delete req.fields.savedRecipes;
-              delete req.payload.savedRecipes;
+           
+              req.fields.savedRecipes = [];
+              req.payload.savedRecipes = [];
             }
             if (typeof ratings != 'undefined' && !ratings.length) {
               ratings = null;
-              console.log('called');
-              delete req.fields.ratings;
-              delete req.payload.ratings;
+
+              req.fields.ratings = [];
+              req.payload.ratings = [];
             }
           }
           return req;
