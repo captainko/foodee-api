@@ -261,7 +261,8 @@ RecipeSchema.methods.toEditObj = function(this: IRecipe) {
 
 RecipeSchema.methods.isCreatedBy = function(this: IRecipe, user: IUser) {
   if (!user) { return false; }
-  return this.createdBy == user._id;
+
+  return this.createdBy == user._id || this.createdBy.username === user.username;
 };
 
 RecipeSchema.methods.toJSONFor = function(this: IRecipe, user: IUser) {
@@ -302,7 +303,7 @@ RecipeSchema.methods.getLatest = function(this: IRecipe) {
 };
 
 RecipeSchema.methods.populateUser = async function(this: IRecipe) {
-  await this.populate('createdBy', 'username').execPopulate();
+  await this.populate('createdBy', 'username _id').execPopulate();
   return this;
 };
 
