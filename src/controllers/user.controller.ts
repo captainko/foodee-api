@@ -255,7 +255,7 @@ export class UserController {
       if (nextPage >= pages) {
         nextPage = null;
       }
-      recipes = recipes.map(c => c.toSearchResultFor());
+      recipes = recipes.map(c => c.toSearchResultFor(req.user));
       res.send({ nextPage, pages, total, docs: recipes });
     } catch (err) {
       next(err);
