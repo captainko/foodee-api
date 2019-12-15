@@ -46,7 +46,9 @@ export interface IUser extends Document, IUserMethods {
   admin?: boolean;
   email?: string;
   image_url?: string;
+  createdRecipes?: Array<IRecipe | string>;
   savedRecipes?: Array<IRecipe | string>;
+  collections?: Array<ICollection | string>;
   ratings?: Array<IRating | string>;
   hash?: string;
   salt?: string;
@@ -273,6 +275,13 @@ UserSchema.methods.toAuthJSON = function() {
     token: this.generateJWT(),
     image_url: this.image_url,
   };
+};
+
+UserSchema.methods.didCreateRecipe = function(this: IUser, recipe: IRecipe) {
+  return this.createdRecipes
+    .findIndex(
+      (r: any) => r == recipe.id || r.id == recipe.id
+    ) !== -1;
 };
 
 UserSchema.methods.canEdit = function(this: IUser, doc: IRecipe | ICollection) {
