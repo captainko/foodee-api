@@ -48,7 +48,3 @@ export class MainFrameController {
   }
 
 }
-
-function toThumbnail(recipes: IRecipe[], user: IUser = null) {
-  return recipes.map(r => r.toThumbnailFor(user));
-}

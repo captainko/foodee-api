@@ -10,7 +10,7 @@ import {
 import mongooseAutoPopulate = require('mongoose-autopopulate');
 import mongoosePaginate = require('mongoose-paginate');
 import { AdminRating, IAdminRating } from "./admin-rating.model";
-import { IAdminUser,  AdminUser } from "./admin-user.model";
+import { IAdminUser, AdminUser } from "./admin-user.model";
 import { IAdminImage, AdminImage } from "./admin-image.model";
 import { AdminCollection } from './admin-collection.model';
 
@@ -328,16 +328,13 @@ RecipeSchema.index({
 // };
 
 RecipeSchema.post("remove", function(this: IAdminRecipe) {
-  AdminUser.updateMany({
-    $or: [
-      { createdRecipes: { $in: [this.id] } },
-      { savedRecipes: { $in: [this.id] } }
-    ]}, {
-    $pull: {
-      createdRecipes: this._id,
-      savedRecipes: this._id,
-    }
-  });
+  AdminUser.updateMany(
+    { savedRecipes: { $in: [this.id] } }
+    , {
+      $pull: {
+        savedRecipes: this._id,
+      }
+    });
 
   AdminCollection.updateMany({ recipes: { $in: [this.id] } }, {
     $pull: {
@@ -346,7 +343,7 @@ RecipeSchema.post("remove", function(this: IAdminRecipe) {
   });
 
   AdminRating.deleteMany({ recipeId: { $in: [this.id] } });
-  AdminImage.deleteMany({_id: {$in: [this.banners]}});
+  AdminImage.deleteMany({ _id: { $in: [this.banners] } });
 });
 
 export const AdminRecipeModel = model<IAdminRecipe, IAdminRecipeModel>('admin-recipe', RecipeSchema, 'recipes');
