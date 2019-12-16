@@ -172,25 +172,12 @@ UserSchema.methods.addRating = function(this: IUser, ratingId: string) {
 };
 
 UserSchema.methods.saveRecipe = function(this: IUser, recipeId) {
-  // console.log(this);
-  // if (!this.didSaveRecipe(recipe)) {
-  //   this.savedRecipes.unshift(recipe.id);
-  // }
-  // return this;
-
   return this.updateOne({
     $push: { savedRecipes: { $each: [recipeId], $position: 0 } }
   }).exec(() => this.getLatest());
 };
 
 UserSchema.methods.unsaveRecipe = function(this: IUser, recipeId) {
-  // @ts-ignore
-  // const position = this.savedRecipes.findIndex((r: IRecipe) => r == recipe.id || recipe.id == r.id);
-  // if (position !== -1) {
-  //   this.savedRecipes.splice(position, 1);
-  //   Collection.removeRecipeFromUser(recipe.id, this.id);
-  // }
-  // return this;
 
   return this.updateOne({
     $pull: {
@@ -200,11 +187,6 @@ UserSchema.methods.unsaveRecipe = function(this: IUser, recipeId) {
     .exec()
     .then(() => Collection.removeRecipeFromUser(recipeId, this.id))
     .then(() => this.getLatest());
-};
-
-UserSchema.methods.createRecipe = function(this: IUser, recipeId) {
-  this.createdRecipes.unshift(recipeId);
-  return this;
 };
 
 UserSchema.methods.deleteRecipe = function(this: IUser, recipeId) {
@@ -221,21 +203,21 @@ UserSchema.methods.deleteRecipe = function(this: IUser, recipeId) {
   }).exec(() => this.getLatest());
 };
 
-UserSchema.methods.deleteCollection = function(this: IUser, collectionId) {
+// UserSchema.methods.deleteCollection = function(this: IUser, collectionId) {
 
-  // @ts-ignore
-  // const position = this.savedRecipes.findIndex(collectionId);
-  // if (position !== -1) {
-  //   this.savedRecipes.splice(position, 1);
-  // }
-  // return this;
+//   // @ts-ignore
+//   // const position = this.savedRecipes.findIndex(collectionId);
+//   // if (position !== -1) {
+//   //   this.savedRecipes.splice(position, 1);
+//   // }
+//   // return this;
 
-  return this.updateOne({
-    $pull: {
-      collections: collectionId,
-    }
-  }).exec(() => this.getLatest());
-};
+//   return this.updateOne({
+//     $pull: {
+//       collections: collectionId,
+//     }
+//   }).exec(() => this.getLatest());
+// };
 
 UserSchema.methods.getCollections = function(this: IUser, limit?: number) {
   const popOptions: ModelPopulateOptions = {
@@ -307,10 +289,7 @@ UserSchema.methods.canEdit = function(this: IUser, doc: IRecipe | ICollection) {
 };
 
 UserSchema.methods.didSaveRecipe = function(this: IUser, recipe: IRecipe) {
-  return this.savedRecipes
-    .findIndex(
-      (r: any) => r == recipe.id || r.id == recipe.id
-    ) !== -1;
+  return recipe.createdBy == this._id;
 };
 
 UserSchema.statics.findOneByEmailOrUsername = function(term: string) {
@@ -318,17 +297,13 @@ UserSchema.statics.findOneByEmailOrUsername = function(term: string) {
 };
 
 UserSchema.statics.deleteRecipeFromAll = function(this: IUser, recipeId) {
-  return UserModel.updateMany({
-    $or: [
-      { createdRecipes: recipeId },
-      { savedRecipes: recipeId },
-    ]
-  }, {
-    $pull: {
-      createdRecipes: recipeId,
-      savedRecipes: recipeId,
-    }
-  }).exec();
+  return UserModel.updateMany(
+    { createdRecipes: recipeId },
+    {
+      $pull: {
+        createdRecipes: recipeId,
+      }
+    }).exec();
 };
 export const UserModel = model<IUser, IUserModel>('user', UserSchema);
 export { UserModel as User };

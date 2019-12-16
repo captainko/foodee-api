@@ -72,7 +72,6 @@ export class RecipeController {
         methods: body.methods,
       });
       await recipe.populate('banners').execPopulate();
-      req.user.createRecipe(recipe.id);
       await req.user.save();
       res.sendAndWrap(recipe.toJSONFor(req.user), 'recipe');
     } catch (err) {
@@ -82,7 +81,6 @@ export class RecipeController {
 
   public static updateRecipe(req: Request, res: Response, next: NextFunction) {
     req.body.createdBy = req.user.id;
-    console.log(req.body);
     req.recipe.updateOne(req.body)
       .then((value) => res.sendAndWrap(value, 'recipe'))
       .catch(next);
@@ -174,7 +172,6 @@ async function resolveImages(banners: string[]) {
   try {
     const images$ = banners.map(b => checkIfExists(b));
     const images = await Promise.all(images$);
-    console.log(images);
     return images.map(x => x.secure_url);
   } catch (error) {
     throw new Error(error.message);

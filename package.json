@@ -22,8 +22,8 @@
         "copyfiles": "grunt copy"
     },
     "dependencies": {
-        "admin-bro": "^1.4.2",
-        "admin-bro-expressjs": "^0.3.0",
+        "admin-bro": "^1.5.0-beta.5",
+        "admin-bro-expressjs": "^0.4.0-beta.2",
         "admin-bro-mongoose": "^0.3.0",
         "babel-loader": "^8.0.6",
         "cloudinary": "^1.17.0",
@@ -36,6 +36,7 @@
         "errorhandler": "^1.5.0",
         "express": "^4.17.1",
         "express-ejs-layouts": "^2.5.0",
+        "express-formidable": "^1.2.0",
         "express-jwt": "^5.3.1",
         "express-session": "^1.17.0",
         "express-validator": "^6.3.0",
@@ -70,6 +71,7 @@
         "@types/express-jwt": "0.0.42",
         "@types/express-session": "^1.15.16",
         "@types/faker": "^4.1.8",
+        "@types/flat": "0.0.28",
         "@types/fs-extra": "^5.0.4",
         "@types/jest": "^24.0.23",
         "@types/jsonwebtoken": "^8.3.5",

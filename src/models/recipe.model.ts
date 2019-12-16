@@ -31,7 +31,7 @@ export interface IRecipe extends Document {
   image_url?: string;
   ingredients?: [{ quantity: string, ingredient: string }];
   methods?: string[];
-  rating: { total: number, avg: number };
+  rating: { total: number, avgRating: number };
   ratings?: string[];
   createdAt?: string;
   updatedAt?: string;
@@ -124,12 +124,12 @@ export const RecipeFields: SchemaDefinition = {
   },
   rating: {
     type: {
-      avg: Number,
+      avgRating: Number,
       total: Number,
     },
     default: {
-      avgRating: 0,
-      total: 0,
+      avgRating: 4.5,
+      total: 1,
     }
   },
   // ratings: {
@@ -261,7 +261,8 @@ RecipeSchema.methods.toEditObj = function(this: IRecipe) {
 
 RecipeSchema.methods.isCreatedBy = function(this: IRecipe, user: IUser) {
   if (!user) { return false; }
-  return this.createdBy == user.id;
+
+  return this.createdBy == user.id || this.createdBy.username === user.username;
 };
 
 RecipeSchema.methods.toJSONFor = function(this: IRecipe, user: IUser) {
@@ -287,7 +288,7 @@ RecipeSchema.methods.updateRating = async function(this: IRecipe) {
     {
       $group: {
         _id: '$recipeId',
-        avg: { $avg: '$rateValue' },
+        avgRating: { $avg: '$rateValue' },
         total: { $sum: 1 },
       }
     },
@@ -302,7 +303,7 @@ RecipeSchema.methods.getLatest = function(this: IRecipe) {
 };
 
 RecipeSchema.methods.populateUser = async function(this: IRecipe) {
-  await this.populate('createdBy', 'username').execPopulate();
+  await this.populate('createdBy', 'username _id').execPopulate();
   return this;
 };
 
@@ -336,14 +337,16 @@ RecipeSchema.statics.getCategories = async function(limit: number = 10) {
         image_url: { $first: { $arrayElemAt: ["$banners", 0] } },
       }, // ~$group
     },
-    { $sample: { size: limit }},
-    { $project: {
-      _id: 0,
-      id: "$_id",
-      name: "$_id",
-      image_url: 1,
-      total: 1,
-    }},
+    { $sample: { size: limit } },
+    {
+      $project: {
+        _id: 0,
+        id: "$_id",
+        name: "$_id",
+        image_url: 1,
+        total: 1,
+      }
+    },
   ]);
   await Image.populate(categories, { path: 'image_url' });
   return categories;
@@ -354,7 +357,7 @@ RecipeSchema.statics.getNewRecipes = function() {
 };
 
 RecipeSchema.statics.getHighRatedRecipes = function() {
-  return Recipe.find().sort({ "rating.total": -1, "rating.avg": -1 });
+  return Recipe.find().sort({ "rating.total": -1, "rating.avgRating": -1 });
 };
 
 RecipeSchema.statics.getRecipesByCategory = function(category: string) {
@@ -375,9 +378,9 @@ RecipeSchema.statics.getRecommendRecipes = function(limit: number = 20) {
 RecipeSchema.post("remove", function(this: IRecipe) {
   console.log(typeof this._id);
 
-  Collection.removeRecipeFromAll(this.id).then(console.log);
+  Collection.removeRecipeFromAll(this.id);
 
-  Rating.removeRecipe(this.id).then(console.log);
+  Rating.removeRecipe(this.id);
 });
 
 export const RecipeModel = model<IRecipe, IRecipeModel>('recipe', RecipeSchema);

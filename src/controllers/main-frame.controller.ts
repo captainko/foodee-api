@@ -27,7 +27,7 @@ export class MainFrameController {
         categories: lists[3],
         collections: lists[4],
       };
-      // console.log(mainFrame.recommendRecipes[0].toJSON());
+
       if (req.isAuthenticated()) {
         user = await user.
           populate({
@@ -47,8 +47,4 @@ export class MainFrameController {
     }
   }
 
-}
-
-function toThumbnail(recipes: IRecipe[], user: IUser = null) {
-  return recipes.map(r => r.toThumbnailFor(user));
 }

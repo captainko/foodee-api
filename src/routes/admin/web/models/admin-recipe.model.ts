@@ -10,7 +10,7 @@ import {
 import mongooseAutoPopulate = require('mongoose-autopopulate');
 import mongoosePaginate = require('mongoose-paginate');
 import { AdminRating, IAdminRating } from "./admin-rating.model";
-import { IAdminUser,  AdminUser } from "./admin-user.model";
+import { IAdminUser, AdminUser } from "./admin-user.model";
 import { IAdminImage, AdminImage } from "./admin-image.model";
 import { AdminCollection } from './admin-collection.model';
 
@@ -121,7 +121,7 @@ export const RecipeFields = {
   },
   rating: {
     type: {
-      avg: Number,
+      avgRating: Number,
       total: Number,
     },
     default: {
@@ -328,26 +328,22 @@ RecipeSchema.index({
 // };
 
 RecipeSchema.post("remove", function(this: IAdminRecipe) {
-  console.log(typeof this._id);
-  AdminUser.updateMany({
-    $or: [
-      { createdRecipes: { $in: [this.id] } },
-      { savedRecipes: { $in: [this.id] } }
-    ]}, {
-    $pull: {
-      createdRecipes: this._id,
-      savedRecipes: this._id,
-    }
-  }).then(console.log);
+  AdminUser.updateMany(
+    { savedRecipes: { $in: [this.id] } }
+    , {
+      $pull: {
+        savedRecipes: this._id,
+      }
+    });
 
   AdminCollection.updateMany({ recipes: { $in: [this.id] } }, {
     $pull: {
       recipes: this._id,
     }
-  }).then(console.log);
+  });
 
-  AdminRating.deleteMany({ recipeId: { $in: [this.id] } }).then(console.log);
-  AdminImage.deleteMany({_id: {$in: [this.banners]}});
+  AdminRating.deleteMany({ recipeId: { $in: [this.id] } });
+  AdminImage.deleteMany({ _id: { $in: [this.banners] } });
 });
 
 export const AdminRecipeModel = model<IAdminRecipe, IAdminRecipeModel>('admin-recipe', RecipeSchema, 'recipes');

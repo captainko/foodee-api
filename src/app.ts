@@ -13,8 +13,8 @@ import { Routes } from "./routes/api";
 import middleware from "./middleware";
 import { applyMiddleware } from "./util";
 import { errorHandlers } from "./middleware/errorHandlers";
-import admin from "./admin";
 import { SEED_DB } from "./seeds";
+import admin from "./routes/admin";
 
 class App {
   public app: express.Application;

@@ -81,9 +81,5 @@ export const handlePassportSession: Handle = (router) => {
       next();
     }
   });
-  // router.use(passport.session());
-};
 
-// export const handleUpload: Handle = (router) => {
-//   router.use(cloudinaryConfig);
-// };
+};

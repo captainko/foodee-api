@@ -45,7 +45,6 @@ export class UserController {
   public static async verify(req: Request, res: Response, next: NextFunction) {
     try {
       const decoded = jwt.verify(req.params.token, EMAIL_SECRET) as any;
-      console.log(decoded);
       await User.updateOne({ _id: decoded.user }, { isVerified: true });
 
       res.send("Email is verified");
@@ -182,7 +181,7 @@ export class UserController {
           }
         });
       }
-      console.log(queries);
+
       const project = {
         score: { $meta: 'textScore' }
       };
@@ -256,7 +255,7 @@ export class UserController {
       if (nextPage >= pages) {
         nextPage = null;
       }
-      recipes = recipes.map(c => c.toSearchResultFor());
+      recipes = recipes.map(c => c.toSearchResultFor(req.user));
       res.send({ nextPage, pages, total, docs: recipes });
     } catch (err) {
       next(err);

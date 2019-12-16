@@ -10,13 +10,13 @@ import path = require('path');
 import {
   DB_URI,
   IS_PROD,
-} from "./environment";
+} from "../../environment";
 
 import { UserResource, ImageResource, RecipeResource, RatingResource, RatingResultResource, CollectionResource } from './web/resources';
-import { UserModel, RatingResultModel } from "./models";
-import { resetPassword } from "./routes/web/reset-password.router";
-import { verifiedAccount } from "./routes/web/verified-account";
-import { resetPasswordSuccess } from "./routes/web/reset-password-success";
+import { UserModel, RatingResultModel } from "../../models";
+import { resetPassword } from "../web/reset-password.router";
+import { verifiedAccount } from "../web/verified-account";
+import { resetPasswordSuccess } from "../web/reset-password-success";
 AdminBro.registerAdapter(require('admin-bro-mongoose'));
 
 class Admin {
@@ -59,15 +59,14 @@ class Admin {
       }
     );
     // const AdminRouter = AdminBroExpress.buildRouter(adminBro);
-    console.log(adminBro.options.rootPath);
     
     const staticFolder = IS_PROD ? 'dist' : 'public';
-    this.app.set('views', path.join(__dirname, 'views'));
+    this.app.set('views', path.join(__dirname, '..', '..', 'views'));
     this.app.set('view engine', 'ejs');
-    this.app.use(express.static(path.join(__dirname, staticFolder)));
+    this.app.use(express.static(path.join(__dirname, '..', '..', staticFolder)));
     this.app.use(expressLayouts);
-    this.app.use(express.urlencoded());
     this.app.use(adminBro.options.rootPath, adminRouter);
+    this.app.use(express.urlencoded());
     this.app.use(resetPassword);
     this.app.use(resetPasswordSuccess);
     this.app.use(verifiedAccount);

@@ -6,7 +6,7 @@ import {
   CollectionFields,
   ImageFields,
   RatingResultFields
-} from "../../models";
+} from "../../../../models";
 import { AdminUserSchema } from "./admin-user.model";
 UserFields.image_url.ref = 'admin-image';
 // export * from '../../src/models';

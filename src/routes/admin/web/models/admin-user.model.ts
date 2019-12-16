@@ -4,7 +4,7 @@ import * as uniqueValidator from 'mongoose-unique-validator';
 import * as crypto from 'crypto';
 import * as jwt from 'jsonwebtoken';
 // app
-import { JWT_SECRET } from "../../environment";
+import { JWT_SECRET } from "../../../../environment";
 
 // const validator;
 
@@ -73,14 +73,11 @@ export const UserFields: SchemaDefinition = {
   isVerified: { type: Boolean, default: false },
   admin: {
     type: Boolean,
-    required: true,
     default: false,
   },
   image_url: {
-
     type: SchemaTypes.ObjectId,
-    ref: 'admin-image'
-
+    ref: 'admin-image',
   },
   // createdRecipes: {
   //   type: [{
@@ -94,7 +91,6 @@ export const UserFields: SchemaDefinition = {
       type: SchemaTypes.ObjectId,
       ref: 'admin-recipe',
     }],
-    default: [],
   },
   ratings: {
     type: [{
@@ -135,60 +131,6 @@ AdminUserSchema.virtual('collections', {
     sort: { updatedAt: -1 }
   }
 });
-
-// AdminUserSchema.methods.addRating = function(this: IUser, ratingId: string) {
-//   if (!this.ratings.includes(ratingId)) {
-//     this.ratings.push(ratingId);
-//   }
-// };
-
-// AdminUserSchema.methods.saveRecipe = function(this: IUser, recipe: IRecipe) {
-//   console.log(this);
-//   if (!this.didSaveRecipe(recipe)) {
-//     this.savedRecipes.unshift(recipe.id);
-//   }
-//   return this;
-// };
-
-// AdminUserSchema.methods.unsaveRecipe = function(this: IUser, recipe) {
-//   // @ts-ignore
-//   const position = this.savedRecipes.findIndex((r: IRecipe) => r == recipe.id || recipe.id == r.id);
-//   if (position !== -1) {
-//     this.savedRecipes.splice(position, 1);
-//   }
-//   return this;
-// };
-
-// AdminUserSchema.methods.createRecipe = function(this: IUser, recipeId) {
-//   this.createdRecipes.unshift(recipeId);
-//   return this;
-// };
-
-// AdminUserSchema.methods.deleteRecipe = function(this: IUser, recipeId) {
-//   // delete recipe from all collections
-
-//   // @ts-ignore
-//   const position = this.createdRecipes.findIndex(recipeId);
-//   if (position !== -1) {
-//     this.createdRecipes.splice(position, 1);
-//   }
-//   return this;
-// };
-
-// AdminUserSchema.methods.createCollection = function(this: IUser, collectionId) {
-//   this.collections.unshift(collectionId);
-//   return this;
-// };
-
-// AdminUserSchema.methods.deleteCollection = function(this: IUser, collectionId) {
-
-//   // @ts-ignore
-//   const position = this.savedRecipes.findIndex(collectionId);
-//   if (position !== -1) {
-//     this.savedRecipes.splice(position, 1);
-//   }
-//   return this;
-// };
 
 AdminUserSchema.methods.setPassword = function(this: IAdminUser, password) {
 

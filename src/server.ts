@@ -3,8 +3,8 @@ import fs = require('fs');
 import https = require('https');
 // app
 import app from "./app";
-import admin from './admin';
 import { SERVER_PORT, IS_PROD, WEB_PORT } from "./environment";
+import admin from './routes/admin';
 
 // if (!IS_PROD) {
 //     process.on("uncaughtException", e => {
