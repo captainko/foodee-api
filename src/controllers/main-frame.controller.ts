@@ -37,6 +37,7 @@ export class MainFrameController {
               limit: 10,
             }
           }).execPopulate();
+        console.log(user);
 
         mainFrame.savedRecipes = user.savedRecipes.toThumbnailFor(user);
         mainFrame.createdRecipes = user.createdRecipes.toThumbnailFor(user);

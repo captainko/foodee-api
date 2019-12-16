@@ -271,6 +271,8 @@ RecipeSchema.methods.toJSONFor = function(this: IRecipe, user: IUser) {
     savedByUser: false,
     createdByUser: false,
   };
+
+  console.log(user);
   if (user) {
     result.savedByUser = user.didSaveRecipe(this);
     result.createdByUser = this.isCreatedBy(user);

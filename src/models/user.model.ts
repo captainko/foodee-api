@@ -173,7 +173,7 @@ UserSchema.methods.addRating = function(this: IUser, ratingId: string) {
 
 UserSchema.methods.saveRecipe = function(this: IUser, recipeId) {
   return this.updateOne({
-    $push: { savedRecipes: { $each: [recipeId], $position: 0 } }
+    $addToSet: { savedRecipes: recipeId }
   }).exec(() => this.getLatest());
 };
 
@@ -289,7 +289,11 @@ UserSchema.methods.canEdit = function(this: IUser, doc: IRecipe | ICollection) {
 };
 
 UserSchema.methods.didSaveRecipe = function(this: IUser, recipe: IRecipe) {
-  return recipe.createdBy == this.id;
+  // console.log(recipe, this.id);
+  return this.savedRecipes
+    .findIndex(
+      (r: any) => r == recipe.id || r.id == recipe.id
+    ) !== -1;
 };
 
 UserSchema.statics.findOneByEmailOrUsername = function(term: string) {
