@@ -8,7 +8,7 @@ export const verifiedUser: RequestParamHandler = async function(req, res, next, 
   }
   const user = await User.findOne({
     resetPasswordToken: token,
-    resetPasswordExpires: { $gt: Date.now() }
+    // resetPasswordExpires: { $gt: Date.now() }
   });
 
   if (!user) {
