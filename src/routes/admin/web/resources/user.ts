@@ -148,7 +148,7 @@ export const UserResource = {
               });
               let image =  await Image.findOneAndUpdate({_id: req.payload.image_url}, {url: uploaded.secure_url,  publicId: uploaded.public_id, type: 'profile'});
               if (!image) {
-                image = await Image.create({url: uploaded.secure_url, publicId: uploaded.public_id, type: 'profile');
+                image = await Image.create({url: uploaded.secure_url, publicId: uploaded.public_id, type: 'profile'});
               }
               req.payload.image_url = image.id;
               
