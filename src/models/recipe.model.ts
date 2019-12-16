@@ -272,7 +272,6 @@ RecipeSchema.methods.toJSONFor = function(this: IRecipe, user: IUser) {
     createdByUser: false,
   };
 
-  console.log(user);
   if (user) {
     result.savedByUser = user.didSaveRecipe(this);
     result.createdByUser = this.isCreatedBy(user);
@@ -378,8 +377,6 @@ RecipeSchema.statics.getRecommendRecipes = function(limit: number = 20) {
 };
 
 RecipeSchema.post("remove", function(this: IRecipe) {
-  console.log(typeof this._id);
-
   Collection.removeRecipeFromAll(this.id);
 
   Rating.removeRecipe(this.id);

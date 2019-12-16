@@ -60,10 +60,10 @@ class Admin {
     );
     // const AdminRouter = AdminBroExpress.buildRouter(adminBro);
     
-    const staticFolder = IS_PROD ? 'dist' : 'public';
+    const staticFolder = 'public';
     this.app.set('views', path.join(__dirname, '..', '..', 'views'));
     this.app.set('view engine', 'ejs');
-    this.app.use(express.static(path.join(__dirname, '..', '..', staticFolder)));
+    this.app.use(express.static(staticFolder));
     this.app.use(expressLayouts);
     this.app.use(adminBro.options.rootPath, adminRouter);
     this.app.use(express.urlencoded());
