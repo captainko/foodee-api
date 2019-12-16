@@ -289,7 +289,7 @@ UserSchema.methods.canEdit = function(this: IUser, doc: IRecipe | ICollection) {
 };
 
 UserSchema.methods.didSaveRecipe = function(this: IUser, recipe: IRecipe) {
-  return recipe.createdBy == this._id;
+  return recipe.createdBy == this.id;
 };
 
 UserSchema.statics.findOneByEmailOrUsername = function(term: string) {

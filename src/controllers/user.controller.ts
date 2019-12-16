@@ -6,7 +6,7 @@ import jwt = require("jsonwebtoken");
 
 // app
 import { User, IUser } from "../models/user.model";
-import { GMAIL_USER, GMAIL_PASS, EMAIL_SECRET, SERVER_PORT, DOMAIN_NAME } from "../environment";
+import { GMAIL_USER, GMAIL_PASS, EMAIL_SECRET, WEB_URL, WEB_PORT } from "../environment";
 import { Image } from "../models/image.model";
 import { HTTP422Error } from "../util/httpErrors";
 import { renderResetPassword, renderVerifiedEmail, renderConfirmEmail } from "../util/emailTemplate";
@@ -47,13 +47,13 @@ export class UserController {
       const decoded = jwt.verify(req.params.token, EMAIL_SECRET) as any;
       await User.updateOne({ _id: decoded.user }, { isVerified: true });
 
-      res.send("Email is verified");
       const user = await User.findById(decoded.user);
       transporter.sendMail({
         to: user.email,
         subject: 'Foodee - Verified Email',
         html: renderVerifiedEmail(user),
       });
+      return res.redirect(`${WEB_URL}:${WEB_PORT}/verified-account/`);
     } catch (e) {
       res.send("Error");
     }
