@@ -39,7 +39,7 @@ class App {
     mongoose.connect(this.mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true })
       .then(() => {
         console.log("Connected to db");
-        return SEED_DB();
+        // return SEED_DB();
       })
       .catch((err) => console.log("Can't connect to db, ", err));
 
