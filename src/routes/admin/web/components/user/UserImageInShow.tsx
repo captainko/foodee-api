@@ -1,5 +1,5 @@
+import * as React from 'react';
 
-const React = require('react');
 import { Label } from "admin-bro";
 
 const UserImageInShow = (props) => {

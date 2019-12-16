@@ -1,4 +1,4 @@
-const React = require('react');
+import * as React from 'react';
 // import { Label } from "admin-bro";
 
 const USER_IMAGE = "https://ccivr.com/wp-content/uploads/2019/07/empty-profile.png";

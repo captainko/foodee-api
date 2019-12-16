@@ -8,6 +8,8 @@ declare global {
     toThumbnailFor(something: any): T[];
     toSearchResult(): Promise<T[]>;
   }
+
+  type FileList = Array<any>;
 }
 
 type ToSomething = "toThumbnailFor" | "toJSONFor";

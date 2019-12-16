@@ -1,6 +1,5 @@
 
 import * as React from 'react';
-import { Label } from "admin-bro";
 
 const ImageInList = (props) => {
   const { url } = props.record.params;
