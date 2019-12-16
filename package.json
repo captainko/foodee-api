@@ -22,6 +22,7 @@
         "copyfiles": "grunt copy"
     },
     "dependencies": {
+        "@types/react": "^16.9.16",
         "admin-bro": "^1.5.0-beta.5",
         "admin-bro-expressjs": "^0.4.0-beta.2",
         "admin-bro-mongoose": "^0.3.0",

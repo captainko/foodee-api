@@ -2,6 +2,7 @@
     "compilerOptions": {
         "module": "commonjs",
         "esModuleInterop": false,
+        "allowSyntheticDefaultImports": true,
         "noImplicitAny": false,
         "allowSyntheticDefaultImports": true,
         "suppressImplicitAnyIndexErrors": true,
@@ -19,6 +20,7 @@
         ],
         "jsx": "react",
         "removeComments": true,
+        "noEmitOnError": true
     },
     "moduleResolution": "node",
     "sourceMap": true,
