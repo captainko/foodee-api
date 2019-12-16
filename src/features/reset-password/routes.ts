@@ -4,7 +4,7 @@ import { Router } from 'express';
 import { verifiedUser } from "./commands/verified-user";
 import { submitPassword } from "./commands/submit-password";
 
-module.exports = (router: Router) => {
+export default (router: Router) => {
   router.all("*").param('token', verifiedUser);
 
   router.get('/reset-password/:token', loadPage);

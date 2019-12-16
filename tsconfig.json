@@ -3,6 +3,7 @@
         "module": "commonjs",
         "esModuleInterop": false,
         "noImplicitAny": false,
+        "allowSyntheticDefaultImports": true,
         "suppressImplicitAnyIndexErrors": true,
         "noUnusedLocals": false,
         "noUnusedParameters": false,

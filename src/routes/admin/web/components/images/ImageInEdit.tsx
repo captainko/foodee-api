@@ -1,4 +1,5 @@
-import React, { FC } from 'react';
+import * as React from 'react';
+import { FC } from 'react';
 import { unflatten } from 'flat';
 
 import { BasePropertyProps, DropArea, PropertyInEdit } from 'admin-bro';

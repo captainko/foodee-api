@@ -7,11 +7,11 @@ function RecipeBannerInShow(props)  {
   // tslint:disable-next-line: max-line-length
   return (
     <img
-      src={url}
+      // src={url}
       style={{ width: '100px', display: 'block', marginLeft: 'auto', marginRight: 'auto', }}
     />
   );
-};
+}
 
 // AdminBro.UserComponents['MyComponentName'] = MyComponent
 export default RecipeBannerInShow;

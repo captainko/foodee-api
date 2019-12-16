@@ -71,5 +71,5 @@ async function uploadFile(req) {
   // if (req.method === 'get') {
     
   // }
-  return {...res,  record: record.toJSON() };
+  return req;
 }
