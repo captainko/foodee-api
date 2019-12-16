@@ -333,6 +333,9 @@ export function renderConfirmEmail(user: IUser, emailToken: string) {
                                       </a>
 </td>
 </tr>
+<tr>
+<td>${WEB_URL}:${SERVER_PORT}/api/v1/user/confirmation/${emailToken}/</td>
+</tr>
 </tbody></table>
 </td>
 </tr>
