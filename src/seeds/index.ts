@@ -1590,23 +1590,23 @@ const users: IUserData[] = [
     password: 'foodee123',
     recipes: {
       created: [{
-        name: 'Chicken stock',
-        banners: ['https://ichef.bbci.co.uk/food/ic/food_16x9_832/recipes/lightchickenstock_90221_16x9.jpg'],
-        category: 'Chicken Food',
-        createdBy: 'Nam',
-        description: 'This homemade chicken stock recipe is a great way to make the most from your roast chicken.',
-        tags: ['Chicken Food'],
-        time: 120,
-        servings: 4,
-        ingredients: [
-          { quantity: '1', ingredient: 'leek' },
-          { quantity: '1', ingredient: 'carrot' },
-          { quantity: '½', ingredient: 'arge onion' },
-          { quantity: 'several', ingredient: 'sprigs fresh thyme' },
-          { quantity: '1', ingredient: 'head garlic' },
-          { quantity: '10 ', ingredient: 'black peppercorns' },
-          { quantity: '1', ingredient: 'chicken carcass' },
-          { quantity: '20', ingredient: 'chicken wings' },
+     name: 'Chicken stock',
+     banners: ['https://ichef.bbci.co.uk/food/ic/food_16x9_832/recipes/lightchickenstock_90221_16x9.jpg'],
+     category: 'Chicken Food',
+     createdBy: 'Nam',
+     description: 'This homemade chicken stock recipe is a great way to make the most from your roast chicken.',
+     tags: ['Chicken Food'] ,
+     time: 120,
+     servings: 4,
+     ingredients: [
+       {quantity: '1', ingredient: 'leek'},
+       {quantity: '1', ingredient: 'carrot'},
+       {quantity: '½', ingredient: 'arge onion'},
+       {quantity: 'several', ingredient: 'sprigs fresh thyme'},
+       {quantity: '1', ingredient: 'head garlic'},
+       {quantity: '10 ', ingredient: 'black peppercorns'},
+       {quantity: '1', ingredient: 'chicken carcass'},
+       {quantity: '20', ingredient: 'chicken wings'},
         ],
         methods: [
           'Put all the ingredients into a stockpot or large heavy-bottomed pan.',
@@ -1625,15 +1625,15 @@ const users: IUserData[] = [
         time: 120,
         servings: 6,
         ingredients: [
-          { quantity: '2', ingredient: 'sticks lemongrass' },
-          { quantity: '50g/1¾oz', ingredient: 'ginger,' },
-          { quantity: '3 ', ingredient: 'spring onions' },
-          { quantity: '2', ingredient: 'medium red chillies' },
-          { quantity: '2', ingredient: 'medium yellow chillies' },
-          { quantity: '1', ingredient: 'medium green chilli' },
-          { quantity: '1 tbsp', ingredient: 'ground turmeric' },
-          { quantity: '200ml/7oz', ingredient: 'groundnut oil' },
-          { quantity: '1', ingredient: 'whole chicken' },
+          {quantity: '2', ingredient: 'sticks lemongrass'},
+          {quantity: '50g/1¾oz', ingredient: 'ginger,'},
+          {quantity: '3 ', ingredient: 'spring onions'},
+          {quantity: '2', ingredient: 'medium red chillies'},
+          {quantity: '2', ingredient: 'medium yellow chillies'},
+          {quantity: '1', ingredient: 'medium green chilli'},
+          {quantity: '1 tbsp', ingredient: 'ground turmeric'},
+          {quantity: '200ml/7oz', ingredient: 'groundnut oil'},
+          {quantity: '1', ingredient: 'whole chicken'},
         ],
         methods: [
           'Set the oven to 180C/350F/Gas 4.',
@@ -1659,7 +1659,7 @@ function fakeMethods(): string[] {
     .map(() => faker.lorem.sentence());
 }
 
-export const SEED_DB = () => new Promise((res) => {
+new Promise((res) => {
   console.log(DB_URI);
   mongoose.connect(DB_URI, { useNewUrlParser: true, useUnifiedTopology: true, ssl: false })
     .then(() => mongoose.connection.db.dropDatabase())
@@ -1731,4 +1731,63 @@ export const SEED_DB = () => new Promise((res) => {
   return mongoose.disconnect();
 }).catch(x => console.error(x));
 
-SEED_DB();
+export const SEED_DB = async () => {
+  await mongoose.connection.db.dropDatabase();
+  async.parallel(users.map((user) => (done) => {
+    async.waterfall([
+      // create profile picture
+      (cb) => {
+        Image.create({
+          url: user.img,
+          type: 'profile',
+        })
+          .then((image) => cb(null, image))
+          .catch((err) => cb(err));
+      },
+      // create new user
+      function(image: IImage, cb) {
+        const newUser = new User({
+          username: user.username,
+          email: user.email,
+          isVerified: user.isVerified,
+          admin: user.admin,
+          image_url: image.id,
+
+        });
+        newUser.setPassword(user.password);
+        newUser.save()
+          .then((user) => cb(null, user))
+          .catch((err) => cb(err, null));
+      },
+
+      // create recipes
+      (newUser: IUser, cb) => {
+        const recipes = user.recipes.created;
+        const createRecipeFuncs = recipes.map((r) => (rDone) => {
+
+          Promise.all(r.banners.map(b => {
+            return Image.create({
+              url: b,
+              type: 'recipe',
+            });
+          }))
+            .then(async images => {
+              const recipe = new Recipe(r);
+              recipe.banners = images.map(x => x.id);
+              // @ts-ignore
+              recipe.createdBy = newUser.id;
+              return await recipe.save();
+            })
+            .then(newRecipe => rDone(null, newRecipe))
+            .catch(err => rDone(err, null));
+
+        });
+        async.series(createRecipeFuncs, (err, recipes) => {
+          console.log(err);
+          console.log(recipes);
+          cb(recipes);
+        });
+      }
+    ], (err, results) => { console.log(err); done(); });
+  }), (err, result) => (result));
+}; 
